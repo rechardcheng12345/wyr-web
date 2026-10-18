@@ -19,6 +19,7 @@
     "install-all": "npm install",
     "dev": "npm start",
     "build": "npm run build -w server && npm run build -w client",
+    "postinstall": "prisma generate --schema server/prisma/schema.prisma",
     "import:catalog": "npm run import:catalog -w server --"
   },
   "devDependencies": {
