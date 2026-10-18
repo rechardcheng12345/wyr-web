@@ -1,0 +1,15 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+.DS_Store
+.scratch/
+
+# Handoff run logs and archive (raw agent transcripts / duplicate of _handoff contents)
+_handoff/*.log
+_handoff/*.tgz
+*.xlsx
+*.csv
+*.md
