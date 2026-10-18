@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "./env.js";
 import { createApp } from "./app.js";
 import { startExpireOrdersJob } from "./jobs/expire-orders.js";
 import { paymentMode } from "./payments/index.js";

@@ -1,6 +1,8 @@
 // ToyyibPay API client. Docs: https://toyyibpay.com/apireference/
 // Sandbox: TOYYIBPAY_BASE_URL=https://dev.toyyibpay.com, live: https://toyyibpay.com
 
+import { TOYYIBPAY_PAYMENT_CHANNEL } from "../constants.js";
+
 export interface BillTransaction {
   /** 1 = successful, 2 or 4 = pending, 3 = unsuccessful */
   status: string;
@@ -72,7 +74,7 @@ export function toyyibPayGateway(): PaymentGateway {
   const secretKey = requireEnv("TOYYIBPAY_SECRET_KEY");
   const categoryCode = requireEnv("TOYYIBPAY_CATEGORY_CODE");
   // 0 = FPX, 1 = card, 2 = both (card must be enabled on the ToyyibPay account).
-  const channel = process.env.TOYYIBPAY_PAYMENT_CHANNEL?.trim() || "0";
+  const channel = TOYYIBPAY_PAYMENT_CHANNEL;
 
   async function post(path: string, fields: Record<string, string>) {
     const res = await fetch(`${baseUrl}/index.php/api/${path}`, {

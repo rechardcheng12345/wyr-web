@@ -1,5 +1,6 @@
 import { randomInt } from "node:crypto";
 import { Prisma } from "@prisma/client";
+import { ORDER_HOLD_MINUTES } from "./constants.js";
 import { prisma } from "./db.js";
 import { priceLadder, unitPriceCents as tierUnitPriceCents, type Tier } from "./pricing.js";
 import { isMalaysianState, quoteShipping, type MalaysianState } from "./shipping.js";
@@ -19,8 +20,7 @@ const MAX_LINES = 50;
 const MAX_QTY = 999;
 
 export function holdMinutes() {
-  const n = Number(process.env.ORDER_HOLD_MINUTES ?? 30);
-  return Number.isFinite(n) && n > 0 ? n : 30;
+  return ORDER_HOLD_MINUTES;
 }
 
 export const toCents = (d: Prisma.Decimal | null) => (d === null ? null : Math.round(d.toNumber() * 100));

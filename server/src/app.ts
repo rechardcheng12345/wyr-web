@@ -1,5 +1,9 @@
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import cors from "cors";
 import express, { type ErrorRequestHandler } from "express";
+import { CORS_ORIGINS } from "./constants.js";
 import { CheckoutError } from "./orders.js";
 import { categoriesRouter } from "./routes/categories.js";
 import { checkoutRouter } from "./routes/checkout.js";
@@ -7,14 +11,15 @@ import { ordersRouter } from "./routes/orders.js";
 import { paymentsRouter } from "./routes/payments.js";
 import { productsRouter } from "./routes/products.js";
 
+// This file runs from server/src (tsx) or server/dist/src (built), so find the server root first.
+const here = path.dirname(fileURLToPath(import.meta.url));
+const serverRoot = path.resolve(here, here.endsWith(path.join("dist", "src")) ? "../.." : "..");
+const CLIENT_DIST = path.resolve(serverRoot, "../client/dist");
+
 export function createApp() {
   const app = express();
 
-  const origins = (process.env.CORS_ORIGIN ?? "http://localhost:5173")
-    .split(",")
-    .map((o) => o.trim())
-    .filter(Boolean);
-  app.use(cors({ origin: origins }));
+  app.use(cors({ origin: CORS_ORIGINS }));
   app.use(express.json());
 
   app.get("/api/health", (_req, res) => {
@@ -29,6 +34,24 @@ export function createApp() {
   app.use("/api", (_req, res) => {
     res.status(404).json({ error: "Not found" });
   });
+
+  // Serve the built frontend from client/dist (production only).
+  // In dev mode, the frontend runs separately via Vite, which proxies /api here.
+  const isDev = process.env.NODE_ENV === "dev" || process.env.NODE_ENV === "development";
+  if (!isDev) {
+    if (fs.existsSync(CLIENT_DIST)) {
+      app.use(express.static(CLIENT_DIST));
+      // SPA fallback: any other GET gets index.html so client-side routes like /checkout/return work.
+      app.use((req, res, next) => {
+        if (req.method !== "GET" && req.method !== "HEAD") return next();
+        res.sendFile(path.join(CLIENT_DIST, "index.html"));
+      });
+    } else {
+      console.warn(`[warn] frontend build not found at ${CLIENT_DIST}; run "npm run client:build" first`);
+    }
+  } else {
+    console.log("[dev] skipping client/dist; frontend served by Vite on port 5173");
+  }
 
   const onError: ErrorRequestHandler = (err, _req, res, _next) => {
     if (err instanceof CheckoutError) {

@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { WHATSAPP_NUMBER } from "./constants.js";
 
 /**
  * Per-piece tiered pricing. The single place that decides what a piece costs at a given quantity:
@@ -49,7 +50,7 @@ export const BULK_QUOTE_MIN_QTY = 50;
 
 export function bulkQuote() {
   // Digits only, with country code (wa.me format), e.g. 60123456789.
-  const number = (process.env.WHATSAPP_NUMBER ?? "").replace(/\D/g, "");
+  const number = WHATSAPP_NUMBER.replace(/\D/g, "");
   return { minQty: BULK_QUOTE_MIN_QTY, whatsappNumber: number || null };
 }
 

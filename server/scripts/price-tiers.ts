@@ -17,7 +17,7 @@
  *   npm run import:tiers -w server              # write
  *   npm run import:tiers -w server -- --dry-run # report only
  */
-import "dotenv/config";
+import "../src/env.js";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";

@@ -20,7 +20,7 @@
  *   npm run import:catalog -w server -- --dry-run # parse and report only, no DB needed
  *   npx -w server tsx scripts/import-catalog.ts --dry-run --verbose   # npm swallows --verbose
  */
-import "dotenv/config";
+import "../src/env.js";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -621,7 +621,8 @@ async function writeCatalog(prisma: PrismaClient, products: ProductDraft[], plat
 
       await writePriceTiers(tx, tiers, variantId);
     },
-    { timeout: 120_000 },
+    // Generous: every query is a network round trip, which adds up against a remote (hosted) DB.
+    { timeout: 30 * 60_000, maxWait: 60_000 },
   );
 }
 
