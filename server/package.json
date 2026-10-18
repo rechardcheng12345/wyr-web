@@ -4,16 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "build": "prisma generate && tsc -p tsconfig.json",
-    "start": "node dist/src/index.js",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dev": "node --watch src/index.js",
+    "build": "prisma generate",
+    "start": "node src/index.js",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "tsx scripts/prisma.ts migrate dev",
-    "prisma:deploy": "tsx scripts/prisma.ts migrate deploy",
-    "import:catalog": "tsx scripts/import-catalog.ts",
-    "import:tiers": "tsx scripts/price-tiers.ts",
-    "prisma": "tsx scripts/prisma.ts"
+    "prisma:migrate": "node scripts/prisma.js migrate dev",
+    "prisma:deploy": "node scripts/prisma.js migrate deploy",
+    "import:catalog": "node scripts/import-catalog.js",
+    "import:tiers": "node scripts/price-tiers.js",
+    "prisma": "node scripts/prisma.js"
   },
   "dependencies": {
     "@prisma/client": "^6.5.0",
@@ -22,13 +21,8 @@
     "express": "^5.1.0"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/express": "^5.0.1",
-    "@types/node": "^22.13.0",
     "csv-parse": "^5.6.0",
     "exceljs": "^4.4.0",
-    "prisma": "^6.5.0",
-    "tsx": "^4.19.3",
-    "typescript": "^5.8.2"
+    "prisma": "^6.5.0"
   }
 }

@@ -2,7 +2,7 @@
   "name": "wyr-website",
   "private": true,
   "type": "module",
-  "main": "server/dist/src/index.js",
+  "main": "index.js",
   "workspaces": [
     "server",
     "client"

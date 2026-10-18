@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  // Built at runtime from DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME by src/env.ts; not set by hand.
+  // Built at runtime from DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME by src/env.js; not set by hand.
   url      = env("DATABASE_URL")
 }
 
@@ -77,7 +77,7 @@ model ProductVariant {
 }
 
 // Per-piece price from min_qty pieces up; below the first tier the variant's own price applies.
-// Loaded by scripts/price-tiers.ts, applied by src/pricing.ts.
+// Loaded by scripts/price-tiers.js, applied by src/pricing.js.
 model PriceTier {
   id        Int            @id @default(autoincrement())
   variantId Int            @map("variant_id")
@@ -174,7 +174,7 @@ model Order {
   trackingNo       String?      @map("tracking_no") @db.VarChar(80)
   bigsellerOrderId String?      @unique @map("bigseller_order_id") @db.VarChar(80)
   createdAt        DateTime?    @default(now()) @map("created_at") @db.Timestamp(0)
-  // Unpaid orders hold a stock reservation until this time (see src/orders.ts).
+  // Unpaid orders hold a stock reservation until this time (see src/orders.js).
   expiresAt        DateTime?    @map("expires_at") @db.Timestamp(0)
   paidAt           DateTime?    @map("paid_at") @db.Timestamp(0)
   customer         Customer?    @relation(fields: [customerId], references: [id])
