@@ -16,7 +16,7 @@
  * variants; `npm run import:tiers` can still refresh the price tiers on their own.
  *
  * Usage:
- *   npm run import:catalog -w server              # write to DATABASE_URL
+ *   npm run import:catalog -w server              # write to the DB_* database
  *   npm run import:catalog -w server -- --dry-run # parse and report only, no DB needed
  *   npx -w server tsx scripts/import-catalog.ts --dry-run --verbose   # npm swallows --verbose
  */

@@ -7,6 +7,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
+  // Built at runtime from DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME by src/env.ts; not set by hand.
   url      = env("DATABASE_URL")
 }
 

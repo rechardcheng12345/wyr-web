@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import cors from "cors";
 import express, { type ErrorRequestHandler } from "express";
 import { CORS_ORIGINS } from "./constants.js";
+import { SERVER_ROOT } from "./env.js";
 import { CheckoutError } from "./orders.js";
 import { categoriesRouter } from "./routes/categories.js";
 import { checkoutRouter } from "./routes/checkout.js";
@@ -11,10 +11,7 @@ import { ordersRouter } from "./routes/orders.js";
 import { paymentsRouter } from "./routes/payments.js";
 import { productsRouter } from "./routes/products.js";
 
-// This file runs from server/src (tsx) or server/dist/src (built), so find the server root first.
-const here = path.dirname(fileURLToPath(import.meta.url));
-const serverRoot = path.resolve(here, here.endsWith(path.join("dist", "src")) ? "../.." : "..");
-const CLIENT_DIST = path.resolve(serverRoot, "../client/dist");
+const CLIENT_DIST = path.resolve(SERVER_ROOT, "../client/dist");
 
 export function createApp() {
   const app = express();

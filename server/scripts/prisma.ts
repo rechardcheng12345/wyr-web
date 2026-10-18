@@ -1,4 +1,4 @@
-// Run the Prisma CLI with DATABASE_URL built from DB_* (see src/env.ts).
+// Run the Prisma CLI against the database configured by DB_* (see src/env.ts).
 //   tsx scripts/prisma.ts migrate deploy
 import "../src/env.js";
 import { spawnSync } from "node:child_process";
