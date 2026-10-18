@@ -12,10 +12,16 @@ export const SERVER_ROOT = path.resolve(here, here.endsWith(path.join("dist", "s
 const ENV_FILE = path.join(SERVER_ROOT, ".env");
 dotenv.config({ path: ENV_FILE });
 
-const { DB_HOST = "localhost", DB_PORT = "3306", DB_USER, DB_PASSWORD = "", DB_NAME } = process.env;
-const missing = [!DB_USER && "DB_USER", !DB_NAME && "DB_NAME"].filter(Boolean);
-if (missing.length) {
-  console.warn(`[warn] database not configured: ${missing.join(", ")} not set (checked environment variables and ${ENV_FILE})`);
+const { DB_HOST, DB_PORT = "3306", DB_USER, DB_PASSWORD = "", DB_NAME } = process.env;
+
+/** Required DB_* variables that are not set. The server refuses to start while this is non-empty. */
+export const MISSING_DB_VARS = (["DB_HOST", "DB_USER", "DB_NAME"] as const).filter((name) => !process.env[name]?.trim());
+export const DB_CONFIG_HELP =
+  `Set them as environment variables (in production: your host's environment variable settings) or in ${ENV_FILE}. ` +
+  "server/.env is not committed to git, so it does not exist on the production server.";
+
+if (MISSING_DB_VARS.length) {
+  console.warn(`[warn] database not configured: ${MISSING_DB_VARS.join(", ")} not set. ${DB_CONFIG_HELP}`);
 } else {
   // Internal only: Prisma reads its URL from this variable (see prisma/schema.prisma). Never set it yourself.
   const auth = `${encodeURIComponent(DB_USER!)}:${encodeURIComponent(DB_PASSWORD)}`;
