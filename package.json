@@ -16,7 +16,8 @@
     "client:build": "npm run build -w client",
     "install-all": "npm install",
     "dev": "npm start",
-    "build": "npm run build -w server && npm run build -w client",
+    "build": "npm install --include=dev && npm run build:app && npm run server:start",
+    "build:app": "npm run build -w server && npm run build -w client",
     "import:catalog": "npm run import:catalog -w server --"
   },
   "devDependencies": {
