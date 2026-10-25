@@ -1,7 +1,8 @@
 import { Router } from "express";
-import { cancelUnpaidOrder, CheckoutError, createPendingOrder, parseBuyer, parseCartItems, quote } from "../orders.js";
+import { cancelUnpaidOrder, CheckoutError, createPendingOrder, parseBuyer, parseCartItems, parseOrderExtras, priceCart, quote } from "../orders.js";
 import { startPayment } from "../payments/index.js";
 import { isMalaysianState } from "../shipping.js";
+import { applyVoucher, normalizeCode } from "../vouchers.js";
 
 export const checkoutRouter = Router();
 
@@ -10,7 +11,17 @@ export const checkoutRouter = Router();
 checkoutRouter.post("/quote", async (req, res) => {
   const items = parseCartItems(req.body?.items);
   const state = typeof req.body?.state === "string" && isMalaysianState(req.body.state) ? req.body.state : null;
-  res.json(await quote(items, state));
+  res.json(await quote(items, state, normalizeCode(req.body?.voucherCode) || null));
+});
+
+checkoutRouter.post("/voucher", async (req, res) => {
+  const code = normalizeCode(req.body?.code);
+  if (!code) throw new CheckoutError(400, "Enter a voucher code.");
+  const items = parseCartItems(req.body?.items);
+  const { subtotalCents } = await priceCart(items);
+  const result = await applyVoucher(code, subtotalCents);
+  if (!result.valid) throw new CheckoutError(400, result.error);
+  res.json(result);
 });
 
 // POST /api/checkout { items: [{variantId, qty}], buyer: {name, email, phone, addressLine, postcode, city, state} }
@@ -18,7 +29,8 @@ checkoutRouter.post("/quote", async (req, res) => {
 checkoutRouter.post("/", async (req, res) => {
   const items = parseCartItems(req.body?.items);
   const buyer = parseBuyer(req.body?.buyer);
-  const order = await createPendingOrder(items, buyer);
+  const extras = parseOrderExtras(req.body);
+  const order = await createPendingOrder(items, buyer, extras);
 
   let paymentUrl;
   try {

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { requireAdmin } from "../auth.js";
 import { prisma } from "../db.js";
+import { safetyBuffer, sellableQty } from "../stock.js";
 
 export const adminInventoryRouter = Router();
 adminInventoryRouter.use(requireAdmin);
@@ -58,8 +59,8 @@ adminInventoryRouter.get("/", async (_req, res) => {
         tracked: Boolean(inv),
         available,
         reserved,
-        safetyBuffer: inv?.safetyBuffer ?? 0,
-        sellable: inv ? Math.max(0, available - reserved - inv.safetyBuffer) : 0,
+        safetyBuffer: inv ? safetyBuffer(inv) : 0,
+        sellable: inv ? sellableQty(inv) : 0,
         lockedToShip: lock?.qty ?? 0,
         onShelf: available + (lock?.qty ?? 0),
         lockedOrders: lock ? [...lock.orders.values()].sort((a, b) => new Date(a.paidAt) - new Date(b.paidAt)) : [],

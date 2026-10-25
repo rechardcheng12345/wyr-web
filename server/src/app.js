@@ -7,6 +7,8 @@ import { SERVER_ROOT } from "./env.js";
 import { CheckoutError } from "./orders.js";
 import { bulkQuote } from "./pricing.js";
 import { getSetting } from "./settings.js";
+import { shippingSummary } from "./shipping.js";
+import { welcomeVoucher } from "./vouchers.js";
 import { adminCostingRouter } from "./routes/admin-costing.js";
 import { adminInventoryRouter } from "./routes/admin-inventory.js";
 import { adminOrdersRouter } from "./routes/admin-orders.js";
@@ -14,6 +16,7 @@ import { adminProductsRouter } from "./routes/admin-products.js";
 import { adminPurchasingRouter } from "./routes/admin-purchasing.js";
 import { adminSalesRouter } from "./routes/admin-sales.js";
 import { adminSettingsRouter } from "./routes/admin-settings.js";
+import { adminVouchersRouter } from "./routes/admin-vouchers.js";
 import { authRouter } from "./routes/auth.js";
 import { categoriesRouter } from "./routes/categories.js";
 import { checkoutRouter } from "./routes/checkout.js";
@@ -32,9 +35,18 @@ export function createApp() {
   app.get("/api/health", (_req, res) => {
     res.json({ ok: true });
   });
-  app.get("/api/site", (_req, res) => {
+  app.get("/api/site", async (_req, res) => {
     const { whatsappNumber, minQty } = bulkQuote();
-    res.json({ whatsappNumber, bulkQuoteMinQty: minQty, shopeeUrl: getSetting("shopeeUrl") || null });
+    const shipping = shippingSummary();
+    res.json({
+      whatsappNumber,
+      bulkQuoteMinQty: minQty,
+      shopeeUrl: getSetting("shopeeUrl") || null,
+      shipping: { westRm: shipping.westCents / 100, eastRm: shipping.eastCents / 100, freeThresholdRm: shipping.freeThresholdCents == null ? null : shipping.freeThresholdCents / 100 },
+      minOrderSubtotalRm: getSetting("min_order_subtotal"),
+      lowPriceMinQty: getSetting("low_price_min_qty"),
+      welcomeVoucher: await welcomeVoucher(),
+    });
   });
   app.use("/api/auth", authRouter);
   app.use("/api/admin/products", adminProductsRouter);
@@ -44,6 +56,7 @@ export function createApp() {
   app.use("/api/admin/sales", adminSalesRouter);
   app.use("/api/admin/costing", adminCostingRouter);
   app.use("/api/admin/settings", adminSettingsRouter);
+  app.use("/api/admin/vouchers", adminVouchersRouter);
   app.use("/api/products", productsRouter);
   app.use("/api/categories", categoriesRouter);
   app.use("/api/checkout", checkoutRouter);

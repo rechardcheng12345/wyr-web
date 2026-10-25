@@ -12,6 +12,9 @@
     "prisma:deploy": "node scripts/prisma.js migrate deploy",
     "import:catalog": "node scripts/import-catalog.js",
     "import:tiers": "node scripts/price-tiers.js",
+    "seed:vouchers": "node scripts/seed-vouchers.js",
+    "stock:crosscheck": "node scripts/stock-crosscheck.js",
+    "stock:apply-shopee": "node scripts/stock-apply-shopee.js",
     "prisma": "node scripts/prisma.js"
   },
   "dependencies": {

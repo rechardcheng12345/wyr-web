@@ -7,14 +7,19 @@ const PLATFORMS = {
 };
 
 /** Secondary to the site's own checkout: links out to the same product on each marketplace. */
-export function MarketplaceStrip({ links, className }) {
+export function MarketplaceStrip({ links, welcomeVoucher, className }) {
   const available = links.filter((l) => l.url && PLATFORMS[l.platform]);
   if (available.length === 0) return null;
 
   return (
-    <section aria-label="Also on marketplaces" className={cn("rounded-xl border p-4", className)}>
-      <p className="text-sm font-medium">Also on</p>
-      <p className="text-muted-foreground mt-0.5 text-xs">Prefer your marketplace vouchers and coins? Same product, same stock.</p>
+    <section aria-label="Also on marketplaces" className={cn("rounded-xl border p-4", className)} data-testid="marketplace-box">
+      <p className="text-sm font-medium">Also on {available.map((l) => PLATFORMS[l.platform].label).join(" / ")}</p>
+      <p className="text-muted-foreground mt-0.5 text-xs">Same products as our Shopee/Lazada shop.</p>
+      {welcomeVoucher && (
+        <p className="mt-2 rounded-md bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-800" data-testid="welcome-voucher">
+          Buy direct: first order use code <span className="font-mono font-semibold">{welcomeVoucher.code}</span> ({welcomeVoucher.description})
+        </p>
+      )}
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
         {available.map((l) => {
           const p = PLATFORMS[l.platform];

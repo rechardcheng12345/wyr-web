@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { requireAdmin } from "../auth.js";
+import { cleanTitle } from "../display-name.js";
 import { prisma } from "../db.js";
+import { logStockMovement } from "../stock.js";
 
 export const adminProductsRouter = Router();
 adminProductsRouter.use(requireAdmin);
@@ -123,6 +125,7 @@ function parseInput(body) {
   return {
     product: {
       name,
+      displayName: str(body?.displayName, 255) || null,
       slug,
       categoryId,
       parentSku: str(body?.parentSku, 80) || null,
@@ -203,11 +206,13 @@ async function writeChildren(tx, productId, input, existingVariantIds) {
     } else {
       variantId = (await tx.productVariant.create({ data: { ...data, productId } })).id;
     }
+    const before = await tx.inventory.findUnique({ where: { variantId }, select: { available: true } });
     await tx.inventory.upsert({
       where: { variantId },
       create: { variantId, available: v.stock },
       update: { available: v.stock },
     });
+    await logStockMovement(tx, { variantId, delta: v.stock - (before?.available ?? 0), reason: "adjust", note: "admin product edit" });
   }
 }
 
@@ -235,6 +240,8 @@ function serializeForEdit(p) {
   return {
     id: p.id,
     name: p.name,
+    displayName: p.displayName ?? "",
+    autoDisplayName: cleanTitle(p.name),
     slug: p.slug ?? "",
     categoryId: p.categoryId,
     parentSku: p.parentSku ?? "",

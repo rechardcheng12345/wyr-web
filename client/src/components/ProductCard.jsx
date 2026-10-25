@@ -18,15 +18,16 @@ export function ProductImage({ src, alt, className }) {
 }
 
 export function ProductCard({ product }) {
-  const { slug, name, image, minPrice, maxPrice, inStock, category, variantCount } = product;
+  const { slug, image, minPrice, maxPrice, inStock, category, variantCount } = product;
+  const name = product.displayName ?? product.name;
   return (
     <Link to={`/products/${slug}`} className="group focus-visible:outline-none">
       <Card className="h-full overflow-hidden transition-shadow group-hover:shadow-md group-focus-visible:ring-ring/50 group-focus-visible:ring-[3px]">
         <div className="relative aspect-square overflow-hidden">
           <ProductImage src={image} alt={name} className="size-full transition-transform duration-300 group-hover:scale-[1.03]" />
           {!inStock && (
-            <Badge variant="muted" className="absolute top-2 left-2 bg-white/90">
-              Check marketplace
+            <Badge variant="muted" className="absolute top-2 left-2 bg-white/90" data-testid="oos-badge">
+              Out of stock
             </Badge>
           )}
         </div>

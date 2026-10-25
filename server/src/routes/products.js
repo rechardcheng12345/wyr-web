@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { prisma } from "../db.js";
+import { displayNameOf } from "../display-name.js";
 import { bulkQuote, priceLadder, quickQtys } from "../pricing.js";
+import { minQtyFor, sellableQty as inventorySellable } from "../stock.js";
 
 export const productsRouter = Router();
 
@@ -25,9 +27,12 @@ const toNumber = (d) => (d === null ? null : d.toNumber());
 // What the site can promise: on-hand minus open reservations and the safety buffer.
 // null = no stock data for this variant (e.g. Lazada-only products before BigSeller sync).
 function sellableQty(v) {
-  if (!v.inventory) return null;
-  const { available, reserved, safetyBuffer } = v.inventory;
-  return Math.max(0, available - reserved - safetyBuffer);
+  return inventorySellable(v.inventory);
+}
+
+function variantMinQty(v) {
+  const base = v.specialPrice ?? v.price;
+  return minQtyFor(base == null ? null : Math.round(base.toNumber() * 100));
 }
 
 function effectivePrice(v) {
@@ -53,11 +58,12 @@ function serializeSummary(p) {
     id: p.id,
     slug: p.slug,
     name: p.name,
+    displayName: displayNameOf(p),
     category: p.category,
     image: p.images[0]?.url ?? null,
     ...priceRange(p.variants),
     variantCount: p.variants.length,
-    inStock: p.variants.some((v) => (sellableQty(v) ?? 0) > 0),
+    inStock: p.variants.some((v) => effectivePrice(v) != null && (sellableQty(v) ?? 0) >= variantMinQty(v)),
     marketplaces: serializeListings(p),
   };
 }
@@ -67,6 +73,7 @@ function serializeDetail(p) {
     id: p.id,
     slug: p.slug,
     name: p.name,
+    displayName: displayNameOf(p),
     parentSku: p.parentSku,
     description: p.description,
     productType: p.productType,
@@ -80,6 +87,7 @@ function serializeDetail(p) {
       price: toNumber(v.price),
       specialPrice: toNumber(v.specialPrice),
       stock: sellableQty(v),
+      minQty: variantMinQty(v),
       // Per-piece price by quantity, starting with the 1+ row; empty if the variant has no price.
       tiers: (priceLadder(v) ?? []).map((t) => ({ minQty: t.minQty, unitPrice: t.unitPriceCents / 100 })),
       quickQtys: quickQtys(v.quickQtys),

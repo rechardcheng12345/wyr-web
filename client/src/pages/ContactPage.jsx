@@ -1,4 +1,4 @@
-import { ExternalLink, MapPin, MessageCircle, Send, ShoppingBag } from "lucide-react";
+import { ExternalLink, MessageCircle, Send, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,10 +60,6 @@ export function ContactPage() {
               </a>
             </ContactCard>
           )}
-          <ContactCard icon={MapPin} title="Location">
-            <p>Kuala Lumpur, Malaysia</p>
-            <p className="mt-1">Orders ship nationwide, to Peninsular and East Malaysia.</p>
-          </ContactCard>
         </div>
 
         <div className="bg-card rounded-2xl border p-6 sm:p-8 lg:col-span-3">

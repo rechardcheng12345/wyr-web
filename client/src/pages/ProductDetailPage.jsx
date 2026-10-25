@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRight, MessageCircle, ShoppingCart } from "lucide-react";
+import { ChevronRight, MessageCircle, ShoppingCart, Truck } from "lucide-react";
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ErrorState } from "@/components/ErrorState";
@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ApiError, fetchProduct } from "@/lib/api";
 import { useCart } from "@/lib/cart";
 import { lineTotal, savingPct, tierFor } from "@/lib/pricing";
+import { shippingText, usePageMeta, useSiteInfo } from "@/lib/site";
 import { cn, formatPrice, formatPriceRange } from "@/lib/utils";
 import { NotFoundPage } from "./NotFoundPage";
 
@@ -35,7 +36,21 @@ export function ProductDetailPage() {
   return <ProductView key={data.id} product={data} />;
 }
 
+export function isVariantPurchasable(v) {
+  return v.tiers.length > 0 && v.stock != null && v.stock >= (v.minQty ?? 1);
+}
+
+function metaDescription(product, name) {
+  const text = (product.description ?? "").replace(/\s+/g, " ").trim();
+  const price = product.minPrice != null ? ` From ${formatPrice(product.minPrice)}.` : "";
+  const base = `${name}.${price} Ready stock in Malaysia, ships from Kuala Lumpur.`;
+  return text ? `${base} ${text}`.slice(0, 160).replace(/\s+\S*$/, "") : base;
+}
+
 function ProductView({ product }) {
+  const site = useSiteInfo();
+  const name = product.displayName ?? product.name;
+  usePageMeta(`${name} · WYR Technology`, metaDescription(product, name));
   const galleryImages = product.images.filter((i) => i.variantId === null);
   const [variantId, setVariantId] = useState(product.variants.length === 1 ? product.variants[0].id : null);
   const [imageUrl, setImageUrl] = useState(galleryImages[0]?.url ?? product.images[0]?.url ?? null);
@@ -43,6 +58,7 @@ function ProductView({ product }) {
   const variant = product.variants.find((v) => v.id === variantId) ?? null;
 
   function selectVariant(v) {
+    if (!isVariantPurchasable(v)) return;
     setVariantId(v.id);
     const img = product.images.find((i) => i.variantId === v.id);
     if (img) setImageUrl(img.url);
@@ -69,7 +85,7 @@ function ProductView({ product }) {
       <div className="mt-6 grid gap-10 md:grid-cols-2">
         <div>
           <div className="bg-card aspect-square overflow-hidden rounded-xl border">
-            <ProductImage src={imageUrl} alt={product.name} className="size-full" />
+            <ProductImage src={imageUrl} alt={name} className="size-full" />
           </div>
           {thumbs.length > 1 && (
             <div className="mt-3 grid grid-cols-5 gap-2">
@@ -93,11 +109,20 @@ function ProductView({ product }) {
 
         <div className="flex flex-col gap-6">
           <div>
-            <h1 className="text-2xl leading-tight font-bold tracking-tight md:text-3xl">{product.name}</h1>
+            <h1 className="text-2xl leading-tight font-bold tracking-tight md:text-3xl">{name}</h1>
             <div className="mt-3 flex items-baseline gap-3">
               <VariantPrice product={product} variant={variant} />
             </div>
-            {variant && <StockNote stock={variant.stock} />}
+            {variant && <StockNote stock={variant.stock} minQty={variant.minQty} />}
+            {site.shipping && (
+              <p className="text-muted-foreground mt-3 flex items-center gap-2 text-sm" data-testid="shipping-note">
+                <Truck className="size-4 shrink-0" />
+                <span>
+                  {shippingText(site.shipping)}
+                  {site.shipping.freeThresholdRm != null && <> · free from {formatPrice(site.shipping.freeThresholdRm)}</>}
+                </span>
+              </p>
+            )}
           </div>
 
           {product.variants.length > 1 && (
@@ -106,28 +131,33 @@ function ProductView({ product }) {
                 Option{variant?.name && <span className="text-muted-foreground font-normal">: {variant.name}</span>}
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
-                {product.variants.map((v) => (
-                  <button
-                    key={v.id}
-                    type="button"
-                    onClick={() => selectVariant(v)}
-                    aria-pressed={v.id === variantId}
-                    className={cn(
-                      "focus-visible:ring-ring/50 rounded-lg border px-3 py-2 text-sm transition-colors outline-none focus-visible:ring-[3px]",
-                      v.id === variantId ? "border-primary bg-primary/5 text-primary font-medium" : "hover:bg-accent",
-                      v.stock === 0 && v.id !== variantId && "text-muted-foreground",
-                    )}
-                  >
-                    {v.name ?? v.sku}
-                  </button>
-                ))}
+                {product.variants.map((v) => {
+                  const soldOut = !isVariantPurchasable(v);
+                  return (
+                    <button
+                      key={v.id}
+                      type="button"
+                      onClick={() => selectVariant(v)}
+                      aria-pressed={v.id === variantId}
+                      disabled={soldOut}
+                      data-testid="variant-option"
+                      data-oos={soldOut ? "true" : undefined}
+                      className={cn(
+                        "focus-visible:ring-ring/50 rounded-lg border px-3 py-2 text-left text-sm transition-colors outline-none focus-visible:ring-[3px]",
+                        v.id === variantId ? "border-primary bg-primary/5 text-primary font-medium" : "hover:bg-accent",
+                        soldOut && "bg-muted/60 text-muted-foreground cursor-not-allowed border-dashed line-through decoration-1 hover:bg-muted/60",
+                      )}
+                    >
+                      {v.name ?? v.sku}
+                      {soldOut && <span className="block text-[11px] font-medium no-underline">Out of stock</span>}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
 
           <AddToCart key={variant?.id ?? "none"} product={product} variant={variant} image={imageUrl} />
-
-          <MarketplaceStrip links={product.marketplaces} />
 
           {product.description && (
             <section className="border-t pt-6">
@@ -135,6 +165,8 @@ function ProductView({ product }) {
               <div className="text-muted-foreground mt-3 text-sm leading-relaxed whitespace-pre-line">{product.description}</div>
             </section>
           )}
+
+          <MarketplaceStrip links={product.marketplaces} welcomeVoucher={site.welcomeVoucher} />
         </div>
       </div>
     </div>
@@ -143,16 +175,19 @@ function ProductView({ product }) {
 
 function AddToCart({ product, variant, image }) {
   const cart = useCart();
-  const [qty, setQty] = useState(1);
+  const minQty = variant?.minQty ?? 1;
+  const [qty, setQty] = useState(minQty);
   const [added, setAdded] = useState(null);
 
   const inCart = variant ? (cart.items.find((i) => i.variantId === variant.id)?.qty ?? 0) : 0;
   const tiers = variant?.tiers ?? [];
   const basePrice = tiers[0]?.unitPrice ?? null;
   // stock null = no stock data yet, so it can't be sold here (only on the marketplaces).
-  const canAdd = Math.max(0, (variant?.stock ?? 0) - inCart);
-  const purchasable = variant != null && basePrice != null && (variant.stock ?? 0) > 0;
-  const clampedQty = Math.min(qty, Math.max(canAdd, 1));
+  const minAdd = Math.max(1, minQty - inCart);
+  const room = Math.max(0, (variant?.stock ?? 0) - inCart);
+  const canAdd = room >= minAdd ? room : 0;
+  const purchasable = variant != null && isVariantPurchasable(variant);
+  const clampedQty = Math.max(minAdd, Math.min(qty, Math.max(canAdd, minAdd)));
   // Tiers go by the line's total quantity, so price what this cart line will become.
   const lineQty = inCart + clampedQty;
   const unit = tierFor(tiers, lineQty)?.unitPrice ?? basePrice ?? 0;
@@ -172,11 +207,12 @@ function AddToCart({ product, variant, image }) {
         unitPrice: basePrice,
         tiers,
         stock: variant.stock ?? 0,
+        minQty,
       },
       clampedQty,
     );
     setAdded(n);
-    setQty(1);
+    setQty(minQty);
   }
 
   if (!variant) {
@@ -192,31 +228,44 @@ function AddToCart({ product, variant, image }) {
         <div>
           <p className="text-sm font-medium">Quantity (pieces)</p>
           <div className="mt-2 flex flex-wrap gap-2" data-testid="quick-qtys">
-            {[1, ...variant.quickQtys].map((q) => {
-              const pct = basePrice != null ? savingPct(basePrice, tierFor(tiers, inCart + q)?.unitPrice ?? basePrice) : 0;
-              return (
-                <button
-                  key={q}
-                  type="button"
-                  onClick={() => setQty(q)}
-                  disabled={q > canAdd}
-                  aria-pressed={clampedQty === q}
-                  className={cn(
-                    "focus-visible:ring-ring/50 min-w-16 rounded-lg border px-3 py-1.5 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-40",
-                    clampedQty === q ? "border-primary bg-primary/5 text-primary font-medium" : "hover:bg-accent",
-                  )}
-                >
-                  {q} pc{q === 1 ? "" : "s"}
-                  {pct > 0 && <span className="block text-[11px] font-medium text-emerald-700">−{pct}%</span>}
-                </button>
-              );
-            })}
+            {[1, ...variant.quickQtys]
+              .filter((q) => q >= minAdd)
+              .map((q) => {
+                const tierUnit = tierFor(tiers, inCart + q)?.unitPrice ?? basePrice;
+                const pct = basePrice != null ? savingPct(basePrice, tierUnit) : 0;
+                return (
+                  <button
+                    key={q}
+                    type="button"
+                    onClick={() => setQty(q)}
+                    disabled={q > canAdd}
+                    aria-pressed={clampedQty === q}
+                    data-testid={`quick-${q}`}
+                    className={cn(
+                      "focus-visible:ring-ring/50 min-w-16 rounded-lg border px-3 py-1.5 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-40",
+                      clampedQty === q ? "border-primary bg-primary/5 text-primary font-medium" : "hover:bg-accent",
+                    )}
+                  >
+                    {q} pc{q === 1 ? "" : "s"}
+                    {pct > 0 && (
+                      <span className="block text-[11px] font-medium text-emerald-700" data-testid="quick-saving">
+                        {formatPrice(tierUnit)}/pc · Save {pct}%
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
           </div>
         </div>
       )}
+      {minQty > 1 && (
+        <p className="text-muted-foreground -mt-2 text-xs" data-testid="min-qty-note">
+          Min. {minQty} pcs
+        </p>
+      )}
 
       <div className="flex flex-wrap items-center gap-3">
-        <QtyStepper value={clampedQty} max={Math.max(canAdd, 1)} onChange={setQty} disabled={canAdd === 0} />
+        <QtyStepper value={clampedQty} min={minAdd} max={Math.max(canAdd, minAdd)} onChange={setQty} disabled={canAdd === 0} />
         <Button size="lg" className="flex-1" onClick={onAdd} disabled={canAdd === 0} data-testid="add-to-cart">
           <ShoppingCart />
           Add to cart
@@ -253,7 +302,7 @@ function AddToCart({ product, variant, image }) {
 
       {tierTable}
 
-      {canAdd === 0 && <p className="text-muted-foreground text-sm">You already have all {variant.stock} in your cart.</p>}
+      {canAdd === 0 && <p className="text-muted-foreground text-sm">You already have all {inCart} available in your cart.</p>}
       {added !== null && added > 0 && (
         <p className="text-sm text-emerald-700" role="status">
           Added {added} to your cart.{" "}
@@ -356,9 +405,9 @@ function VariantPrice({ product, variant }) {
   );
 }
 
-function StockNote({ stock }) {
+function StockNote({ stock, minQty = 1 }) {
   if (stock == null) return null;
-  if (stock === 0) return <Badge variant="muted" className="mt-3">Out of stock here, check the marketplaces</Badge>;
+  if (stock < minQty) return <Badge variant="muted" className="mt-3">Out of stock here, check the marketplaces</Badge>;
   return <Badge variant="success" className="mt-3">{stock < 10 ? `Only ${stock} left` : "In stock"}</Badge>;
 }
 

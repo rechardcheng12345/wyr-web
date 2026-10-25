@@ -1,6 +1,7 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import { prisma } from "../db.js";
 import { settlePaidOrder, STOCK_TX, toCents } from "../orders.js";
+import { pushOrder } from "../integrations/bigseller.js";
 import { mockGateway } from "./mock.js";
 import { toyyibPayGateway } from "./toyyibpay.js";
 
@@ -14,6 +15,10 @@ let cached = null;
 export function gateway() {
   cached ??= paymentMode() === "mock" ? mockGateway() : toyyibPayGateway();
   return cached;
+}
+
+export function setGatewayForTests(g) {
+  cached = g;
 }
 
 export function publicBaseUrl() {
@@ -106,6 +111,9 @@ async function reconcilePayment(payment, callbackBody) {
       if (count === 0) return "already_paid";
       return settlePaidOrder(tx, payment.orderId);
     }, STOCK_TX);
+    if (outcome === "paid" || outcome === "paid_after_expiry") {
+      pushOrder(payment.order).catch((err) => console.error(`[bigseller] push ${payment.order.orderNo} failed:`, err));
+    }
     if (outcome === "paid_after_expiry") {
       console.warn(`[payments] ${payment.order.orderNo} was paid after its reservation expired; stock may be oversold, check it.`);
     } else if (outcome === "already_settled") {

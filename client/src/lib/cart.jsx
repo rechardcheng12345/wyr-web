@@ -44,7 +44,7 @@ export function CartProvider({ children }) {
     (item, qty) => {
       const inCart = items.find((i) => i.variantId === item.variantId)?.qty ?? 0;
       const added = Math.max(0, Math.min(qty, item.stock - inCart));
-      if (added === 0) return 0;
+      if (added === 0 || inCart + added < (item.minQty ?? 1)) return 0;
       setItems((prev) => {
         const existing = prev.find((i) => i.variantId === item.variantId);
         if (!existing) return [...prev, { ...item, qty: added }];
@@ -56,7 +56,13 @@ export function CartProvider({ children }) {
   );
 
   const setQty = useCallback((variantId, qty) => {
-    setItems((prev) => prev.map((i) => (i.variantId === variantId ? { ...i, qty: Math.max(1, Math.min(qty, Math.max(i.stock, 1))) } : i)));
+    setItems((prev) =>
+      prev.map((i) => {
+        if (i.variantId !== variantId) return i;
+        const min = i.minQty ?? 1;
+        return { ...i, qty: Math.max(min, Math.min(qty, Math.max(i.stock, min))) };
+      }),
+    );
   }, []);
 
   const remove = useCallback((variantId) => setItems((prev) => prev.filter((i) => i.variantId !== variantId)), []);
@@ -67,9 +73,13 @@ export function CartProvider({ children }) {
       let changed = false;
       const next = prev.map((i) => {
         const u = updates.find((x) => x.variantId === i.variantId);
-        if (!u || (u.unitPrice === i.unitPrice && u.stock === i.stock && JSON.stringify(u.tiers) === JSON.stringify(i.tiers))) return i;
+        if (
+          !u ||
+          (u.unitPrice === i.unitPrice && u.stock === i.stock && u.minQty === i.minQty && u.productName === i.productName && JSON.stringify(u.tiers) === JSON.stringify(i.tiers))
+        )
+          return i;
         changed = true;
-        return { ...i, unitPrice: u.unitPrice, tiers: u.tiers, stock: u.stock };
+        return { ...i, unitPrice: u.unitPrice, tiers: u.tiers, stock: u.stock, minQty: u.minQty, productName: u.productName ?? i.productName };
       });
       return changed ? next : prev;
     });

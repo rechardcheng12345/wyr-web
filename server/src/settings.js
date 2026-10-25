@@ -1,5 +1,11 @@
 import {
   BULK_QUOTE_MIN_QTY,
+  FREE_SHIPPING_THRESHOLD_RM,
+  LOW_PRICE_MIN_QTY,
+  LOW_PRICE_THRESHOLD_RM,
+  MIN_ORDER_SUBTOTAL_RM,
+  STOCK_SAFETY_BUFFER,
+  WELCOME_VOUCHER_CODE,
   ORDER_HOLD_MINUTES,
   SHIPPING_FLAT_EM_RM,
   SHIPPING_FLAT_WM_RM,
@@ -13,6 +19,17 @@ function money(raw) {
   const n = Number(raw);
   if (raw === "" || raw == null || !Number.isFinite(n) || n < 0 || n > 10_000) throw new Error("Enter an amount between 0 and 10,000");
   return Math.round(n * 100) / 100;
+}
+
+function optionalMoney(raw) {
+  if (raw === "" || raw == null) return null;
+  return money(raw);
+}
+
+function voucherCode(raw) {
+  const v = String(raw ?? "").trim().toUpperCase();
+  if (v && !/^[A-Z0-9_-]{1,40}$/.test(v)) throw new Error("Letters, digits, - and _ only (max 40)");
+  return v;
 }
 
 function intBetween(min, max) {
@@ -73,6 +90,61 @@ export const SETTINGS = [
     type: "money",
     defaultValue: SHIPPING_FLAT_EM_RM,
     parse: money,
+  },
+  {
+    key: "free_shipping_threshold",
+    group: "Shipping fees",
+    label: "Free shipping from (subtotal)",
+    help: "Orders with a subtotal (before voucher) at or above this ship free. Leave empty to turn off.",
+    type: "money",
+    optional: true,
+    defaultValue: FREE_SHIPPING_THRESHOLD_RM,
+    parse: optionalMoney,
+  },
+  {
+    key: "min_order_subtotal",
+    group: "Checkout & payment",
+    label: "Minimum order subtotal",
+    help: "Checkout is blocked below this subtotal (before voucher discount).",
+    type: "money",
+    defaultValue: MIN_ORDER_SUBTOTAL_RM,
+    parse: money,
+  },
+  {
+    key: "low_price_threshold",
+    group: "Checkout & payment",
+    label: "Low-price item threshold (per piece)",
+    help: "Items whose 1-piece price is below this have a minimum quantity per cart line.",
+    type: "money",
+    defaultValue: LOW_PRICE_THRESHOLD_RM,
+    parse: money,
+  },
+  {
+    key: "low_price_min_qty",
+    group: "Checkout & payment",
+    label: "Minimum pieces for low-price items",
+    help: "Minimum quantity per cart line for items under the low-price threshold.",
+    type: "int",
+    defaultValue: LOW_PRICE_MIN_QTY,
+    parse: intBetween(1, 1000),
+  },
+  {
+    key: "welcome_voucher_code",
+    group: "Checkout & payment",
+    label: "Welcome voucher code",
+    help: "Advertised on product pages as \"Buy direct: first order use code …\" while the voucher is active. Leave empty to hide.",
+    type: "text",
+    defaultValue: WELCOME_VOUCHER_CODE,
+    parse: voucherCode,
+  },
+  {
+    key: "stock_safety_buffer",
+    group: "Stock",
+    label: "Stock safety buffer (pieces)",
+    help: "Held back from every variant so the site never sells the last pieces that marketplaces may also sell. Sellable = stock − reserved − buffer.",
+    type: "int",
+    defaultValue: STOCK_SAFETY_BUFFER,
+    parse: intBetween(0, 100_000),
   },
   {
     key: "orderHoldMinutes",

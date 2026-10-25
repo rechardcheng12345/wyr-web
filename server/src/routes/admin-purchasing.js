@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { requireAdmin } from "../auth.js";
 import { prisma } from "../db.js";
+import { logStockMovement } from "../stock.js";
 
 export const adminPurchasingRouter = Router();
 adminPurchasingRouter.use(requireAdmin);
@@ -186,6 +187,7 @@ adminPurchasingRouter.post(
           create: { variantId: l.variantId, available: l.qty },
           update: { available: { increment: l.qty } },
         });
+        await logStockMovement(tx, { variantId: l.variantId, delta: l.qty, reason: "restock", note: `PO ${po.poNumber}` });
       }
       return po.id;
     });

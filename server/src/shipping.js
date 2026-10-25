@@ -30,8 +30,19 @@ export function isMalaysianState(value) {
 }
 
 /** Shipping for one parcel to `state`. Items are passed for when rates depend on weight (EasyParcel). */
-export function quoteShipping(state, _items) {
+export function quoteShipping(state, _items, subtotalCents = 0) {
   const zone = EAST_MALAYSIA.has(state) ? "east" : "west";
+  const { freeThresholdCents } = shippingSummary();
+  if (freeThresholdCents != null && subtotalCents >= freeThresholdCents) return { feeCents: 0, zone, method: "free" };
   const feeCents = Math.round(getSetting(zone === "east" ? "shippingEastRm" : "shippingWestRm") * 100);
   return { feeCents, zone, method: "flat" };
+}
+
+export function shippingSummary() {
+  const free = getSetting("free_shipping_threshold");
+  return {
+    westCents: Math.round(getSetting("shippingWestRm") * 100),
+    eastCents: Math.round(getSetting("shippingEastRm") * 100),
+    freeThresholdCents: free == null ? null : Math.round(free * 100),
+  };
 }

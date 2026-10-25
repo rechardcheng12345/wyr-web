@@ -1,9 +1,12 @@
 import { randomInt } from "node:crypto";
 import { Prisma } from "@prisma/client";
 import { prisma } from "./db.js";
+import { displayNameOf } from "./display-name.js";
 import { priceLadder, unitPriceCents as tierUnitPriceCents } from "./pricing.js";
 import { getSetting } from "./settings.js";
-import { isMalaysianState, quoteShipping } from "./shipping.js";
+import { isMalaysianState, quoteShipping, shippingSummary } from "./shipping.js";
+import { logStockMovement, minQtyFor, sellableQty, sellableSql } from "./stock.js";
+import { applyVoucher, normalizeCode } from "./vouchers.js";
 
 /** An error whose message is safe to show the buyer. */
 export class CheckoutError extends Error {
@@ -75,6 +78,21 @@ export function parseBuyer(raw) {
   return { name, email, phone, addressLine, postcode, city, state: state };
 }
 
+export function parseOrderExtras(raw) {
+  const b = raw ?? {};
+  const errors = {};
+  const companyName = typeof b.companyName === "string" ? b.companyName.trim().replace(/\s+/g, " ") : "";
+  if (companyName.length > 150) errors.companyName = "At most 150 characters";
+  const note = typeof b.note === "string" ? b.note.trim() : "";
+  if (note.length > 2000) errors.note = "At most 2000 characters";
+  if (Object.keys(errors).length > 0) throw new CheckoutError(400, "Please check the highlighted fields.", { fields: errors });
+  return { companyName: companyName || null, note: note || null, voucherCode: normalizeCode(b.voucherCode) || null };
+}
+
+export function minOrderCents() {
+  return Math.round(getSetting("min_order_subtotal") * 100);
+}
+
 // ---------------------------------------------------------------------------
 // Pricing: server prices and stock only
 
@@ -84,7 +102,7 @@ export async function priceCart(items, db = prisma) {
     include: {
       inventory: true,
       priceTiers: true,
-      product: { select: { name: true, slug: true, isActive: true, images: { orderBy: [{ sortOrder: "asc" }, { id: "asc" }], take: 1 } } },
+      product: { select: { name: true, displayName: true, slug: true, isActive: true, images: { orderBy: [{ sortOrder: "asc" }, { id: "asc" }], take: 1 } } },
     },
   });
   const byId = new Map(variants.map((v) => [v.id, v]));
@@ -99,12 +117,13 @@ export async function priceCart(items, db = prisma) {
     const ladder = v ? priceLadder(v) : null;
     // No inventory row = no stock data (not synced from BigSeller yet), so the site can't sell it.
     const sellable = v?.product.isActive && v.inventory && ladder !== null && ladder[0].unitPriceCents > 0;
-    const stock = sellable ? Math.max(0, v.inventory.available - v.inventory.reserved - v.inventory.safetyBuffer) : 0;
+    const stock = sellable ? sellableQty(v.inventory) : 0;
     const unitPriceCents = ladder ? tierUnitPriceCents(ladder, qty) : 0;
+    const minQty = minQtyFor(ladder?.[0].unitPriceCents ?? null);
     return {
       variantId,
       sku: v?.sku ?? "",
-      productName: v?.product.name ?? "Unavailable item",
+      productName: v ? displayNameOf(v.product) : "Unavailable item",
       productSlug: v?.product.slug ?? null,
       variantName: v?.variationName ?? null,
       image: variantImages.find((i) => i.variantId === variantId)?.url ?? v?.product.images[0]?.url ?? null,
@@ -114,26 +133,43 @@ export async function priceCart(items, db = prisma) {
       lineTotalCents: unitPriceCents * qty,
       tiers: ladder ?? [],
       stock,
-      problem: !sellable || stock === 0 ? "unavailable" : stock < qty ? "insufficient_stock" : null,
+      minQty,
+      problem: !sellable || stock < minQty ? "unavailable" : stock < qty ? "insufficient_stock" : qty < minQty ? "below_min_qty" : null,
     };
   });
   const subtotalCents = lines.reduce((sum, l) => sum + l.lineTotalCents, 0);
   return { lines, subtotalCents, weights: variants.map((v) => ({ variantId: v.id, weightG: v.weightG })) };
 }
 
-export async function quote(items, state) {
+function withWeights(items, weights) {
+  return items.map((i) => ({ ...i, weightG: weights.find((w) => w.variantId === i.variantId)?.weightG ?? null }));
+}
+
+export function minimumOrder(subtotalCents) {
+  const minCents = minOrderCents();
+  return { minCents, shortfallCents: Math.max(0, minCents - subtotalCents) };
+}
+
+export async function quote(items, state, voucherCode) {
   const { lines, subtotalCents, weights } = await priceCart(items);
-  const shipping = state
-    ? quoteShipping(
-        state,
-        items.map((i) => ({ ...i, weightG: weights.find((w) => w.variantId === i.variantId)?.weightG ?? null })),
-      )
-    : null;
+  const shipping = state ? quoteShipping(state, withWeights(items, weights), subtotalCents) : null;
+  const voucher = voucherCode ? await applyVoucher(voucherCode, subtotalCents) : null;
+  const discount = voucher?.valid ? voucher.discountCents : 0;
+  const summary = shippingSummary();
   return {
     lines,
     subtotalCents,
+    voucher,
+    discountCents: discount,
     shippingCents: shipping?.feeCents ?? null,
-    totalCents: shipping ? subtotalCents + shipping.feeCents : null,
+    shippingRange: {
+      westCents: summary.westCents,
+      eastCents: summary.eastCents,
+      freeShippingThresholdCents: summary.freeThresholdCents,
+      freeShippingShortfallCents: summary.freeThresholdCents == null ? null : Math.max(0, summary.freeThresholdCents - subtotalCents),
+    },
+    totalCents: shipping ? subtotalCents - discount + shipping.feeCents : null,
+    minimumOrder: minimumOrder(subtotalCents),
     ok: lines.every((l) => l.problem === null),
   };
 }
@@ -162,19 +198,30 @@ function newOrderNo() {
  * Prices the cart from the database, then in one transaction reserves stock for every line and
  * creates the order + items as pending_payment. Any line short of stock rolls the whole thing back.
  */
-export async function createPendingOrder(items, buyer) {
+export async function createPendingOrder(items, buyer, extras = {}) {
   for (let attempt = 0; ; attempt++) {
     try {
       return await prisma.$transaction(async (tx) => {
         const { lines, subtotalCents, weights } = await priceCart(items, tx);
+        const belowMin = lines.find((l) => l.problem === "below_min_qty");
+        if (belowMin) {
+          throw new CheckoutError(409, `${belowMin.productName}${belowMin.variantName ? ` (${belowMin.variantName})` : ""} has a minimum of ${belowMin.minQty} pcs.`, { lines });
+        }
         const bad = lines.filter((l) => l.problem !== null);
         if (bad.length > 0) throw new CheckoutError(409, "Some items in your cart are no longer available in that quantity.", { lines });
+        const { minCents, shortfallCents } = minimumOrder(subtotalCents);
+        if (shortfallCents > 0) {
+          throw new CheckoutError(409, `Minimum order RM${(minCents / 100).toFixed(2)}: add RM${(shortfallCents / 100).toFixed(2)} more.`, { lines });
+        }
+        const voucher = extras.voucherCode ? await applyVoucher(extras.voucherCode, subtotalCents, tx) : null;
+        if (voucher && !voucher.valid) throw new CheckoutError(409, voucher.error, { fields: { voucherCode: voucher.error } });
+        const discount = voucher?.discountCents ?? 0;
 
         // Fixed lock order (by variant id) so two concurrent checkouts can't deadlock.
         for (const line of [...lines].sort((a, b) => a.variantId - b.variantId)) {
           const updated = await tx.$executeRaw`
             UPDATE inventory SET reserved = reserved + ${line.qty}
-            WHERE variant_id = ${line.variantId} AND available - reserved - safety_buffer >= ${line.qty}`;
+            WHERE variant_id = ${line.variantId} AND ${sellableSql()} >= ${line.qty}`;
           if (updated !== 1) {
             throw new CheckoutError(409, `Sorry, ${line.productName}${line.variantName ? ` (${line.variantName})` : ""} just sold out in that quantity.`, {
               lines,
@@ -182,10 +229,7 @@ export async function createPendingOrder(items, buyer) {
           }
         }
 
-        const shipping = quoteShipping(
-          buyer.state,
-          items.map((i) => ({ ...i, weightG: weights.find((w) => w.variantId === i.variantId)?.weightG ?? null })),
-        );
+        const shipping = quoteShipping(buyer.state, withWeights(items, weights), subtotalCents);
         const now = new Date();
         return tx.order.create({
           data: {
@@ -193,8 +237,12 @@ export async function createPendingOrder(items, buyer) {
             email: buyer.email,
             status: "pending_payment",
             subtotal: fromCents(subtotalCents),
+            voucherCode: voucher?.code ?? null,
+            discount: fromCents(discount),
             shippingFee: fromCents(shipping.feeCents),
-            total: fromCents(subtotalCents + shipping.feeCents),
+            total: fromCents(subtotalCents - discount + shipping.feeCents),
+            companyName: extras.companyName ?? null,
+            note: extras.note ?? null,
             shipName: buyer.name,
             shipPhone: buyer.phone,
             shipAddress: buyer.addressLine,
@@ -235,6 +283,15 @@ export async function cancelUnpaidOrder(orderId) {
  * Marks an order paid and turns its reservation into a sale (available -= qty, reserved -= qty).
  * Must run inside the payment transaction. Returns what happened, for logging; safe to call twice.
  */
+async function recordSale(tx, orderId, items, note) {
+  for (const item of items) {
+    if (item.variantId == null) continue;
+    await logStockMovement(tx, { variantId: item.variantId, delta: -(item.qty ?? 0), reason: "sale", orderId, note });
+  }
+  const order = await tx.order.findUnique({ where: { id: orderId }, select: { voucherCode: true } });
+  if (order?.voucherCode) await tx.$executeRaw`UPDATE vouchers SET used_count = used_count + 1 WHERE code = ${order.voucherCode}`;
+}
+
 export async function settlePaidOrder(tx, orderId) {
   const paidAt = new Date();
   const { count } = await tx.order.updateMany({ where: { id: orderId, status: "pending_payment" }, data: { status: "paid", paidAt } });
@@ -246,6 +303,7 @@ export async function settlePaidOrder(tx, orderId) {
         UPDATE inventory SET available = available - ${qty}, reserved = GREATEST(reserved - ${qty}, 0)
         WHERE variant_id = ${item.variantId}`;
     }
+    await recordSale(tx, orderId, items, null);
     return "paid";
   }
   // Paid after the hold expired and the reservation was released: still take the money's worth of
@@ -255,6 +313,7 @@ export async function settlePaidOrder(tx, orderId) {
     for (const item of items) {
       await tx.$executeRaw`UPDATE inventory SET available = available - ${item.qty ?? 0} WHERE variant_id = ${item.variantId}`;
     }
+    await recordSale(tx, orderId, items, "paid after hold expired");
     return "paid_after_expiry";
   }
   return "already_settled";
@@ -267,7 +326,7 @@ export async function findOrderForBuyer(orderNo, email) {
   const order = await prisma.order.findUnique({
     where: { orderNo },
     include: {
-      items: { include: { variant: { include: { product: { select: { name: true, slug: true } } } } }, orderBy: { id: "asc" } },
+      items: { include: { variant: { include: { product: { select: { name: true, displayName: true, slug: true } } } } }, orderBy: { id: "asc" } },
       payments: { orderBy: { id: "desc" }, take: 1 },
     },
   });
@@ -288,7 +347,7 @@ export function serializeOrder(order) {
     items: order.items.map((i) => ({
       variantId: i.variantId,
       sku: i.variant?.sku ?? null,
-      productName: i.variant?.product.name ?? null,
+      productName: i.variant ? displayNameOf(i.variant.product) : null,
       productSlug: i.variant?.product.slug ?? null,
       variantName: i.variant?.variationName ?? null,
       qty: i.qty,
@@ -296,6 +355,10 @@ export function serializeOrder(order) {
       lineTotal: i.unitPrice && i.qty ? i.unitPrice.mul(i.qty).toNumber() : null,
     })),
     subtotal: order.subtotal?.toNumber() ?? null,
+    voucherCode: order.voucherCode,
+    discount: order.discount?.toNumber() ?? 0,
+    companyName: order.companyName,
+    note: order.note,
     shippingFee: order.shippingFee?.toNumber() ?? null,
     total: order.total?.toNumber() ?? null,
     shipping: {

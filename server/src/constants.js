@@ -23,3 +23,14 @@ export const SHOPEE_SHOP_URL = "https://shopee.com.my/shop/147356782";
 
 /** ToyyibPay payment channel: "0" = FPX only, "1" = card only, "2" = both (card must be enabled on the account). */
 export const TOYYIBPAY_PAYMENT_CHANNEL = "0";
+
+export const MIN_ORDER_SUBTOTAL_RM = 10;
+
+export const FREE_SHIPPING_THRESHOLD_RM = null;
+
+export const LOW_PRICE_THRESHOLD_RM = 3;
+export const LOW_PRICE_MIN_QTY = 3;
+
+export const STOCK_SAFETY_BUFFER = 0;
+
+export const WELCOME_VOUCHER_CODE = "WELCOME5";
