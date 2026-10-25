@@ -1,4 +1,4 @@
-import { Check, CheckCheck, Copy, ImageOff, Loader2, MapPin, PackageCheck, Phone, RefreshCw, Truck, Undo2 } from "lucide-react";
+import { Building2, Check, CheckCheck, Copy, Download, ImageOff, Loader2, MapPin, PackageCheck, Phone, RefreshCw, StickyNote, Tag, Truck, Undo2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { Modal } from "../components/Modal";
 import { PageHeader } from "../components/PageHeader";
 import { PrintMenu } from "../components/PrintOrder";
 import { formatRM } from "../format";
-import { completeOrder, listOrders, shipOrder, unshipOrder } from "../services/ordersService";
+import { completeOrder, exportPaidOrdersUrl, listOrders, shipOrder, unshipOrder } from "../services/ordersService";
 
 const TABS = [
   { key: "to_ship", label: "To ship" },
@@ -66,6 +66,7 @@ export function PendingOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [shipping, setShipping] = useState(null);
   const [notice, setNotice] = useState("");
+  const [exportOpen, setExportOpen] = useState(false);
 
   const load = useCallback(async (which) => {
     setLoading(true);
@@ -108,12 +109,19 @@ export function PendingOrdersPage() {
         title="Pending Orders"
         description={counts.to_ship ? `${counts.to_ship} paid order${counts.to_ship === 1 ? "" : "s"} waiting to be packed and shipped` : "Nothing waiting to ship"}
         actions={
-          <Button variant="outline" onClick={() => load(tab)} disabled={loading}>
-            <RefreshCw className={cn(loading && "animate-spin")} />
-            Refresh
-          </Button>
+          <>
+            <Button variant="outline" onClick={() => setExportOpen(true)} data-testid="export-bigseller">
+              <Download />
+              Export paid orders CSV for BigSeller
+            </Button>
+            <Button variant="outline" onClick={() => load(tab)} disabled={loading}>
+              <RefreshCw className={cn(loading && "animate-spin")} />
+              Refresh
+            </Button>
+          </>
         }
       />
+      {exportOpen && <ExportDialog onClose={() => setExportOpen(false)} />}
 
       <div className="mb-5 flex gap-1 overflow-x-auto border-b">
         {TABS.map((t) => (
@@ -234,6 +242,15 @@ function OrderCard({ order: o, onShip, onUnship, onComplete }) {
               </li>
             ))}
           </ul>
+          {o.note && (
+            <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm">
+              <p className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-amber-900 uppercase">
+                <StickyNote className="size-3.5" />
+                Customer note
+              </p>
+              <p className="mt-1 break-words whitespace-pre-line text-amber-950">{o.note}</p>
+            </div>
+          )}
         </div>
 
         <div className="md:col-span-2">
@@ -256,8 +273,20 @@ function OrderCard({ order: o, onShip, onUnship, onComplete }) {
               <MapPin className="mt-0.5 size-3.5 shrink-0" />
               <span className="whitespace-pre-line">{[o.shipping.address, [o.shipping.postcode, o.shipping.city].filter(Boolean).join(" "), o.shipping.state].filter(Boolean).join("\n")}</span>
             </p>
+            {o.companyName && (
+              <p className="text-muted-foreground mt-1 flex items-center gap-1.5">
+                <Building2 className="size-3.5 shrink-0" />
+                {o.companyName}
+              </p>
+            )}
             {o.email && <p className="text-muted-foreground mt-2 truncate text-xs">{o.email}</p>}
           </div>
+          {o.voucherCode && (
+            <p className="mt-3 flex items-center gap-1.5 text-sm text-emerald-700">
+              <Tag className="size-4" />
+              {o.voucherCode} · −{formatRM(o.discount)}
+            </p>
+          )}
           {o.courier && (
             <p className="mt-3 flex items-center gap-1.5 text-sm">
               <Truck className="text-muted-foreground size-4" />
@@ -365,6 +394,41 @@ function ShipDialog({ order, onClose, onShipped }) {
         </FormField>
         {error && <p className="text-destructive text-sm">{error}</p>}
       </form>
+    </Modal>
+  );
+}
+
+function ExportDialog({ onClose }) {
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      title="Export paid orders for BigSeller"
+      footer={
+        <>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button asChild>
+            <a href={exportPaidOrdersUrl(from, to)} onClick={onClose} data-testid="export-download">
+              <Download />
+              Download CSV
+            </a>
+          </Button>
+        </>
+      }
+    >
+      <p className="text-muted-foreground text-sm">Paid, shipped and completed orders, one row per item. Leave the dates empty to export everything.</p>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <FormField label="Paid from" htmlFor="export-from">
+          <Input id="export-from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+        </FormField>
+        <FormField label="Paid to" htmlFor="export-to">
+          <Input id="export-to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+        </FormField>
+      </div>
     </Modal>
   );
 }

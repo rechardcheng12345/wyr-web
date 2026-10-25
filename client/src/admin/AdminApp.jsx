@@ -12,6 +12,7 @@ import { PendingOrdersPage } from "./pages/PendingOrdersPage";
 import { PurchasingPage } from "./pages/PurchasingPage";
 import { SalesPage } from "./pages/SalesPage";
 import { StaticPage } from "./pages/StaticPage";
+import { VouchersPage } from "./pages/VouchersPage";
 
 export default function AdminApp() {
   return (
@@ -35,6 +36,7 @@ export default function AdminApp() {
           <Route path="costing" element={<CostingPage />} />
           <Route path="sales" element={<SalesPage />} />
           <Route path="orders/pending" element={<PendingOrdersPage />} />
+          <Route path="vouchers" element={<VouchersPage />} />
           <Route path="static" element={<StaticPage />} />
           <Route path="*" element={<AdminNotFoundPage />} />
         </Route>

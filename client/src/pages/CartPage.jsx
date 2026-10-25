@@ -8,15 +8,16 @@ import { Button } from "@/components/ui/button";
 import { itemUnitPrice, useCart } from "@/lib/cart";
 import { cents, fetchQuote } from "@/lib/checkout";
 import { lineTotal, savingPct } from "@/lib/pricing";
+import { shippingText, useSiteInfo } from "@/lib/site";
 import { formatPrice } from "@/lib/utils";
 
 /** Server prices and stock for the current cart; also refreshes what the cart has stored. */
-export function useCartQuote(state) {
+export function useCartQuote(state, voucherCode) {
   const { items, sync } = useCart();
   const refs = items.map((i) => ({ variantId: i.variantId, qty: i.qty }));
   const query = useQuery({
-    queryKey: ["quote", refs, state ?? null],
-    queryFn: () => fetchQuote(refs, state),
+    queryKey: ["quote", refs, state ?? null, voucherCode ?? null],
+    queryFn: () => fetchQuote(refs, state, voucherCode),
     enabled: refs.length > 0,
     placeholderData: keepPreviousData,
     staleTime: 0,
@@ -29,6 +30,8 @@ export function useCartQuote(state) {
           unitPrice: cents(l.baseUnitPriceCents),
           tiers: l.tiers.map((t) => ({ minQty: t.minQty, unitPrice: cents(t.unitPriceCents) })),
           stock: l.stock,
+          minQty: l.minQty,
+          productName: l.productName,
         })),
       );
     }
@@ -59,11 +62,23 @@ function nextTierHint(item) {
 export function lineProblem(line) {
   if (!line?.problem) return null;
   if (line.problem === "unavailable") return "No longer available here. Please remove it.";
+  if (line.problem === "below_min_qty") return `Minimum ${line.minQty} pcs for this item.`;
   return `Only ${line.stock} left. Please lower the quantity.`;
+}
+
+function shortRm(c) {
+  return `RM${c % 100 === 0 ? c / 100 : (c / 100).toFixed(2)}`;
+}
+
+export function minimumOrderMessage(quote) {
+  const m = quote?.minimumOrder;
+  if (!m || m.shortfallCents <= 0) return null;
+  return `Minimum order ${shortRm(m.minCents)} — add ${shortRm(m.shortfallCents)} more`;
 }
 
 export function CartPage() {
   const cart = useCart();
+  const site = useSiteInfo();
   const { data: quote, isError, refetch } = useCartQuote();
 
   if (cart.items.length === 0) {
@@ -80,7 +95,9 @@ export function CartPage() {
   }
 
   const current = quoteIsCurrent(quote, cart.items);
-  const canCheckout = current && !!quote?.ok;
+  const minimumMessage = current ? minimumOrderMessage(quote) : null;
+  const canCheckout = current && !!quote?.ok && !minimumMessage;
+  const freeShortfall = current ? quote?.shippingRange?.freeShippingShortfallCents : null;
   const subtotal = quote && current
     ? cents(quote.subtotalCents)
     : cart.items.reduce((s, i) => s + linePricing(i, quote?.lines.find((l) => l.variantId === i.variantId)).total, 0);
@@ -88,37 +105,44 @@ export function CartPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Your cart</h1>
-      <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_340px]">
-        <ul className="divide-y rounded-xl border" data-testid="cart-lines">
+      <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <ul className="min-w-0 divide-y rounded-xl border" data-testid="cart-lines">
           {cart.items.map((item) => {
             const line = quote?.lines.find((l) => l.variantId === item.variantId);
             const problem = lineProblem(line);
             const price = linePricing(item, line);
             const hint = nextTierHint(item);
             return (
-              <li key={item.variantId} className="flex gap-4 p-4">
-                <Link to={`/products/${item.productSlug}`} className="bg-card size-20 shrink-0 overflow-hidden rounded-lg border">
+              <li key={item.variantId} className="flex min-w-0 gap-3 p-4 sm:gap-4">
+                <Link to={`/products/${item.productSlug}`} className="bg-card size-16 shrink-0 overflow-hidden rounded-lg border sm:size-20">
                   <ProductImage src={item.image} alt="" className="size-full" />
                 </Link>
                 <div className="flex min-w-0 flex-1 flex-col gap-2">
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex min-w-0 items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <Link to={`/products/${item.productSlug}`} className="line-clamp-2 text-sm font-medium hover:underline">
+                      <Link to={`/products/${item.productSlug}`} className="line-clamp-2 text-sm font-medium break-words hover:underline">
                         {item.productName}
                       </Link>
                       {item.variantName && <p className="text-muted-foreground mt-0.5 text-sm">{item.variantName}</p>}
                     </div>
                     <p className="shrink-0 text-sm font-semibold" data-testid="line-total">{formatPrice(price.total)}</p>
                   </div>
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <QtyStepper size="sm" value={item.qty} max={Math.max(item.stock, 1)} onChange={(q) => cart.setQty(item.variantId, q)} />
+                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                    <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+                      <QtyStepper
+                        size="sm"
+                        value={item.qty}
+                        min={item.minQty ?? 1}
+                        max={Math.max(item.stock, item.minQty ?? 1)}
+                        onChange={(q) => cart.setQty(item.variantId, q)}
+                      />
                       <span className="text-muted-foreground text-xs" data-testid="line-unit">
                         {formatPrice(price.unit)} each
                         {price.savePct > 0 && <span className="font-medium text-emerald-700"> · save {price.savePct}%</span>}
+                        {(item.minQty ?? 1) > 1 && <span> · Min. {item.minQty} pcs</span>}
                       </span>
                     </div>
-                    <Button variant="ghost" size="sm" onClick={() => cart.remove(item.variantId)} aria-label={`Remove ${item.productName}`}>
+                    <Button variant="ghost" size="sm" className="-mr-2" onClick={() => cart.remove(item.variantId)} aria-label={`Remove ${item.productName}`}>
                       <Trash2 />
                       Remove
                     </Button>
@@ -131,18 +155,34 @@ export function CartPage() {
           })}
         </ul>
 
-        <aside className="h-fit rounded-xl border p-5">
+        <aside className="h-fit min-w-0 rounded-xl border p-5">
           <h2 className="font-semibold">Summary</h2>
           <dl className="mt-4 space-y-2 text-sm">
             <div className="flex justify-between">
               <dt className="text-muted-foreground">Subtotal ({cart.count} item{cart.count === 1 ? "" : "s"})</dt>
               <dd className="font-medium" data-testid="cart-subtotal">{formatPrice(subtotal)}</dd>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-4">
               <dt className="text-muted-foreground">Shipping</dt>
-              <dd className="text-muted-foreground">Calculated at checkout</dd>
+              <dd className="text-muted-foreground text-right">Calculated at checkout</dd>
             </div>
           </dl>
+          {site.shipping && (
+            <p className="text-muted-foreground mt-3 text-xs" data-testid="cart-shipping-note">
+              {shippingText(site.shipping)}
+            </p>
+          )}
+          {freeShortfall > 0 && (
+            <p className="mt-2 text-xs font-medium text-emerald-700" data-testid="free-shipping-hint">
+              Add {formatPrice(cents(freeShortfall))} more for free shipping
+            </p>
+          )}
+          {freeShortfall === 0 && <p className="mt-2 text-xs font-medium text-emerald-700">Your order ships free.</p>}
+          {minimumMessage && (
+            <p className="mt-4 rounded-md bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900" role="status" data-testid="min-order-message">
+              {minimumMessage}
+            </p>
+          )}
           {isError && (
             <p className="text-destructive mt-4 text-sm">
               Couldn't check current prices.{" "}

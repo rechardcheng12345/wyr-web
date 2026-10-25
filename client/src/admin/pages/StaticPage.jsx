@@ -12,7 +12,7 @@ import { listSettings, saveSettings } from "../services/settingsService";
 const asText = (v) => (v == null ? "" : String(v));
 
 function displayDefault(s) {
-  if (s.type === "money") return formatRM(s.defaultValue);
+  if (s.type === "money") return s.defaultValue == null ? "(off)" : formatRM(s.defaultValue);
   if (s.type === "select") return s.options.find((o) => o.value === s.defaultValue)?.label ?? s.defaultValue;
   return asText(s.defaultValue) || "(empty)";
 }
@@ -149,12 +149,25 @@ function SettingInput({ setting: s, value, onChange, dirty }) {
     return (
       <div className="flex items-center">
         <span className="bg-muted text-muted-foreground border-input flex h-9 items-center rounded-l-md border border-r-0 px-3 text-sm">RM</span>
-        <Input id={s.key} type="number" min="0" step="0.01" inputMode="decimal" value={value} onChange={onChange} className={cn("rounded-l-none", ring)} />
+        <Input
+          id={s.key}
+          type="number"
+          min="0"
+          step="0.01"
+          inputMode="decimal"
+          placeholder={s.optional ? "Off" : undefined}
+          value={value}
+          onChange={onChange}
+          className={cn("rounded-l-none", ring)}
+        />
       </div>
     );
   }
   if (s.type === "int") {
-    return <Input id={s.key} type="number" min="1" step="1" value={value} onChange={onChange} className={ring} />;
+    return <Input id={s.key} type="number" min="0" step="1" value={value} onChange={onChange} className={ring} />;
+  }
+  if (s.type === "text") {
+    return <Input id={s.key} type="text" value={value} onChange={onChange} className={ring} />;
   }
   return <Input id={s.key} type={s.type === "url" ? "url" : "tel"} value={value} onChange={onChange} className={ring} />;
 }

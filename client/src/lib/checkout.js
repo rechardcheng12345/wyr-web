@@ -21,12 +21,16 @@ export const MALAYSIAN_STATES = [
   "W.P. Putrajaya",
 ];
 
-export function fetchQuote(items, state) {
-  return post("/api/checkout/quote", { items, state: state || undefined });
+export function fetchQuote(items, state, voucherCode) {
+  return post("/api/checkout/quote", { items, state: state || undefined, voucherCode: voucherCode || undefined });
 }
 
-export function placeOrder(items, buyer) {
-  return post("/api/checkout", { items, buyer });
+export function checkVoucher(code, items) {
+  return post("/api/checkout/voucher", { code, items });
+}
+
+export function placeOrder(items, buyer, extras = {}) {
+  return post("/api/checkout", { items, buyer, ...extras });
 }
 
 export function fetchOrder(orderNo, email) {

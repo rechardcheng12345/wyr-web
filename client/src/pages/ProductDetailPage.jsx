@@ -42,9 +42,10 @@ export function isVariantPurchasable(v) {
 
 function metaDescription(product, name) {
   const text = (product.description ?? "").replace(/\s+/g, " ").trim();
-  const price = product.minPrice != null ? ` From ${formatPrice(product.minPrice)}.` : "";
-  const base = `${name}.${price} Ready stock in Malaysia, ships from Kuala Lumpur.`;
-  return text ? `${base} ${text}`.slice(0, 160).replace(/\s+\S*$/, "") : base;
+  const price = product.minPrice != null ? ` from ${formatPrice(product.minPrice)}` : "";
+  if (!text) return `${name}${price}. Ready stock in Malaysia, ships from Kuala Lumpur.`;
+  const full = `${name}${price}. ${text}`;
+  return full.length <= 160 ? full : `${full.slice(0, 157).replace(/\s+\S*$/, "")}…`;
 }
 
 function ProductView({ product }) {
@@ -145,11 +146,11 @@ function ProductView({ product }) {
                       className={cn(
                         "focus-visible:ring-ring/50 rounded-lg border px-3 py-2 text-left text-sm transition-colors outline-none focus-visible:ring-[3px]",
                         v.id === variantId ? "border-primary bg-primary/5 text-primary font-medium" : "hover:bg-accent",
-                        soldOut && "bg-muted/60 text-muted-foreground cursor-not-allowed border-dashed line-through decoration-1 hover:bg-muted/60",
+                        soldOut && "bg-muted/60 text-muted-foreground cursor-not-allowed border-dashed hover:bg-muted/60",
                       )}
                     >
-                      {v.name ?? v.sku}
-                      {soldOut && <span className="block text-[11px] font-medium no-underline">Out of stock</span>}
+                      <span className={cn(soldOut && "line-through decoration-1")}>{v.name ?? v.sku}</span>
+                      {soldOut && <span className="block text-[11px] font-medium">Out of stock</span>}
                     </button>
                   );
                 })}

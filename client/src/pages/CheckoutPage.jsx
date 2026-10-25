@@ -7,11 +7,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ApiError } from "@/lib/api";
 import { useCart } from "@/lib/cart";
-import { cents, MALAYSIAN_STATES, placeOrder, rememberOrderEmail } from "@/lib/checkout";
+import { cents, checkVoucher, MALAYSIAN_STATES, placeOrder, rememberOrderEmail } from "@/lib/checkout";
 import { cn, formatPrice } from "@/lib/utils";
-import { lineProblem, linePricing, useCartQuote } from "./CartPage";
+import { lineProblem, linePricing, minimumOrderMessage, quoteIsCurrent, useCartQuote } from "./CartPage";
 
-const EMPTY = { name: "", email: "", phone: "", addressLine: "", postcode: "", city: "", state: "" };
+const EMPTY = { name: "", email: "", phone: "", addressLine: "", postcode: "", city: "", state: "", companyName: "" };
+
+function shippingRangeText(range) {
+  if (!range) return null;
+  if (range.freeShippingShortfallCents === 0) return "Free";
+  const west = cents(range.westCents);
+  const east = cents(range.eastCents);
+  return west === east ? formatPrice(west) : `RM ${west}–${east}`;
+}
 const BUYER_KEY = "wyr.checkoutBuyer.v1";
 
 function loadBuyer() {
@@ -26,14 +34,31 @@ export function CheckoutPage() {
   const cart = useCart();
   const [buyer, setBuyer] = useState(loadBuyer);
   const [fieldErrors, setFieldErrors] = useState({});
-  const { data: quote, refetch } = useCartQuote(buyer.state);
+  const [note, setNote] = useState("");
+  const [voucherInput, setVoucherInput] = useState("");
+  const [voucherCode, setVoucherCode] = useState("");
+  const [voucherError, setVoucherError] = useState("");
+  const { data: quote, refetch } = useCartQuote(buyer.state, voucherCode);
+  const refs = cart.items.map((i) => ({ variantId: i.variantId, qty: i.qty }));
+
+  const voucher = useMutation({
+    mutationFn: (code) => checkVoucher(code, refs),
+    onSuccess: (res) => {
+      setVoucherCode(res.code);
+      setVoucherInput(res.code);
+      setVoucherError("");
+    },
+    onError: (err) => {
+      setVoucherCode("");
+      setVoucherError(err instanceof ApiError ? err.message : "Couldn't check that code. Please try again.");
+    },
+  });
 
   const order = useMutation({
-    mutationFn: () =>
-      placeOrder(
-        cart.items.map((i) => ({ variantId: i.variantId, qty: i.qty })),
-        buyer,
-      ),
+    mutationFn: () => {
+      const { companyName, ...address } = buyer;
+      return placeOrder(refs, address, { companyName, note, voucherCode: voucherCode || undefined });
+    },
     onSuccess: ({ orderNo, paymentUrl }) => {
       rememberOrderEmail(orderNo, buyer.email.trim().toLowerCase());
       cart.clear();
@@ -42,6 +67,10 @@ export function CheckoutPage() {
     onError: (err) => {
       if (err instanceof ApiError) {
         if (err.body?.fields) setFieldErrors(err.body.fields);
+        if (err.body?.fields?.voucherCode) {
+          setVoucherCode("");
+          setVoucherError(err.body.fields.voucherCode);
+        }
         if (err.status === 409) void refetch();
       }
     },
@@ -68,6 +97,10 @@ export function CheckoutPage() {
   const subtotal = quote ? cents(quote.subtotalCents) : null;
   const shipping = quote?.shippingCents != null ? cents(quote.shippingCents) : null;
   const total = quote?.totalCents != null ? cents(quote.totalCents) : null;
+  const discount = quote?.discountCents ? cents(quote.discountCents) : 0;
+  const appliedVoucher = quote?.voucher?.valid ? quote.voucher : null;
+  const lostVoucher = voucherCode && quote?.voucher && !quote.voucher.valid ? quote.voucher.error : null;
+  const minimumMessage = quoteIsCurrent(quote, cart.items) ? minimumOrderMessage(quote) : null;
   const eastMalaysia = ["Sabah", "Sarawak", "W.P. Labuan"].includes(buyer.state);
 
   return (
@@ -93,6 +126,9 @@ export function CheckoutPage() {
               </Field>
               <Field label="Phone" error={fieldErrors.phone}>
                 <Input name="phone" type="tel" autoComplete="tel" placeholder="012-345 6789" value={buyer.phone} onChange={set("phone")} required />
+              </Field>
+              <Field label="Company name (optional)" error={fieldErrors.companyName} className="sm:col-span-2">
+                <Input name="companyName" autoComplete="organization" value={buyer.companyName} onChange={set("companyName")} maxLength={150} />
               </Field>
             </div>
           </fieldset>
@@ -145,6 +181,24 @@ export function CheckoutPage() {
               </Field>
             </div>
           </fieldset>
+
+          <fieldset className="rounded-xl border p-5">
+            <legend className="px-1 font-semibold">Order note (optional)</legend>
+            <Field label="Note for us" error={fieldErrors.note}>
+              <textarea
+                name="note"
+                rows={3}
+                maxLength={2000}
+                value={note}
+                onChange={(e) => {
+                  setNote(e.target.value);
+                  setFieldErrors((f) => ({ ...f, note: undefined }));
+                }}
+                placeholder="NFC programming instructions, e.g. link to write on the tags"
+                className="border-input focus-visible:border-ring focus-visible:ring-ring/50 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs outline-none focus-visible:ring-[3px] md:text-sm"
+              />
+            </Field>
+          </fieldset>
         </div>
 
         <aside className="h-fit rounded-xl border p-5 lg:sticky lg:top-24">
@@ -174,14 +228,78 @@ export function CheckoutPage() {
               );
             })}
           </ul>
+          <div className="mt-5 border-t pt-4">
+            <label htmlFor="voucher" className="text-sm font-medium">
+              Voucher code
+            </label>
+            <div className="mt-1.5 flex gap-2">
+              <Input
+                id="voucher"
+                value={voucherInput}
+                onChange={(e) => {
+                  setVoucherInput(e.target.value.toUpperCase());
+                  setVoucherError("");
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (voucherInput.trim()) voucher.mutate(voucherInput.trim());
+                  }
+                }}
+                placeholder="e.g. WELCOME5"
+                className="min-w-0 flex-1 uppercase"
+                data-testid="voucher-input"
+              />
+              {appliedVoucher && voucherCode === voucherInput.trim() ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setVoucherCode("");
+                    setVoucherInput("");
+                  }}
+                >
+                  Remove
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!voucherInput.trim() || voucher.isPending}
+                  onClick={() => voucher.mutate(voucherInput.trim())}
+                  data-testid="voucher-apply"
+                >
+                  Apply
+                </Button>
+              )}
+            </div>
+            {(voucherError || lostVoucher) && <p className="text-destructive mt-1.5 text-xs" data-testid="voucher-error">{voucherError || lostVoucher}</p>}
+            {appliedVoucher && (
+              <p className="mt-1.5 text-xs font-medium text-emerald-700">
+                {appliedVoucher.code} applied: {appliedVoucher.description}
+              </p>
+            )}
+          </div>
           <dl className="mt-5 space-y-2 border-t pt-4 text-sm">
             <div className="flex justify-between">
               <dt className="text-muted-foreground">Subtotal</dt>
               <dd data-testid="checkout-subtotal">{formatPrice(subtotal)}</dd>
             </div>
-            <div className="flex justify-between">
+            {discount > 0 && (
+              <div className="flex justify-between text-emerald-700">
+                <dt>Voucher {appliedVoucher?.code}</dt>
+                <dd data-testid="checkout-discount">−{formatPrice(discount)}</dd>
+              </div>
+            )}
+            <div className="flex justify-between gap-4">
               <dt className="text-muted-foreground">Shipping{buyer.state && ` (${eastMalaysia ? "East" : "Peninsular"} Malaysia)`}</dt>
-              <dd data-testid="checkout-shipping">{shipping != null ? formatPrice(shipping) : <span className="text-muted-foreground">Choose a state</span>}</dd>
+              <dd data-testid="checkout-shipping" className="text-right">
+                {shipping != null ? (
+                  shipping === 0 ? "Free" : formatPrice(shipping)
+                ) : (
+                  <span className="text-muted-foreground">{shippingRangeText(quote?.shippingRange) ?? "Choose a state"}</span>
+                )}
+              </dd>
             </div>
             <div className="flex justify-between border-t pt-3 text-base font-semibold">
               <dt>Total</dt>
@@ -189,6 +307,14 @@ export function CheckoutPage() {
             </div>
           </dl>
 
+          {minimumMessage && (
+            <p className="mt-4 rounded-md bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900" role="status" data-testid="min-order-message">
+              {minimumMessage}.{" "}
+              <Link to="/cart" className="underline">
+                Back to cart
+              </Link>
+            </p>
+          )}
           {order.isError && (
             <p className="text-destructive mt-4 text-sm" role="alert">
               {order.error instanceof ApiError ? order.error.message : "Something went wrong. Please try again."}
@@ -202,7 +328,7 @@ export function CheckoutPage() {
               )}
             </p>
           )}
-          <Button type="submit" size="lg" className="mt-5 w-full" disabled={order.isPending || order.isSuccess || quote?.ok === false} data-testid="place-order">
+          <Button type="submit" size="lg" className="mt-5 w-full" disabled={order.isPending || order.isSuccess || quote?.ok === false || !!minimumMessage} data-testid="place-order">
             <Lock />
             {order.isPending || order.isSuccess ? "Taking you to payment…" : total != null ? `Pay ${formatPrice(total)}` : "Continue to payment"}
           </Button>

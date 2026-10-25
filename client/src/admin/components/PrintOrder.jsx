@@ -166,6 +166,7 @@ function OrderDetails({ order: o }) {
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: "8.5pt", fontWeight: 700, letterSpacing: "0.08em", color: "#444" }}>SHIP TO</div>
           <div style={{ fontWeight: 700, marginTop: "1mm" }}>{s.name}</div>
+          {o.companyName && <div>{o.companyName}</div>}
           <div>{s.phone}</div>
           {addressLines(s).map((line) => (
             <div key={line}>{line}</div>
@@ -225,6 +226,12 @@ function OrderDetails({ order: o }) {
             <td style={{ padding: "1mm 0", color: "#444" }}>Subtotal</td>
             <td style={{ padding: "1mm 0", ...right }}>{formatRM(o.subtotal)}</td>
           </tr>
+          {o.discount > 0 && (
+            <tr>
+              <td style={{ padding: "1mm 0", color: "#444" }}>Voucher {o.voucherCode}</td>
+              <td style={{ padding: "1mm 0", ...right }}>−{formatRM(o.discount)}</td>
+            </tr>
+          )}
           <tr>
             <td style={{ padding: "1mm 0", color: "#444" }}>Shipping</td>
             <td style={{ padding: "1mm 0", ...right }}>{formatRM(o.shippingFee)}</td>
@@ -235,6 +242,13 @@ function OrderDetails({ order: o }) {
           </tr>
         </tbody>
       </table>
+
+      {o.note && (
+        <div style={{ marginTop: "6mm", border: "1px solid #000", padding: "3mm", whiteSpace: "pre-line" }}>
+          <div style={{ fontSize: "8.5pt", fontWeight: 700, letterSpacing: "0.08em", color: "#444" }}>CUSTOMER NOTE</div>
+          {o.note}
+        </div>
+      )}
 
       <div style={{ marginTop: "12mm", fontSize: "9pt", color: "#444", textAlign: "center" }}>Thank you for shopping with WYR Technology!</div>
     </div>

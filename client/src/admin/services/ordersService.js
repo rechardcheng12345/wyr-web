@@ -19,3 +19,11 @@ export function unshipOrder(id) {
 export function completeOrder(id) {
   return adminRequest(`/api/admin/orders/${id}/complete`, { method: "POST" });
 }
+
+export function exportPaidOrdersUrl(from, to) {
+  const params = new URLSearchParams();
+  if (from) params.set("from", from);
+  if (to) params.set("to", to);
+  const qs = params.toString();
+  return `${import.meta.env.VITE_API_URL ?? ""}/api/admin/orders/export.csv${qs ? `?${qs}` : ""}`;
+}

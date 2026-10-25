@@ -190,6 +190,12 @@ function OrderDetails({ order }) {
             <dt className="text-muted-foreground">Subtotal</dt>
             <dd>{formatPrice(order.subtotal)}</dd>
           </div>
+          {order.discount > 0 && (
+            <div className="flex justify-between text-emerald-700">
+              <dt>Voucher {order.voucherCode}</dt>
+              <dd>−{formatPrice(order.discount)}</dd>
+            </div>
+          )}
           <div className="flex justify-between">
             <dt className="text-muted-foreground">Shipping</dt>
             <dd>{formatPrice(order.shippingFee)}</dd>
@@ -199,12 +205,24 @@ function OrderDetails({ order }) {
             <dd data-testid="order-total">{formatPrice(order.total)}</dd>
           </div>
         </dl>
+        {order.note && (
+          <div className="mt-4 border-t pt-4 text-sm">
+            <p className="font-medium">Your note</p>
+            <p className="text-muted-foreground mt-1 break-words whitespace-pre-line">{order.note}</p>
+          </div>
+        )}
       </section>
       <section className="h-fit rounded-xl border p-5 text-sm">
         <h2 className="font-semibold">Shipping to</h2>
         <address className="text-muted-foreground mt-3 leading-relaxed not-italic">
           {s.name}
           <br />
+          {order.companyName && (
+            <>
+              {order.companyName}
+              <br />
+            </>
+          )}
           {s.addressLine}
           <br />
           {s.postcode} {s.city}

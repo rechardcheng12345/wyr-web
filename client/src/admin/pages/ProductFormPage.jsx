@@ -14,6 +14,8 @@ const emptyVariant = () => ({ key: newKey(), id: null, sku: "", name: "", price:
 
 const EMPTY = {
   name: "",
+  displayName: "",
+  autoDisplayName: "",
   slug: "",
   categoryId: "",
   parentSku: "",
@@ -55,6 +57,7 @@ function toServer(form) {
   return {
     id: form.id,
     name: form.name,
+    displayName: form.displayName,
     slug: form.slug,
     categoryId: form.categoryId === "" ? null : Number(form.categoryId),
     parentSku: form.parentSku,
@@ -185,6 +188,19 @@ export function ProductFormPage() {
               <h2 className="font-semibold sm:col-span-2">Details</h2>
               <FormField label="Product name" htmlFor="name" error={errors.name} className="sm:col-span-2">
                 <Input id="name" value={form.name} onChange={(e) => onNameChange(e.target.value)} />
+              </FormField>
+              <FormField label="Display name (optional)" htmlFor="displayName" error={errors.displayName} className="sm:col-span-2">
+                <Input
+                  id="displayName"
+                  value={form.displayName}
+                  maxLength={255}
+                  placeholder={form.autoDisplayName || "Short name for cards, headings and the cart"}
+                  onChange={(e) => set({ displayName: e.target.value })}
+                />
+                <p className="text-muted-foreground text-xs">
+                  Shown on product cards, the product heading and the cart. Empty = the product name, cleaned up automatically
+                  {form.autoDisplayName ? ` ("${form.autoDisplayName}")` : ""}.
+                </p>
               </FormField>
               <FormField label="Page URL" htmlFor="slug" error={errors.slug} className="sm:col-span-2">
                 <div className="flex items-center">
