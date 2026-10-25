@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { getCustomer } from "../customer-auth.js";
+import { prisma } from "../db.js";
 import { cancelUnpaidOrder, CheckoutError, createPendingOrder, parseBuyer, parseCartItems, parseOrderExtras, priceCart, quote } from "../orders.js";
 import { startPayment } from "../payments/index.js";
 import { isMalaysianState } from "../shipping.js";
@@ -30,7 +32,14 @@ checkoutRouter.post("/", async (req, res) => {
   const items = parseCartItems(req.body?.items);
   const buyer = parseBuyer(req.body?.buyer);
   const extras = parseOrderExtras(req.body);
-  const order = await createPendingOrder(items, buyer, extras);
+  const customer = await getCustomer(req);
+  const order = await createPendingOrder(items, buyer, { ...extras, customerId: customer?.id ?? null });
+  if (customer && !customer.addressLine) {
+    await prisma.customer.update({
+      where: { id: customer.id },
+      data: { addressLine: buyer.addressLine, postcode: buyer.postcode, city: buyer.city, state: buyer.state, phone: customer.phone ?? buyer.phone },
+    });
+  }
 
   let paymentUrl;
   try {

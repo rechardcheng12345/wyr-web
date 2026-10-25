@@ -2,7 +2,11 @@ import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Layout } from "@/components/Layout";
+import { RequireCustomer } from "@/components/RequireCustomer";
 import { AboutPage } from "@/pages/AboutPage";
+import { AccountPage } from "@/pages/account/AccountPage";
+import { LoginPage, RegisterPage } from "@/pages/account/AuthPages";
+import { MyOrdersPage } from "@/pages/account/MyOrdersPage";
 import { CartPage } from "@/pages/CartPage";
 import { CheckoutPage } from "@/pages/CheckoutPage";
 import { CheckoutReturnPage } from "@/pages/CheckoutReturnPage";
@@ -12,6 +16,7 @@ import { NotFoundPage } from "@/pages/NotFoundPage";
 import { OrderPage } from "@/pages/OrderPage";
 import { ProductDetailPage } from "@/pages/ProductDetailPage";
 import { ProductsPage } from "@/pages/ProductsPage";
+import { TrackOrderPage } from "@/pages/TrackOrderPage";
 
 const AdminApp = lazy(() => import("@/admin/AdminApp"));
 
@@ -38,6 +43,25 @@ export function App() {
           <Route path="checkout" element={<CheckoutPage />} />
           <Route path="checkout/return" element={<CheckoutReturnPage />} />
           <Route path="orders/:orderNo" element={<OrderPage />} />
+          <Route path="track" element={<TrackOrderPage />} />
+          <Route path="account/login" element={<LoginPage />} />
+          <Route path="account/register" element={<RegisterPage />} />
+          <Route
+            path="account"
+            element={
+              <RequireCustomer>
+                <AccountPage />
+              </RequireCustomer>
+            }
+          />
+          <Route
+            path="account/orders"
+            element={
+              <RequireCustomer>
+                <MyOrdersPage />
+              </RequireCustomer>
+            }
+          />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

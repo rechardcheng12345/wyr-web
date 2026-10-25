@@ -11,11 +11,11 @@ const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toSt
 export const USING_DEFAULT_ADMIN_LOGIN = !process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD;
 export const USING_RANDOM_SESSION_SECRET = !process.env.SESSION_SECRET;
 
-function sign(value) {
+export function sign(value) {
   return crypto.createHmac("sha256", SESSION_SECRET).update(value).digest("base64url");
 }
 
-function safeEqual(a, b) {
+export function safeEqual(a, b) {
   const ha = crypto.createHash("sha256").update(a).digest();
   const hb = crypto.createHash("sha256").update(b).digest();
   return crypto.timingSafeEqual(ha, hb);
@@ -27,7 +27,7 @@ export function checkCredentials(username, password) {
   return userOk && passOk ? { username: ADMIN_USERNAME, name: "Administrator", role: "admin" } : null;
 }
 
-function readCookie(req, name) {
+export function readCookie(req, name) {
   for (const part of (req.headers.cookie ?? "").split(";")) {
     const [k, ...v] = part.trim().split("=");
     if (k === name) return decodeURIComponent(v.join("="));

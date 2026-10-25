@@ -1,8 +1,9 @@
-import { Menu, MessageCircle, Search, ShoppingCart, X } from "lucide-react";
+import { Menu, MessageCircle, Search, ShoppingCart, User, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Input } from "@/components/ui/input";
+import { useCustomer } from "@/lib/account";
 import { useCart } from "@/lib/cart";
 import { LOGO_SRC, useSiteInfo, whatsappLink } from "@/lib/site";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,22 @@ function CartLink() {
   );
 }
 
+function AccountLink() {
+  const { customer } = useCustomer();
+  const firstName = customer?.name?.split(" ")[0];
+  return (
+    <Link
+      to={customer ? "/account/orders" : "/account/login"}
+      className="hover:bg-accent focus-visible:ring-ring/50 flex h-10 min-w-10 items-center justify-center gap-2 rounded-lg px-2.5 outline-none focus-visible:ring-[3px]"
+      aria-label={customer ? "My account" : "Log in"}
+      data-testid="header-account"
+    >
+      <User className="size-5" />
+      <span className="hidden max-w-24 truncate text-sm font-medium xl:inline">{customer ? firstName || "Account" : "Log in"}</span>
+    </Link>
+  );
+}
+
 function HeaderSearch() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
@@ -34,7 +51,7 @@ function HeaderSearch() {
     navigate(q.trim() ? `/products?q=${encodeURIComponent(q.trim())}` : "/products");
   };
   return (
-    <form onSubmit={onSubmit} className="relative mr-1 hidden w-60 md:block xl:w-72" role="search">
+    <form onSubmit={onSubmit} className="relative mr-1 hidden w-56 md:block xl:w-64" role="search">
       <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
       <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search NTAG215, ACR122U…" className="pl-9" aria-label="Search products" />
     </form>
@@ -46,6 +63,7 @@ const NAV = [
   { to: "/products", label: "Shop" },
   { to: "/about", label: "About Us" },
   { to: "/contact", label: "Contact Us" },
+  { to: "/track", label: "Track Order" },
 ];
 
 const navClass = ({ isActive }) =>
@@ -115,6 +133,7 @@ export function Layout() {
           </nav>
           <div className="ml-auto flex items-center gap-1">
             <HeaderSearch />
+            <AccountLink />
             <CartLink />
             <button
               className="hover:bg-accent grid size-10 place-items-center rounded-lg lg:hidden"
@@ -150,6 +169,12 @@ export function Layout() {
                 {n.label}
               </NavLink>
             ))}
+            <NavLink
+              to="/account/orders"
+              className={({ isActive }) => cn("mt-1 block rounded-lg border-t px-3 pt-3.5 pb-2.5 text-sm font-medium", isActive ? "text-foreground" : "text-muted-foreground")}
+            >
+              My account
+            </NavLink>
           </nav>
         )}
       </header>
@@ -180,6 +205,8 @@ export function Layout() {
           <FooterColumn title="Company">
             <FooterLink to="/about">About us</FooterLink>
             <FooterLink to="/contact">Contact us</FooterLink>
+            <FooterLink to="/track">Track order</FooterLink>
+            <FooterLink to="/account/orders">My account</FooterLink>
             {site.shopeeUrl && <FooterLink href={site.shopeeUrl}>Shopee store</FooterLink>}
           </FooterColumn>
           <FooterColumn title="Talk to us">

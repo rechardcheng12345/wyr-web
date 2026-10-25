@@ -211,6 +211,7 @@ function OrderCard({ order: o, onShip, onUnship, onComplete }) {
       <header className="bg-muted/40 flex flex-wrap items-center gap-x-4 gap-y-1 border-b px-4 py-3">
         <span className="font-mono text-sm font-semibold">{o.orderNo}</span>
         <span className={cn("rounded-md px-2 py-0.5 text-xs font-medium", STATUS_CLASS[o.status])}>{STATUS_LABEL[o.status] ?? o.status}</span>
+        <span className="text-muted-foreground rounded-md border px-2 py-0.5 text-xs">{o.registered ? "Member" : "Guest"}</span>
         <span className="text-muted-foreground text-xs">
           {o.paidAt ? `Paid ${formatDateTime(o.paidAt)} · ${timeAgo(o.paidAt)}` : `Placed ${formatDateTime(o.createdAt)}`}
         </span>

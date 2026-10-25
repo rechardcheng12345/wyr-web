@@ -56,17 +56,25 @@ function text(value, field, max, errors) {
   return v;
 }
 
+export const PHONE_ERROR = "Enter a Malaysian phone number, e.g. 012-345 6789";
+
+// Malaysian numbers: 01x-xxx xxxx or +60 1x-xxx xxxx. Stored as digits only (ToyyibPay wants numeric).
+export function normalizePhone(raw) {
+  let phone = String(raw ?? "").replace(/[\s\-()+]/g, "");
+  if (phone.startsWith("60")) phone = `0${phone.slice(2)}`;
+  return /^0\d{8,10}$/.test(phone) ? phone : null;
+}
+
 export function parseBuyer(raw) {
   const b = (raw ?? {});
   const errors = {};
   const name = text(b.name, "name", 150, errors);
   const email = text(b.email, "email", 255, errors).toLowerCase();
   if (email && !errors.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = "Enter a valid email address";
-  // Malaysian numbers: 01x-xxx xxxx or +60 1x-xxx xxxx. Stored as digits only (ToyyibPay wants numeric).
-  let phone = text(b.phone, "phone", 30, errors).replace(/[\s\-()+]/g, "");
+  let phone = text(b.phone, "phone", 30, errors);
   if (phone && !errors.phone) {
-    if (phone.startsWith("60")) phone = `0${phone.slice(2)}`;
-    if (!/^0\d{8,10}$/.test(phone)) errors.phone = "Enter a Malaysian phone number, e.g. 012-345 6789";
+    phone = normalizePhone(phone);
+    if (!phone) errors.phone = PHONE_ERROR;
   }
   const addressLine = text(b.addressLine, "addressLine", 300, errors);
   const postcode = text(b.postcode, "postcode", 10, errors);
@@ -234,6 +242,7 @@ export async function createPendingOrder(items, buyer, extras = {}) {
         return tx.order.create({
           data: {
             orderNo: newOrderNo(),
+            customerId: extras.customerId ?? null,
             email: buyer.email,
             status: "pending_payment",
             subtotal: fromCents(subtotalCents),
@@ -322,17 +331,21 @@ export async function settlePaidOrder(tx, orderId) {
 // ---------------------------------------------------------------------------
 // Buyer-facing view of an order
 
+const BUYER_ORDER_INCLUDE = {
+  items: { include: { variant: { include: { product: { select: { name: true, displayName: true, slug: true } } } } }, orderBy: { id: "asc" } },
+  payments: { orderBy: { id: "desc" }, take: 1 },
+};
+
 export async function findOrderForBuyer(orderNo, email) {
-  const order = await prisma.order.findUnique({
-    where: { orderNo },
-    include: {
-      items: { include: { variant: { include: { product: { select: { name: true, displayName: true, slug: true } } } } }, orderBy: { id: "asc" } },
-      payments: { orderBy: { id: "desc" }, take: 1 },
-    },
-  });
+  const order = await prisma.order.findUnique({ where: { orderNo }, include: BUYER_ORDER_INCLUDE });
   // Same response for "no such order" and "wrong email", so order numbers can't be probed.
   if (!order || !order.email || order.email !== email.trim().toLowerCase()) return null;
   return order;
+}
+
+export async function findOrderForCustomer(orderNo, customerId) {
+  const order = await prisma.order.findUnique({ where: { orderNo }, include: BUYER_ORDER_INCLUDE });
+  return order && order.customerId === customerId ? order : null;
 }
 
 export function serializeOrder(order) {
@@ -343,6 +356,8 @@ export function serializeOrder(order) {
     createdAt: order.createdAt,
     expiresAt: order.expiresAt,
     paidAt: order.paidAt,
+    shippedAt: order.shippedAt,
+    completedAt: order.completedAt,
     email: order.email,
     items: order.items.map((i) => ({
       variantId: i.variantId,

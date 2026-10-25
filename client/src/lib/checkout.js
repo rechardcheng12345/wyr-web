@@ -34,7 +34,7 @@ export function placeOrder(items, buyer, extras = {}) {
 }
 
 export function fetchOrder(orderNo, email) {
-  return get(`/api/orders/${encodeURIComponent(orderNo)}?email=${encodeURIComponent(email)}`);
+  return get(`/api/orders/${encodeURIComponent(orderNo)}${email ? `?email=${encodeURIComponent(email)}` : ""}`);
 }
 
 export function retryPayment(orderNo, email) {

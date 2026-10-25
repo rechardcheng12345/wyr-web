@@ -140,9 +140,15 @@ model Customer {
   email        String?   @unique @db.VarChar(255)
   name         String?   @db.VarChar(150)
   phone        String?   @db.VarChar(30)
-  passwordHash String?   @map("password_hash") @db.VarChar(255)
-  createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamp(0)
-  orders       Order[]
+  passwordHash   String?   @map("password_hash") @db.VarChar(255)
+  sessionVersion Int       @default(0) @map("session_version")
+  addressLine    String?   @map("address_line") @db.VarChar(300)
+  postcode       String?   @db.VarChar(10)
+  city           String?   @db.VarChar(100)
+  state          String?   @db.VarChar(50)
+  lastLoginAt    DateTime? @map("last_login_at") @db.Timestamp(0)
+  createdAt      DateTime? @default(now()) @map("created_at") @db.Timestamp(0)
+  orders         Order[]
 
   @@map("customers")
 }
@@ -184,12 +190,15 @@ model Order {
   // Unpaid orders hold a stock reservation until this time (see src/orders.js).
   expiresAt        DateTime?    @map("expires_at") @db.Timestamp(0)
   paidAt           DateTime?    @map("paid_at") @db.Timestamp(0)
+  shippedAt        DateTime?    @map("shipped_at") @db.Timestamp(0)
+  completedAt      DateTime?    @map("completed_at") @db.Timestamp(0)
   customer         Customer?    @relation(fields: [customerId], references: [id])
   items            OrderItem[]
   payments         Payment[]
   stockMovements   StockMovement[]
 
   @@index([status, expiresAt])
+  @@index([customerId, id])
   @@map("orders")
 }
 

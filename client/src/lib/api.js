@@ -28,6 +28,10 @@ export function post(path, body) {
   return request(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
 }
 
+export function patch(path, body) {
+  return request(path, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+}
+
 export function fetchProducts(query) {
   const params = new URLSearchParams();
   for (const [k, v] of Object.entries(query)) if (v) params.set(k, String(v));

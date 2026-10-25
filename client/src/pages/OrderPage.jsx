@@ -1,14 +1,16 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { CheckCircle2, Clock, Loader2, Truck, XCircle } from "lucide-react";
+import { Check, CheckCircle2, Clock, ExternalLink, Loader2, Truck, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ErrorState } from "@/components/ErrorState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCustomer } from "@/lib/account";
 import { ApiError } from "@/lib/api";
 import { fetchOrder, recallOrderEmail, rememberOrderEmail, retryPayment } from "@/lib/checkout";
-import { formatPrice } from "@/lib/utils";
+import { formatDateTime, trackingUrl } from "@/lib/orderStatus";
+import { cn, formatPrice } from "@/lib/utils";
 
 // After returning from payment, poll this long for the server-side callback to land.
 const POLL_MS = 2000;
@@ -17,12 +19,41 @@ const POLL_FOR_MS = 90_000;
 export function OrderPage() {
   const { orderNo = "" } = useParams();
   const [email, setEmail] = useState(() => recallOrderEmail(orderNo));
+  const [askEmail, setAskEmail] = useState(false);
+  const { customer, isPending } = useCustomer();
 
-  if (!email) return <OrderLookup orderNo={orderNo} onFound={setEmail} />;
-  return <OrderView orderNo={orderNo} email={email} onWrongEmail={() => setEmail(null)} />;
+  if (!email && isPending) {
+    return (
+      <Centered>
+        <Skeleton className="h-24 w-full" />
+      </Centered>
+    );
+  }
+  if (!email && (!customer || askEmail)) {
+    return (
+      <OrderLookup
+        orderNo={orderNo}
+        onFound={(e) => {
+          setAskEmail(false);
+          setEmail(e);
+        }}
+      />
+    );
+  }
+  return (
+    <OrderView
+      orderNo={orderNo}
+      email={email ?? ""}
+      loggedIn={!!customer}
+      onWrongEmail={() => {
+        setEmail(null);
+        setAskEmail(true);
+      }}
+    />
+  );
 }
 
-function OrderView({ orderNo, email, onWrongEmail }) {
+function OrderView({ orderNo, email, loggedIn, onWrongEmail }) {
   const [params] = useSearchParams();
   const returnedStatus = params.get("payment"); // 1 success, 2 pending, 3 failed (a hint only)
   const [pollWindowOpen, setPollWindowOpen] = useState(!!returnedStatus);
@@ -42,7 +73,7 @@ function OrderView({ orderNo, email, onWrongEmail }) {
     if (error instanceof ApiError && error.status === 404) {
       return (
         <Centered>
-          <ErrorState message="We couldn't find this order with the saved email." onRetry={onWrongEmail} />
+          <ErrorState message={email ? "We couldn't find this order with the saved email." : "This order isn't in your account."} onRetry={onWrongEmail} />
         </Centered>
       );
     }
@@ -65,7 +96,15 @@ function OrderView({ orderNo, email, onWrongEmail }) {
   const polling = order.status === "pending_payment" && pollWindowOpen && returnedStatus !== "3" && order.payment?.status !== "failed";
   return (
     <Centered>
+      {loggedIn && (
+        <nav className="text-muted-foreground mb-4 text-sm">
+          <Link to="/account/orders" className="hover:text-foreground">
+            ← My orders
+          </Link>
+        </nav>
+      )}
       <StatusBanner order={order} returnedStatus={returnedStatus} polling={polling} />
+      <OrderTimeline order={order} />
       <OrderDetails order={order} />
     </Centered>
   );
@@ -89,6 +128,17 @@ function StatusBanner({ order, returnedStatus, polling }) {
           <>
             Shipped with <strong>{order.courier}</strong>, tracking number{" "}
             <strong className="font-mono select-all">{order.trackingNo}</strong>.
+            {trackingUrl(order.courier, order.trackingNo) && (
+              <a
+                href={trackingUrl(order.courier, order.trackingNo)}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 flex w-fit items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                data-testid="courier-tracking-link"
+              >
+                Track parcel on {order.courier} <ExternalLink className="size-3.5" />
+              </a>
+            )}
           </>
         ) : order.courier === "Self pickup" ? (
           "Your order is ready for pickup."
@@ -151,6 +201,40 @@ function StatusBanner({ order, returnedStatus, polling }) {
       We haven't received a payment confirmation for this order yet. If you've just paid, refresh in a minute.
       {retry}
     </Banner>
+  );
+}
+
+function OrderTimeline({ order }) {
+  if (order.status === "cancelled" || order.status === "refunded") return null;
+  const paid = order.paidAt ?? (order.status !== "pending_payment" ? true : null);
+  const shipped = order.shippedAt ?? (["shipped", "completed"].includes(order.status) ? true : null);
+  const completed = order.completedAt ?? (order.status === "completed" ? true : null);
+  const steps = [
+    { label: "Order placed", at: order.createdAt, done: true },
+    { label: "Paid", at: paid, done: !!paid },
+    { label: "Shipped", at: shipped, done: !!shipped },
+    { label: "Completed", at: completed, done: !!completed },
+  ];
+  const current = steps.findIndex((s) => !s.done);
+
+  return (
+    <ol className="mt-6 grid grid-cols-4 rounded-xl border px-2 py-5 sm:px-5" aria-label="Order progress" data-testid="order-timeline">
+      {steps.map((step, i) => (
+        <li key={step.label} className="relative flex flex-col items-center text-center" aria-current={i === current ? "step" : undefined}>
+          {i > 0 && <span className={cn("absolute top-3.5 right-1/2 h-0.5 w-full -translate-y-1/2", step.done ? "bg-emerald-500" : "bg-border")} aria-hidden />}
+          <span
+            className={cn(
+              "relative grid size-7 place-items-center rounded-full border-2 text-xs font-semibold",
+              step.done ? "border-emerald-500 bg-emerald-500 text-white" : i === current ? "border-brand-orange bg-background text-brand-orange" : "bg-background text-muted-foreground",
+            )}
+          >
+            {step.done ? <Check className="size-4" /> : i + 1}
+          </span>
+          <span className={cn("mt-2 text-xs font-medium sm:text-sm", !step.done && "text-muted-foreground")}>{step.label}</span>
+          {step.done && typeof step.at === "string" && <span className="text-muted-foreground mt-0.5 hidden text-[11px] sm:block">{formatDateTime(step.at)}</span>}
+        </li>
+      ))}
+    </ol>
   );
 }
 

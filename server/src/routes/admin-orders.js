@@ -38,7 +38,10 @@ function serialize(o) {
     email: o.email,
     createdAt: o.createdAt,
     paidAt: o.paidAt,
+    shippedAt: o.shippedAt,
+    completedAt: o.completedAt,
     expiresAt: o.expiresAt,
+    registered: o.customerId != null,
     subtotal: o.subtotal?.toNumber() ?? null,
     voucherCode: o.voucherCode,
     discount: o.discount?.toNumber() ?? 0,
@@ -168,7 +171,7 @@ adminOrdersRouter.post("/:id/ship", async (req, res) => {
   if (!courier || (!trackingNo && courier !== "Self pickup")) return badRequest(res, 400, "Courier and tracking number are both required");
   const { count } = await prisma.order.updateMany({
     where: { id: order.id, status: { in: ["paid", "sent_to_bigseller", "shipped"] } },
-    data: { status: "shipped", courier, trackingNo: trackingNo || null },
+    data: { status: "shipped", courier, trackingNo: trackingNo || null, shippedAt: order.shippedAt ?? new Date() },
   });
   if (count === 0) return badRequest(res, 409, `Can't ship an order that is ${order.status.replace(/_/g, " ")}`);
   await respondWithOrder(res, order.id);
@@ -177,7 +180,7 @@ adminOrdersRouter.post("/:id/ship", async (req, res) => {
 adminOrdersRouter.post("/:id/unship", async (req, res) => {
   const order = await findOrder(req, res);
   if (!order) return;
-  const { count } = await prisma.order.updateMany({ where: { id: order.id, status: "shipped" }, data: { status: "paid", courier: null, trackingNo: null } });
+  const { count } = await prisma.order.updateMany({ where: { id: order.id, status: "shipped" }, data: { status: "paid", courier: null, trackingNo: null, shippedAt: null } });
   if (count === 0) return badRequest(res, 409, "Only shipped orders can be moved back to To ship");
   await respondWithOrder(res, order.id);
 });
@@ -185,7 +188,7 @@ adminOrdersRouter.post("/:id/unship", async (req, res) => {
 adminOrdersRouter.post("/:id/complete", async (req, res) => {
   const order = await findOrder(req, res);
   if (!order) return;
-  const { count } = await prisma.order.updateMany({ where: { id: order.id, status: "shipped" }, data: { status: "completed" } });
+  const { count } = await prisma.order.updateMany({ where: { id: order.id, status: "shipped" }, data: { status: "completed", completedAt: new Date() } });
   if (count === 0) return badRequest(res, 409, "Only shipped orders can be marked completed");
   await respondWithOrder(res, order.id);
 });

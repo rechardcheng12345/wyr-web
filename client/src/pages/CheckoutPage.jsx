@@ -1,10 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
 import { Lock } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { ProductImage } from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useCustomer } from "@/lib/account";
 import { ApiError } from "@/lib/api";
 import { useCart } from "@/lib/cart";
 import { cents, checkVoucher, MALAYSIAN_STATES, placeOrder, rememberOrderEmail } from "@/lib/checkout";
@@ -33,6 +34,12 @@ function loadBuyer() {
 export function CheckoutPage() {
   const cart = useCart();
   const [buyer, setBuyer] = useState(loadBuyer);
+  const { customer } = useCustomer();
+  useEffect(() => {
+    if (!customer) return;
+    const fromAccount = { name: customer.name, email: customer.email, phone: customer.phone, ...customer.address };
+    setBuyer((b) => Object.fromEntries(Object.entries(b).map(([k, v]) => [k, v || fromAccount[k] || ""])));
+  }, [customer]);
   const [fieldErrors, setFieldErrors] = useState({});
   const [note, setNote] = useState("");
   const [voucherInput, setVoucherInput] = useState("");
@@ -116,7 +123,23 @@ export function CheckoutPage() {
         <div className="space-y-8">
           <fieldset className="rounded-xl border p-5">
             <legend className="px-1 font-semibold">Contact</legend>
-            <p className="text-muted-foreground text-sm">No account needed. We'll email your receipt and tracking number.</p>
+            {customer ? (
+              <p className="text-muted-foreground text-sm" data-testid="checkout-account-note">
+                Logged in as <span className="text-foreground font-medium">{customer.email}</span>. This order will be saved to{" "}
+                <Link to="/account/orders" className="text-primary hover:underline">
+                  My orders
+                </Link>
+                .
+              </p>
+            ) : (
+              <p className="text-muted-foreground text-sm">
+                No account needed.{" "}
+                <Link to="/account/login?next=/checkout" className="text-primary font-medium hover:underline">
+                  Log in
+                </Link>{" "}
+                to save this order to your account.
+              </p>
+            )}
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <Field label="Full name" error={fieldErrors.name} className="sm:col-span-2">
                 <Input name="name" autoComplete="name" value={buyer.name} onChange={set("name")} required />

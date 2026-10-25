@@ -9,6 +9,7 @@ import { bulkQuote } from "./pricing.js";
 import { getSetting } from "./settings.js";
 import { shippingSummary } from "./shipping.js";
 import { welcomeVoucher } from "./vouchers.js";
+import { accountRouter } from "./routes/account.js";
 import { adminCostingRouter } from "./routes/admin-costing.js";
 import { adminInventoryRouter } from "./routes/admin-inventory.js";
 import { adminOrdersRouter } from "./routes/admin-orders.js";
@@ -29,6 +30,7 @@ const CLIENT_DIST = path.resolve(SERVER_ROOT, "../client/dist");
 export function createApp() {
   const app = express();
 
+  app.set("trust proxy", "loopback");
   app.use(cors({ origin: CORS_ORIGINS }));
   app.use(express.json());
 
@@ -49,6 +51,7 @@ export function createApp() {
     });
   });
   app.use("/api/auth", authRouter);
+  app.use("/api/account", accountRouter);
   app.use("/api/admin/products", adminProductsRouter);
   app.use("/api/admin/orders", adminOrdersRouter);
   app.use("/api/admin/inventory", adminInventoryRouter);
