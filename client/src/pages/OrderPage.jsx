@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { CheckCircle2, Clock, Loader2, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, Loader2, Truck, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ErrorState } from "@/components/ErrorState";
@@ -77,10 +77,31 @@ function StatusBanner({ order, returnedStatus, polling }) {
     onSuccess: ({ paymentUrl }) => window.location.assign(paymentUrl),
   });
 
+  if (order.status === "shipped" || order.status === "completed") {
+    return (
+      <Banner
+        tone="success"
+        icon={<Truck className="size-7" />}
+        title={order.status === "completed" ? "Your order was delivered" : "Your order is on its way"}
+        testId="order-status-shipped"
+      >
+        {order.trackingNo ? (
+          <>
+            Shipped with <strong>{order.courier}</strong>, tracking number{" "}
+            <strong className="font-mono select-all">{order.trackingNo}</strong>.
+          </>
+        ) : order.courier === "Self pickup" ? (
+          "Your order is ready for pickup."
+        ) : (
+          "Your parcel has been handed to the courier."
+        )}
+      </Banner>
+    );
+  }
   if (order.status !== "pending_payment" && order.status !== "cancelled") {
     return (
       <Banner tone="success" icon={<CheckCircle2 className="size-7" />} title="Thank you! Your order is confirmed." testId="order-status-paid">
-        Payment received. We'll pack it and email the tracking number to <strong>{order.email}</strong>.
+        Payment received. We'll pack it and add the tracking number to this page once it ships.
       </Banner>
     );
   }

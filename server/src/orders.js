@@ -1,8 +1,8 @@
 import { randomInt } from "node:crypto";
 import { Prisma } from "@prisma/client";
-import { ORDER_HOLD_MINUTES } from "./constants.js";
 import { prisma } from "./db.js";
 import { priceLadder, unitPriceCents as tierUnitPriceCents } from "./pricing.js";
+import { getSetting } from "./settings.js";
 import { isMalaysianState, quoteShipping } from "./shipping.js";
 
 /** An error whose message is safe to show the buyer. */
@@ -18,7 +18,7 @@ const MAX_LINES = 50;
 const MAX_QTY = 999;
 
 export function holdMinutes() {
-  return ORDER_HOLD_MINUTES;
+  return getSetting("orderHoldMinutes");
 }
 
 export const toCents = (d) => (d === null ? null : Math.round(d.toNumber() * 100));
@@ -307,5 +307,7 @@ export function serializeOrder(order) {
       state: order.shipState,
     },
     payment: latestPayment && { status: latestPayment.status, method: latestPayment.method, provider: latestPayment.provider },
+    courier: order.courier,
+    trackingNo: order.trackingNo,
   };
 }

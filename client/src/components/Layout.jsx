@@ -1,9 +1,10 @@
-import { Nfc, Search, ShoppingCart } from "lucide-react";
+import { Menu, MessageCircle, Search, ShoppingCart, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/lib/cart";
+import { LOGO_SRC, useSiteInfo, whatsappLink } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 function CartLink() {
@@ -33,18 +34,68 @@ function HeaderSearch() {
     navigate(q.trim() ? `/products?q=${encodeURIComponent(q.trim())}` : "/products");
   };
   return (
-    <form onSubmit={onSubmit} className="relative hidden w-72 md:block" role="search">
+    <form onSubmit={onSubmit} className="relative mr-1 hidden w-60 md:block xl:w-72" role="search">
       <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
       <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search NTAG215, ACR122U…" className="pl-9" aria-label="Search products" />
     </form>
   );
 }
 
+const NAV = [
+  { to: "/", label: "Home", end: true },
+  { to: "/products", label: "Shop" },
+  { to: "/about", label: "About Us" },
+  { to: "/contact", label: "Contact Us" },
+];
+
 const navClass = ({ isActive }) =>
-  cn("text-sm font-medium transition-colors hover:text-foreground", isActive ? "text-foreground" : "text-muted-foreground");
+  cn(
+    "relative py-1 text-sm font-medium transition-colors hover:text-foreground",
+    "after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-brand-orange after:transition-transform",
+    isActive ? "text-foreground after:scale-x-100" : "text-muted-foreground after:scale-x-0",
+  );
+
+function Logo({ className }) {
+  return (
+    <Link to="/" className={cn("flex shrink-0 items-center gap-2.5", className)} aria-label="WYR Technology home">
+      <img src={LOGO_SRC} alt="" width="318" height="178" className="h-8 w-auto" />
+      <span className="leading-none">
+        <span className="block text-[15px] font-bold tracking-tight">WYR Technology</span>
+        <span className="text-muted-foreground block text-[10px] font-medium tracking-[0.14em] uppercase">NFC · RFID · UHF</span>
+      </span>
+    </Link>
+  );
+}
+
+function FooterColumn({ title, children }) {
+  return (
+    <div>
+      <p className="text-sm font-semibold text-white">{title}</p>
+      <div className="mt-4 flex flex-col gap-2.5">{children}</div>
+    </div>
+  );
+}
+
+function FooterLink({ to, href, children }) {
+  const className = "w-fit text-sm transition-colors hover:text-white";
+  return href ? (
+    <a href={href} target="_blank" rel="noreferrer" className={className}>
+      {children}
+    </a>
+  ) : (
+    <Link to={to} className={className}>
+      {children}
+    </Link>
+  );
+}
 
 export function Layout() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const site = useSiteInfo();
+  const whatsapp = whatsappLink(site.whatsappNumber, "Hi WYR Technology, I have a question.");
+  const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => setMenuOpen(false), [pathname]);
   // Braces matter: newer Chrome returns a Promise from scrollTo, and React would call it as the cleanup.
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -52,30 +103,55 @@ export function Layout() {
 
   return (
     <div className="flex min-h-svh flex-col">
-      <header className="bg-background/80 sticky top-0 z-40 border-b backdrop-blur">
+      <header className="bg-background/85 sticky top-0 z-40 border-b backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4">
-          <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
-            <span className="bg-primary text-primary-foreground grid size-8 place-items-center rounded-lg">
-              <Nfc className="size-5" />
-            </span>
-            WYR Technology
-          </Link>
-          <nav className="flex items-center gap-5">
-            <NavLink to="/products" className={navClass}>
-              Shop all
-            </NavLink>
-            <Link to="/products?category=nfc-tags" className={navClass({ isActive: false })}>
-              NFC tags
-            </Link>
-            <Link to="/products?category=review-social-nfc" className={cn(navClass({ isActive: false }), "hidden sm:inline")}>
-              Review standees
-            </Link>
+          <Logo />
+          <nav className="hidden items-center gap-6 lg:flex" aria-label="Main">
+            {NAV.map((n) => (
+              <NavLink key={n.to} to={n.to} end={n.end} className={navClass}>
+                {n.label}
+              </NavLink>
+            ))}
           </nav>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-1">
             <HeaderSearch />
             <CartLink />
+            <button
+              className="hover:bg-accent grid size-10 place-items-center rounded-lg lg:hidden"
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={menuOpen}
+            >
+              {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+            </button>
           </div>
         </div>
+        {menuOpen && (
+          <nav className="bg-background border-t px-4 pt-2 pb-4 lg:hidden" aria-label="Mobile">
+            <form
+              role="search"
+              className="relative mb-2 md:hidden"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const q = new FormData(e.currentTarget).get("q")?.toString().trim();
+                navigate(q ? `/products?q=${encodeURIComponent(q)}` : "/products");
+              }}
+            >
+              <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+              <Input name="q" placeholder="Search products" className="pl-9" aria-label="Search products" />
+            </form>
+            {NAV.map((n) => (
+              <NavLink
+                key={n.to}
+                to={n.to}
+                end={n.end}
+                className={({ isActive }) => cn("block rounded-lg px-3 py-2.5 text-sm font-medium", isActive ? "bg-accent text-foreground" : "text-muted-foreground")}
+              >
+                {n.label}
+              </NavLink>
+            ))}
+          </nav>
+        )}
       </header>
 
       <main className="flex-1">
@@ -84,29 +160,41 @@ export function Layout() {
         </ErrorBoundary>
       </main>
 
-      <footer className="bg-muted/40 mt-16 border-t">
-        <div className="text-muted-foreground mx-auto grid max-w-6xl gap-6 px-4 py-10 text-sm sm:grid-cols-3">
-          <div>
-            <p className="text-foreground font-semibold">WYR Technology</p>
-            <p className="mt-2">NFC tags, RFID cards and readers. Ready stock, shipped from Kuala Lumpur.</p>
+      <footer className="bg-brand-navy mt-20 text-slate-300">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center gap-2.5">
+              <span className="rounded-lg bg-white p-1.5">
+                <img src={LOGO_SRC} alt="" className="h-6 w-auto" />
+              </span>
+              <span className="font-bold text-white">WYR Technology</span>
+            </div>
+            <p className="mt-4 max-w-xs text-sm leading-relaxed">NFC tags, RFID cards and readers. Ready stock, shipped from Kuala Lumpur.</p>
           </div>
-          <div>
-            <p className="text-foreground font-semibold">Shop</p>
-            <ul className="mt-2 space-y-1">
-              <li><Link to="/products" className="hover:text-foreground">All products</Link></li>
-              <li><Link to="/products?category=readers-writers" className="hover:text-foreground">Readers & writers</Link></li>
-              <li><Link to="/products?category=uhf-rfid-tags" className="hover:text-foreground">UHF RFID tags</Link></li>
-            </ul>
-          </div>
-          <div>
-            <p className="text-foreground font-semibold">Also on</p>
-            <ul className="mt-2 space-y-1">
-              <li><a href="https://shopee.com.my/shop/147356782" target="_blank" rel="noreferrer" className="hover:text-foreground">Shopee</a></li>
-              <li>Lazada (link on each product page)</li>
-            </ul>
-          </div>
+          <FooterColumn title="Shop">
+            <FooterLink to="/products">All products</FooterLink>
+            <FooterLink to="/products?category=nfc-tags">NFC tags & stickers</FooterLink>
+            <FooterLink to="/products?category=rfid-cards">RFID cards & key fobs</FooterLink>
+            <FooterLink to="/products?category=readers-writers">Readers & writers</FooterLink>
+          </FooterColumn>
+          <FooterColumn title="Company">
+            <FooterLink to="/about">About us</FooterLink>
+            <FooterLink to="/contact">Contact us</FooterLink>
+            {site.shopeeUrl && <FooterLink href={site.shopeeUrl}>Shopee store</FooterLink>}
+          </FooterColumn>
+          <FooterColumn title="Talk to us">
+            {whatsapp ? (
+              <a href={whatsapp} target="_blank" rel="noreferrer" className="bg-brand-orange hover:bg-brand-orange-deep inline-flex w-fit items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors">
+                <MessageCircle className="size-4" />
+                WhatsApp us
+              </a>
+            ) : (
+              <FooterLink to="/contact">Contact options</FooterLink>
+            )}
+            <p className="text-sm">Kuala Lumpur, Malaysia</p>
+          </FooterColumn>
         </div>
-        <p className="text-muted-foreground border-t py-4 text-center text-xs">© {new Date().getFullYear()} WYR Technology, Malaysia</p>
+        <p className="border-t border-white/10 py-5 text-center text-xs text-slate-400">© {new Date().getFullYear()} WYR Technology, Malaysia</p>
       </footer>
     </div>
   );

@@ -1,7 +1,7 @@
 // ToyyibPay API client. Docs: https://toyyibpay.com/apireference/
 // Sandbox: TOYYIBPAY_BASE_URL=https://dev.toyyibpay.com, live: https://toyyibpay.com
 
-import { TOYYIBPAY_PAYMENT_CHANNEL } from "../constants.js";
+import { getSetting } from "../settings.js";
 
 function requireEnv(name) {
   const v = process.env[name]?.trim();
@@ -44,7 +44,7 @@ export function toyyibPayGateway() {
   const secretKey = requireEnv("TOYYIBPAY_SECRET_KEY");
   const categoryCode = requireEnv("TOYYIBPAY_CATEGORY_CODE");
   // 0 = FPX, 1 = card, 2 = both (card must be enabled on the ToyyibPay account).
-  const channel = TOYYIBPAY_PAYMENT_CHANNEL;
+  const channel = () => getSetting("toyyibpayPaymentChannel");
 
   async function post(path, fields) {
     const res = await fetch(`${baseUrl}/index.php/api/${path}`, {
@@ -80,7 +80,7 @@ export function toyyibPayGateway() {
         billTo: input.buyerName,
         billEmail: input.buyerEmail,
         billPhone: input.buyerPhone,
-        billPaymentChannel: channel,
+        billPaymentChannel: channel(),
         billExpiryDate: toyyibDate(input.expiresAt),
       });
       const billCode = Array.isArray(body) ? body[0]?.BillCode : undefined;

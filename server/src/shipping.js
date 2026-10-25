@@ -1,7 +1,7 @@
 // All shipping maths lives here so EasyParcel rates can replace the flat rates in one place.
 // Rates come from constants.js: SHIPPING_FLAT_WM_RM (Peninsular) and SHIPPING_FLAT_EM_RM (Sabah, Sarawak, Labuan).
 
-import { SHIPPING_FLAT_EM_RM, SHIPPING_FLAT_WM_RM } from "./constants.js";
+import { getSetting } from "./settings.js";
 
 // Keep in sync with client/src/lib/checkout.js.
 export const MALAYSIAN_STATES = [
@@ -32,6 +32,6 @@ export function isMalaysianState(value) {
 /** Shipping for one parcel to `state`. Items are passed for when rates depend on weight (EasyParcel). */
 export function quoteShipping(state, _items) {
   const zone = EAST_MALAYSIA.has(state) ? "east" : "west";
-  const feeCents = zone === "east" ? Math.round(SHIPPING_FLAT_EM_RM * 100) : Math.round(SHIPPING_FLAT_WM_RM * 100);
+  const feeCents = Math.round(getSetting(zone === "east" ? "shippingEastRm" : "shippingWestRm") * 100);
   return { feeCents, zone, method: "flat" };
 }

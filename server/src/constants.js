@@ -12,8 +12,14 @@ export const SHIPPING_FLAT_EM_RM = 15;
 /** How long an unpaid order holds its stock, in minutes. */
 export const ORDER_HOLD_MINUTES = 30;
 
-/** WhatsApp number for "Bulk / business quote" links: digits with country code, no + or spaces. PLACEHOLDER: replace with the real business number. */
-export const WHATSAPP_NUMBER = "60123456789";
+/** From this many pieces the product page also offers a bulk / business quote over WhatsApp. */
+export const BULK_QUOTE_MIN_QTY = 50;
+
+/** WhatsApp number for "Bulk / business quote" links: digits with country code, no + or spaces. */
+export const WHATSAPP_NUMBER = "60125978873";
+
+/** WYR's Shopee shop, linked from the public site's header, footer and contact page. */
+export const SHOPEE_SHOP_URL = "https://shopee.com.my/shop/147356782";
 
 /** ToyyibPay payment channel: "0" = FPX only, "1" = card only, "2" = both (card must be enabled on the account). */
 export const TOYYIBPAY_PAYMENT_CHANNEL = "0";

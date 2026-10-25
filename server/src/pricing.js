@@ -1,4 +1,4 @@
-import { WHATSAPP_NUMBER } from "./constants.js";
+import { getSetting } from "./settings.js";
 
 /**
  * Per-piece tiered pricing. The single place that decides what a piece costs at a given quantity:
@@ -33,13 +33,10 @@ export function unitPriceCents(ladder, qty) {
   return price;
 }
 
-/** From this many pieces the product page also offers a bulk / business quote over WhatsApp. */
-export const BULK_QUOTE_MIN_QTY = 50;
-
 export function bulkQuote() {
   // Digits only, with country code (wa.me format), e.g. 60123456789.
-  const number = WHATSAPP_NUMBER.replace(/\D/g, "");
-  return { minQty: BULK_QUOTE_MIN_QTY, whatsappNumber: number || null };
+  const number = getSetting("whatsappNumber").replace(/\D/g, "");
+  return { minQty: getSetting("bulkQuoteMinQty"), whatsappNumber: number || null };
 }
 
 /** quick_qtys JSON -> sorted positive integers (anything else is ignored). */
