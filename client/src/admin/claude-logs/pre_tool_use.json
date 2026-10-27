@@ -93,5 +93,118 @@
     "tool_name": "Bash",
     "tool_use_id": "toolu_01U7M2QfdfGsCZFnvH5vR4rZ",
     "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\client\\src\\admin",
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "38d483a3-e646-4e54-916e-869a1de084b3",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "content": "import { Prisma } from \"@prisma/client\";\nimport { Router } from \"express\";\nimport { requireAdmin } from \"../auth.js\";\nimport { prisma } from \"../db.js\";\n\n// Customers of quotations, invoices and delivery orders. Every document saves its bill-to here\n// (routes/admin-documents.js), and they can also be added or edited by hand. Editing a customer\n// only changes what new documents pick up: issued documents keep the details printed on them.\n\nexport const adminClientsRouter = Router();\nadminClientsRouter.use(requireAdmin);\n\nconst EMAIL_RE = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\n\nclass InputError extends Error {\n  constructor(message, status = 400, fields = {}) {\n    super(message);\n    this.status = status;\n    this.fields = fields;\n  }\n}\n\nfunction handle(fn) {\n  return async (req, res, next) =\u003e {\n    try {\n      await fn(req, res);\n    } catch (err) {\n      if (err instanceof InputError) res.status(err.status).json({ error: err.message, fields: err.fields });\n      else next(err);\n    }\n  };\n}\n\nfunction str(raw, max) {\n  return typeof raw === \"string\" ? raw.replace(/\\r\\n/g, \"\\n\").trim().slice(0, max) : \"\";\n}\n\n/** Phone and email checks shared with the document form. Returns the cleaned values. */\nexport function parseContact(body, fields) {\n  const phone = str(body?.phone, 30);\n  const email = str(body?.email, 255);\n  if (email \u0026\u0026 !EMAIL_RE.test(email)) fields.email = \"Check the email address\";\n  return { phone: phone || null, email: email || null };\n}\n\nfunction parseClient(body) {\n  const fields = {};\n  const name = str(body?.name, 200);\n  if (!name) fields.name = \"Required\";\n  const contact = parseContact(body, fields);\n  if (Object.keys(fields).length) throw new InputError(\"Please fix the highlighted fields\", 400, fields);\n  return { name, address: str(body?.address, 1000) || null, attention: str(body?.attention, 150) || null, ...contact };\n}\n\nconst isoDate = (d) =\u003e (d ? d.toISOString().slice(0, 10) : null);\nconst cents = (d) =\u003e Math.round(Number(d) * 100);\n\nfunction serializeClient(c) {\n  return { id: c.id, name: c.name, address: c.address ?? \"\", attention: c.attention ?? \"\", phone: c.phone ?? \"\", email: c.email ?? \"\", createdAt: c.createdAt };\n}\n\n/** Counts and money per customer, from documents that aren't void. */\nfunction summarize(docs) {\n  const s = { quotations: 0, invoices: 0, deliveryOrders: 0, invoicedCents: 0, unpaidCents: 0, lastDocDate: null };\n  for (const d of docs) {\n    if (!s.lastDocDate || d.docDate \u003e s.lastDocDate) s.lastDocDate = d.docDate;\n    if (d.status === \"void\") continue;\n    if (d.type === \"quotation\") s.quotations++;\n    if (d.type === \"delivery_order\") s.deliveryOrders++;\n    if (d.type === \"invoice\") {\n      s.invoices++;\n      s.invoicedCents += cents(d.total);\n      if (!d.paidAt) s.unpaidCents += cents(d.total);\n    }\n  }\n  return {\n    quotations: s.quotations,\n    invoices: s.invoices,\n    deliveryOrders: s.deliveryOrders,\n    invoiced: s.invoicedCents / 100,\n    unpaid: s.unpaidCents / 100,\n    lastDocDate: isoDate(s.lastDocDate),\n  };\n}\n\nconst docSelect = { id: true, type: true, docNo: true, docDate: true, status: true, total: true, paidAt: true, customerRef: true };\n\nasync function loadClient(idParam) {\n  const id = Number(idParam);\n  const client = Number.isInteger(id) ? await prisma.client.findUnique({ where: { id } }) : null;\n  if (!client) throw new InputError(\"Customer not found\", 404);\n  return client;\n}\n\nfunction isUniqueError(err) {\n  return err instanceof Prisma.PrismaClientKnownRequestError \u0026\u0026 err.code === \"P2002\";\n}\n\nconst nameTaken = (name) =\u003e new InputError(\"Another customer already has that name\", 409, { name: `${name} already exists` });\n\nasync function respond(res, id, status = 200) {\n  const client = await prisma.client.findUnique({\n    where: { id },\n    include: { documents: { select: docSelect, orderBy: [{ docDate: \"desc\" }, { id: \"desc\" }] } },\n  });\n  res.status(status).json({\n    ...serializeClient(client),\n    ...summarize(client.documents),\n    documents: client.documents.map((d) =\u003e ({ ...d, docDate: isoDate(d.docDate), paidAt: isoDate(d.paidAt), total: d.total.toNumber(), customerRef: d.customerRef ?? \"\" })),\n  });\n}\n\nadminClientsRouter.get(\n  \"/\",\n  handle(async (_req, res) =\u003e {\n    const clients = await prisma.client.findMany({\n      orderBy: { name: \"asc\" },\n      include: { documents: { select: { type: true, status: true, total: true, paidAt: true, docDate: true } } },\n    });\n    res.json(clients.map((c) =\u003e ({ ...serializeClient(c), ...summarize(c.documents) })));\n  }),\n);\n\nadminClientsRouter.get(\n  \"/:id\",\n  handle(async (req, res) =\u003e {\n    const client = await loadClient(req.params.id);\n    await respond(res, client.id);\n  }),\n);\n\nadminClientsRouter.post(\n  \"/\",\n  handle(async (req, res) =\u003e {\n    const data = parseClient(req.body);\n    try {\n      const client = await prisma.client.create({ data });\n      await respond(res, client.id, 201);\n    } catch (err) {\n      if (isUniqueError(err)) throw nameTaken(data.name);\n      throw err;\n    }\n  }),\n);\n\nadminClientsRouter.put(\n  \"/:id\",\n  handle(async (req, res) =\u003e {\n    const client = await loadClient(req.params.id);\n    const data = parseClient(req.body);\n    try {\n      await prisma.client.update({ where: { id: client.id }, data });\n    } catch (err) {\n      if (isUniqueError(err)) throw nameTaken(data.name);\n      throw err;\n    }\n    await respond(res, client.id);\n  }),\n);\n\nadminClientsRouter.delete(\n  \"/:id\",\n  handle(async (req, res) =\u003e {\n    const client = await loadClient(req.params.id);\n    const count = await prisma.document.count({ where: { clientId: client.id } });\n    if (count) throw new InputError(`This customer has ${count} document${count === 1 ? \"\" : \"s\"}, so it can't be deleted.`, 409);\n    await prisma.client.delete({ where: { id: client.id } });\n    res.json({ ok: true });\n  }),\n);\n",
+      "file_path": "D:\\Github\\WYR Web\\server\\src\\routes\\admin-clients.js"
+    },
+    "tool_name": "Write",
+    "tool_use_id": "toolu_01JnEZg5wjbRVqVVvwpjLMyo",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\client\\src\\admin",
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "38d483a3-e646-4e54-916e-869a1de084b3",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "file_path": "D:\\Github\\WYR Web\\server\\src\\app.js",
+      "new_string": "import { adminClientsRouter } from \"./routes/admin-clients.js\";\nimport { adminCostingRouter } from \"./routes/admin-costing.js\";",
+      "old_string": "import { adminCostingRouter } from \"./routes/admin-costing.js\";",
+      "replace_all": false
+    },
+    "tool_name": "Edit",
+    "tool_use_id": "toolu_016WvUQQ5f9nBt2DaMXB1etG",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\client\\src\\admin",
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "38d483a3-e646-4e54-916e-869a1de084b3",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "file_path": "D:\\Github\\WYR Web\\server\\src\\app.js",
+      "new_string": "  app.use(\"/api/admin/documents\", adminDocumentsRouter);\n  app.use(\"/api/admin/clients\", adminClientsRouter);",
+      "old_string": "  app.use(\"/api/admin/documents\", adminDocumentsRouter);",
+      "replace_all": false
+    },
+    "tool_name": "Edit",
+    "tool_use_id": "toolu_01SqLX6UGYnBCofeoYnHHCWM",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\client\\src\\admin",
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "38d483a3-e646-4e54-916e-869a1de084b3",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "command": "cd \"D:/Github/WYR Web/server/src/routes\" \u0026\u0026 python -X utf8 - \u003c\u003c'EOF'\np = \"admin-documents.js\"\ns = open(p, encoding=\"utf-8\").read()\ndef rep(a, b):\n    global s\n    assert s.count(a) == 1, a\n    s = s.replace(a, b)\nrep('import { logStockMovement } from \"../stock.js\";', 'import { logStockMovement } from \"../stock.js\";\\nimport { parseContact } from \"./admin-clients.js\";')\nrep('''  const billToName = str(body?.billToName, 200);\n  if (!billToName) fields.billToName = \"Required\";\n''', '''  const billToName = str(body?.billToName, 200);\n  if (!billToName) fields.billToName = \"Required\";\n  // Saved on the customer only: documents print the name, address and attention.\n  const contact = parseContact(body, fields);\n''')\nrep('''    notes: str(body?.notes, 5000) || null,\n    lines,\n  };\n}''', '''    notes: str(body?.notes, 5000) || null,\n    lines,\n    contact,\n  };\n}''')\nrep('''/** Saves the bill-to as a client (or refreshes its address) so the next document can pick it. */\nasync function saveClient(tx, input) {\n  const data = { address: input.billToAddress, attention: input.attention };''', '''/** Saves the bill-to as a client (or refreshes its details) so the next document can pick it. */\nasync function saveClient(tx, input) {\n  const data = { address: input.billToAddress, attention: input.attention, ...input.contact };''')\nrep('''      const { seq: _seq, lines, ...data } = input;''', '''      const { seq: _seq, lines, contact: _contact, ...data } = input;''')\nrep('''      clients: clients.map((c) =\u003e ({ id: c.id, name: c.name, address: c.address ?? \"\", attention: c.attention ?? \"\" })),''',\n    '''      clients: clients.map((c) =\u003e ({ id: c.id, name: c.name, address: c.address ?? \"\", attention: c.attention ?? \"\", phone: c.phone ?? \"\", email: c.email ?? \"\" })),''')\nopen(p, \"w\", encoding=\"utf-8\", newline=\"\\n\").write(s)\nEOF\ngrep -n 'contact' admin-documents.js",
+      "description": "Add phone/email handling to documents route"
+    },
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01HzM8kxK1DGf7kX7Cm3Kf5X",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\client\\src\\admin",
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "38d483a3-e646-4e54-916e-869a1de084b3",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "command": "cd \"D:/Github/WYR Web/client/src/admin/pages\" \u0026\u0026 python -X utf8 - \u003c\u003c'EOF'\np = \"DocumentsPage.jsx\"\ns = open(p, encoding=\"utf-8\").read()\ndef rep(a, b):\n    global s\n    assert s.count(a) == 1, a\n    s = s.replace(a, b)\n\n# copies keep the customer link so the form can show the saved phone/email\nrep('''    sourceId: doc.id,\n    billToName: doc.billToName,''', '''    sourceId: doc.id,\n    clientId: doc.clientId,\n    billToName: doc.billToName,''')\nrep('''    attention: o.companyName ? s.name : \"\",\n    customerRef: o.orderNo,''', '''    attention: o.companyName ? s.name : \"\",\n    phone: s.phone ?? \"\",\n    email: o.email ?? \"\",\n    customerRef: o.orderNo,''')\n\n# navigation state from the Customers page\nrep('''  const docs = data?.type === type ? data.documents : [];''', '''  // The Customers page links here to start a document for a customer, or to show one document.\n  const fromCustomer = location.state?.newFor;\n  const showDoc = location.state?.search;\n  useEffect(() =\u003e {\n    if ((!fromCustomer \u0026\u0026 !showDoc) || data?.type !== type) return;\n    navigate(location.pathname + location.search, { replace: true, state: null });\n    if (showDoc) setQuery(showDoc);\n    else\n      setEditing({\n        type,\n        clientId: fromCustomer.id,\n        billToName: fromCustomer.name,\n        billToAddress: fromCustomer.address,\n        attention: fromCustomer.attention,\n        phone: fromCustomer.phone,\n        email: fromCustomer.email,\n      });\n  }, [fromCustomer, showDoc, data, type, navigate, location.pathname, location.search]);\n\n  const docs = data?.type === type ? data.documents : [];''')\n\n# form state\nrep('''  const [attention, setAttention] = useState(initial.attention ?? \"\");\n  const [customerRef''', '''  const [attention, setAttention] = useState(initial.attention ?? \"\");\n  const findClient = (name) =\u003e clients.find((c) =\u003e c.name.toLowerCase() === name.trim().toLowerCase());\n  const initialClient = clients.find((c) =\u003e c.id === initial.clientId) ?? findClient(initial.billToName ?? \"\");\n  // The saved customer the bill-to currently matches; picking a different one fills in its details.\n  const [matchedId, setMatchedId] = useState(initialClient?.id ?? null);\n  const [phone, setPhone] = useState(initial.phone ?? initialClient?.phone ?? \"\");\n  const [email, setEmail] = useState(initial.email ?? initialClient?.email ?? \"\");\n  const [customerRef''')\nrep('''  function changeBillTo(value) {\n    setBillToName(value);\n    const client = clients.find((c) =\u003e c.name.toLowerCase() === value.trim().toLowerCase());\n    if (client \u0026\u0026 !billToAddress.trim()) {\n      setBillToAddress(client.address);\n      if (!attention.trim()) setAttention(client.attention);\n    }\n  }''', '''  function changeBillTo(value) {\n    setBillToName(value);\n    const client = findClient(value);\n    if (client \u0026\u0026 client.id !== matchedId) {\n      setBillToAddress(client.address);\n      setAttention(client.attention);\n      setPhone(client.phone);\n      setEmail(client.email);\n    }\n    setMatchedId(client?.id ?? null);\n  }''')\nrep('''        attention,\n        customerRef,\n        otherLabel,''', '''        attention,\n        phone,\n        email,\n        customerRef,\n        otherLabel,''')\n\n# form fields\nrep('''              \u003cdatalist id=\"client-list\"\u003e\n                {clients.map((c) =\u003e (\n                  \u003coption key={c.id} value={c.name} /\u003e\n                ))}\n              \u003c/datalist\u003e\n            \u003c/FormField\u003e''', '''              \u003cdatalist id=\"client-list\"\u003e\n                {clients.map((c) =\u003e (\n                  \u003coption key={c.id} value={c.name} /\u003e\n                ))}\n              \u003c/datalist\u003e\n              {billToName.trim() \u0026\u0026 (\n                \u003cp className=\"text-muted-foreground text-xs\"\u003e\n                  {matchedId ? \"Saved customer: details filled in. Changes here update the customer too.\" : \"New customer: saved when you save this document.\"}\n                \u003c/p\u003e\n              )}\n            \u003c/FormField\u003e''')\nrep('''              \u003cInput id=\"attention\" value={attention} onChange={(e) =\u003e setAttention(e.target.value)} placeholder=\"Contact person\" /\u003e\n            \u003c/FormField\u003e''', '''              \u003cInput id=\"attention\" value={attention} onChange={(e) =\u003e setAttention(e.target.value)} placeholder=\"Contact person\" /\u003e\n            \u003c/FormField\u003e\n            \u003cdiv className=\"grid gap-4 sm:grid-cols-2\"\u003e\n              \u003cFormField label=\"Phone (optional)\" htmlFor=\"phone\"\u003e\n                \u003cInput id=\"phone\" type=\"tel\" value={phone} onChange={(e) =\u003e setPhone(e.target.value)} /\u003e\n              \u003c/FormField\u003e\n              \u003cFormField label=\"Email (optional)\" htmlFor=\"email\" error={errors.email}\u003e\n                \u003cInput id=\"email\" type=\"email\" value={email} onChange={(e) =\u003e setEmail(e.target.value)} /\u003e\n              \u003c/FormField\u003e\n            \u003c/div\u003e\n            \u003cp className=\"text-muted-foreground -mt-2 text-xs\"\u003ePhone and email are kept with the customer, not printed.\u003c/p\u003e''')\nopen(p, \"w\", encoding=\"utf-8\", newline=\"\\n\").write(s)\nEOF\necho ok",
+      "description": "Add phone/email and customer prefill to document form"
+    },
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01UUzKai9ByyWhHYPMcKcJWN",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\client\\src\\admin",
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "38d483a3-e646-4e54-916e-869a1de084b3",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "command": "cd \"D:/Github/WYR Web\" \u0026\u0026 npm run build -w client 2\u003e\u00261 | grep -iE 'error|built in' | head",
+      "description": "Build the client",
+      "timeout": 300000
+    },
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_0152z43sL52hiPyTEDmkvaEs",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
   }
 ]

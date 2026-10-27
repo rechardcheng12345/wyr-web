@@ -1,4 +1,4 @@
-import { BarChart3, Boxes, Calculator, ClipboardList, FileText, LogOut, Menu, Package, ShoppingCart, SlidersHorizontal, TicketPercent, X } from "lucide-react";
+import { BarChart3, Boxes, Calculator, ClipboardList, Contact, FileText, LogOut, Menu, Package, ShoppingCart, SlidersHorizontal, TicketPercent, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -15,6 +15,7 @@ const NAV = [
   { to: "/system/sales", label: "Sales Performance", icon: BarChart3 },
   { to: "/system/orders/pending", label: "Pending Orders", icon: ClipboardList, badge: "to_ship" },
   { to: "/system/documents", label: "Quotations & Invoices", icon: FileText },
+  { to: "/system/customers", label: "Customers", icon: Contact },
   { to: "/system/vouchers", label: "Vouchers", icon: TicketPercent },
   { to: "/system/static", label: "Static", icon: SlidersHorizontal },
 ];

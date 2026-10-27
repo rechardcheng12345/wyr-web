@@ -78,6 +78,7 @@ function copyFrom(doc, type) {
   return {
     type,
     sourceId: doc.id,
+    clientId: doc.clientId,
     billToName: doc.billToName,
     billToAddress: doc.billToAddress,
     attention: doc.attention,
@@ -110,6 +111,8 @@ function invoiceForOrder(o) {
     billToName: o.companyName || s.name,
     billToAddress: [s.address, [s.postcode, s.city].filter(Boolean).join(" "), s.state].filter(Boolean).join("\n"),
     attention: o.companyName ? s.name : "",
+    phone: s.phone ?? "",
+    email: o.email ?? "",
     customerRef: o.orderNo,
     otherLabel: o.discount > 0 ? `Voucher ${o.voucherCode ?? ""}`.trim() : "",
     otherAmount: o.discount > 0 ? -o.discount : 0,
@@ -165,6 +168,25 @@ export function DocumentsPage() {
       setEditing(invoiceForOrder(fromOrder));
     }
   }, [fromOrder, data, navigate, location.pathname, location.search]);
+
+  // The Customers page links here to start a document for a customer, or to show one document.
+  const fromCustomer = location.state?.newFor;
+  const showDoc = location.state?.search;
+  useEffect(() => {
+    if ((!fromCustomer && !showDoc) || data?.type !== type) return;
+    navigate(location.pathname + location.search, { replace: true, state: null });
+    if (showDoc) setQuery(showDoc);
+    else
+      setEditing({
+        type,
+        clientId: fromCustomer.id,
+        billToName: fromCustomer.name,
+        billToAddress: fromCustomer.address,
+        attention: fromCustomer.attention,
+        phone: fromCustomer.phone,
+        email: fromCustomer.email,
+      });
+  }, [fromCustomer, showDoc, data, type, navigate, location.pathname, location.search]);
 
   const docs = data?.type === type ? data.documents : [];
   const rows = useMemo(() => {
@@ -505,6 +527,12 @@ function DocForm({ initial, tabType, next, clients, validDays, onClose, onSaved 
   const [billToName, setBillToName] = useState(initial.billToName ?? "");
   const [billToAddress, setBillToAddress] = useState(initial.billToAddress ?? "");
   const [attention, setAttention] = useState(initial.attention ?? "");
+  const findClient = (name) => clients.find((c) => c.name.toLowerCase() === name.trim().toLowerCase());
+  const initialClient = clients.find((c) => c.id === initial.clientId) ?? findClient(initial.billToName ?? "");
+  // The saved customer the bill-to currently matches; picking a different one fills in its details.
+  const [matchedId, setMatchedId] = useState(initialClient?.id ?? null);
+  const [phone, setPhone] = useState(initial.phone ?? initialClient?.phone ?? "");
+  const [email, setEmail] = useState(initial.email ?? initialClient?.email ?? "");
   const [customerRef, setCustomerRef] = useState(initial.customerRef ?? "");
   const [otherLabel, setOtherLabel] = useState(initial.otherLabel ?? "");
   const [otherAmount, setOtherAmount] = useState(initial.otherAmount ? String(initial.otherAmount) : "");
@@ -544,11 +572,14 @@ function DocForm({ initial, tabType, next, clients, validDays, onClose, onSaved 
 
   function changeBillTo(value) {
     setBillToName(value);
-    const client = clients.find((c) => c.name.toLowerCase() === value.trim().toLowerCase());
-    if (client && !billToAddress.trim()) {
+    const client = findClient(value);
+    if (client && client.id !== matchedId) {
       setBillToAddress(client.address);
-      if (!attention.trim()) setAttention(client.attention);
+      setAttention(client.attention);
+      setPhone(client.phone);
+      setEmail(client.email);
     }
+    setMatchedId(client?.id ?? null);
   }
 
   const subtotal = lines.reduce((s, l) => s + (Number(l.qty) || 0) * (Number(l.unitPrice) || 0), 0);
@@ -573,6 +604,8 @@ function DocForm({ initial, tabType, next, clients, validDays, onClose, onSaved 
         billToName,
         billToAddress,
         attention,
+        phone,
+        email,
         customerRef,
         otherLabel,
         otherAmount: otherAmount === "" ? 0 : Number(otherAmount),
@@ -659,10 +692,24 @@ function DocForm({ initial, tabType, next, clients, validDays, onClose, onSaved 
                   <option key={c.id} value={c.name} />
                 ))}
               </datalist>
+              {billToName.trim() && (
+                <p className="text-muted-foreground text-xs">
+                  {matchedId ? "Saved customer: details filled in. Changes here update the customer too." : "New customer: saved when you save this document."}
+                </p>
+              )}
             </FormField>
             <FormField label="Attention (optional)" htmlFor="attention">
               <Input id="attention" value={attention} onChange={(e) => setAttention(e.target.value)} placeholder="Contact person" />
             </FormField>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField label="Phone (optional)" htmlFor="phone">
+                <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+              </FormField>
+              <FormField label="Email (optional)" htmlFor="email" error={errors.email}>
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              </FormField>
+            </div>
+            <p className="text-muted-foreground -mt-2 text-xs">Phone and email are kept with the customer, not printed.</p>
             {type === "quotation" && (
               <FormField label="Customer ref (optional)" htmlFor="customerRef">
                 <Input id="customerRef" value={customerRef} onChange={(e) => setCustomerRef(e.target.value)} />

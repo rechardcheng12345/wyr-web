@@ -26,3 +26,21 @@ export function setInvoicePaid(id, paidAt) {
 export function deleteDocument(id) {
   return adminRequest(`/api/admin/documents/${id}`, { method: "DELETE" });
 }
+
+export function listClients() {
+  return adminRequest("/api/admin/clients");
+}
+
+export function getClient(id) {
+  return adminRequest(`/api/admin/clients/${id}`);
+}
+
+export function saveClient(client) {
+  return client.id
+    ? adminRequest(`/api/admin/clients/${client.id}`, { method: "PUT", body: client })
+    : adminRequest("/api/admin/clients", { method: "POST", body: client });
+}
+
+export function deleteClient(id) {
+  return adminRequest(`/api/admin/clients/${id}`, { method: "DELETE" });
+}

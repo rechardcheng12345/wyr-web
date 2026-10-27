@@ -10,6 +10,7 @@ import { getSetting } from "./settings.js";
 import { shippingSummary } from "./shipping.js";
 import { welcomeVoucher } from "./vouchers.js";
 import { accountRouter } from "./routes/account.js";
+import { adminClientsRouter } from "./routes/admin-clients.js";
 import { adminCostingRouter } from "./routes/admin-costing.js";
 import { adminDocumentsRouter } from "./routes/admin-documents.js";
 import { adminInventoryRouter } from "./routes/admin-inventory.js";
@@ -66,6 +67,7 @@ export function createApp() {
   app.use("/api/admin/settings", adminSettingsRouter);
   app.use("/api/admin/vouchers", adminVouchersRouter);
   app.use("/api/admin/documents", adminDocumentsRouter);
+  app.use("/api/admin/clients", adminClientsRouter);
   app.use("/api/products", productsRouter);
   app.use("/api/categories", categoriesRouter);
   app.use("/api/checkout", checkoutRouter);

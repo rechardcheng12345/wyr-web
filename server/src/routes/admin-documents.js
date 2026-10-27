@@ -4,6 +4,7 @@ import { requireAdmin } from "../auth.js";
 import { prisma } from "../db.js";
 import { getSetting } from "../settings.js";
 import { logStockMovement } from "../stock.js";
+import { parseContact } from "./admin-clients.js";
 
 // Quotations, invoices and delivery orders for walk-in and company customers, plus formal invoices
 // for website orders. Quotations and invoices are issued as soon as they're created and stay editable
@@ -109,6 +110,8 @@ function parseInput(body, type) {
   if (!docDate || Number.isNaN(Date.parse(docDate))) fields.docDate = "Pick a date";
   const billToName = str(body?.billToName, 200);
   if (!billToName) fields.billToName = "Required";
+  // Saved on the customer only: documents print the name, address and attention.
+  const contact = parseContact(body, fields);
 
   let validUntil = null;
   if (type === "quotation" && body?.validUntil) {
@@ -167,6 +170,7 @@ function parseInput(body, type) {
     total: totalCents / 100,
     notes: str(body?.notes, 5000) || null,
     lines,
+    contact,
   };
 }
 
@@ -182,9 +186,9 @@ async function checkVariants(tx, lines) {
   }
 }
 
-/** Saves the bill-to as a client (or refreshes its address) so the next document can pick it. */
+/** Saves the bill-to as a client (or refreshes its details) so the next document can pick it. */
 async function saveClient(tx, input) {
-  const data = { address: input.billToAddress, attention: input.attention };
+  const data = { address: input.billToAddress, attention: input.attention, ...input.contact };
   const client = await tx.client.upsert({ where: { name: input.billToName }, create: { name: input.billToName, ...data }, update: data });
   return client.id;
 }
@@ -237,7 +241,7 @@ adminDocumentsRouter.get(
     ]);
     res.json({
       documents: documents.map(serialize),
-      clients: clients.map((c) => ({ id: c.id, name: c.name, address: c.address ?? "", attention: c.attention ?? "" })),
+      clients: clients.map((c) => ({ id: c.id, name: c.name, address: c.address ?? "", attention: c.attention ?? "", phone: c.phone ?? "", email: c.email ?? "" })),
       next: { year, seq, docNo: formatDocNo(type, year, seq) },
       company: company(),
     });
@@ -330,7 +334,7 @@ adminDocumentsRouter.put(
       if (doc.type === "delivery_order" && doc.status !== "draft") throw new InputError("An issued delivery order can't be edited: its stock is already out. Void it and make a new one.", 409);
       const input = parseInput(req.body, doc.type);
       // The number and year stay as issued, even if the date moves into another year.
-      const { seq: _seq, lines, ...data } = input;
+      const { seq: _seq, lines, contact: _contact, ...data } = input;
       await checkVariants(tx, lines);
       await tx.documentLine.deleteMany({ where: { documentId: doc.id } });
       await tx.document.update({

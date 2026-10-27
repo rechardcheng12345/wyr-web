@@ -28,3 +28,8 @@ server/claude-logs/post_tool_use.json
 server/claude-logs/pre_tool_use.json
 /server/scripts/claude-logs
 logs/chat.json
+/server/src/routes/claude-logs
+/client/src/admin/claude-logs
+/client/src/admin/pages/claude-logs
+/client/src/admin/pages/claude-logs
+/client/src/admin/claude-logs
