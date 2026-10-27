@@ -34,3 +34,15 @@ export const LOW_PRICE_MIN_QTY = 3;
 export const STOCK_SAFETY_BUFFER = 0;
 
 export const WELCOME_VOUCHER_CODE = "WELCOME5";
+
+/** Company details and wording on quotations, invoices and delivery orders (editable on the admin Static page). */
+export const COMPANY_NAME = "WYR Technology";
+export const COMPANY_ADDRESS = "5-17 Setapak Green Condominium\nJalan Semarak Api off Jalan Gombak\n53000, Setapak,";
+export const COMPANY_PHONE = "0125978873";
+export const COMPANY_EMAIL = "alancheng8873@gmail.com";
+export const BANK_INFO = "Maybank 512866195920";
+export const DOCUMENT_PREPARED_BY = "Alan Cheng";
+export const QUOTATION_VALID_DAYS = 30;
+export const QUOTATION_TERMS =
+  "All prices quoted are valid for 30 days from the date stated on the quotation.\nIf you have any questions concerning this quotation, please contact us by email or by phone.";
+export const INVOICE_FOOTER = "This is a computer-generated invoice. No signature is required.";

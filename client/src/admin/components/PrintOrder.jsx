@@ -68,6 +68,22 @@ function MenuItem({ icon: Icon, title, hint, onClick }) {
 }
 
 function PrintJob({ type, order, onDone }) {
+  return (
+    <PrintSheet pageCss={PAGE_CSS[type]} onDone={onDone}>
+      {type === "waybill" ? <Waybill order={order} /> : <OrderDetails order={order} />}
+    </PrintSheet>
+  );
+}
+
+/**
+ * Renders `children` as the only thing on the printed page, opens the print dialog once its images
+ * have loaded, and calls `onDone` after printing (or cancelling).
+ * @param {object} props
+ * @param {string} props.pageCss An `@page` rule, e.g. "@page { size: A4; margin: 14mm; }".
+ * @param {() => void} props.onDone
+ * @param {React.ReactNode} props.children
+ */
+export function PrintSheet({ pageCss, onDone, children }) {
   const rootRef = useRef(null);
 
   useEffect(() => {
@@ -97,11 +113,11 @@ function PrintJob({ type, order, onDone }) {
         @media print {
           body > *:not(#admin-print) { display: none !important; }
           #admin-print { display: block; color: #000; }
-          ${PAGE_CSS[type]}
+          ${pageCss}
           html, body { background: #fff !important; }
         }
       `}</style>
-      {type === "waybill" ? <Waybill order={order} /> : <OrderDetails order={order} />}
+      {children}
     </div>,
     document.body,
   );

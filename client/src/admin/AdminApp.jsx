@@ -4,6 +4,7 @@ import { AuthProvider } from "./hooks/useAuth";
 import { AdminLayout } from "./layouts/AdminLayout";
 import { AdminNotFoundPage } from "./pages/AdminNotFoundPage";
 import { CostingPage } from "./pages/CostingPage";
+import { DocumentsPage } from "./pages/DocumentsPage";
 import { InventoryPage } from "./pages/InventoryPage";
 import { LoginPage } from "./pages/LoginPage";
 import { ProductFormPage } from "./pages/ProductFormPage";
@@ -36,6 +37,7 @@ export default function AdminApp() {
           <Route path="costing" element={<CostingPage />} />
           <Route path="sales" element={<SalesPage />} />
           <Route path="orders/pending" element={<PendingOrdersPage />} />
+          <Route path="documents" element={<DocumentsPage />} />
           <Route path="vouchers" element={<VouchersPage />} />
           <Route path="static" element={<StaticPage />} />
           <Route path="*" element={<AdminNotFoundPage />} />

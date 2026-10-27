@@ -70,7 +70,7 @@ export function StaticPage() {
     <form onSubmit={onSave}>
       <PageHeader
         title="Static"
-        description="Fixed values the shop uses: shipping fees, checkout and contact details."
+        description="Fixed values the shop uses: shipping fees, checkout, contact details and what quotations, invoices and delivery orders print."
         actions={
           <>
             <Button type="button" variant="outline" disabled={!changed.length || saving} onClick={() => apply(settings)}>
@@ -107,7 +107,7 @@ export function StaticPage() {
                     const dirty = form[s.key] !== asText(s.value);
                     const atDefault = form[s.key] === asText(s.defaultValue);
                     return (
-                      <FormField key={s.key} label={s.label} htmlFor={s.key} error={errors[s.key]} className={cn(s.type === "select" || s.type === "url" ? "md:col-span-2" : "")}>
+                      <FormField key={s.key} label={s.label} htmlFor={s.key} error={errors[s.key]} className={cn(["select", "url", "textarea"].includes(s.type) ? "md:col-span-2" : "")}>
                         <SettingInput setting={s} value={form[s.key] ?? ""} onChange={set(s.key)} dirty={dirty} />
                         <p className="text-muted-foreground text-xs">{s.help}</p>
                         <p className="text-muted-foreground flex flex-wrap items-center gap-x-2 text-xs">
@@ -165,6 +165,20 @@ function SettingInput({ setting: s, value, onChange, dirty }) {
   }
   if (s.type === "int") {
     return <Input id={s.key} type="number" min="0" step="1" value={value} onChange={onChange} className={ring} />;
+  }
+  if (s.type === "textarea") {
+    return (
+      <textarea
+        id={s.key}
+        rows={Math.min(Math.max(value.split("\n").length, 2), 6)}
+        value={value}
+        onChange={onChange}
+        className={cn(
+          "border-input focus-visible:border-ring focus-visible:ring-ring/50 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs outline-none focus-visible:ring-[3px] md:text-sm",
+          ring,
+        )}
+      />
+    );
   }
   if (s.type === "text") {
     return <Input id={s.key} type="text" value={value} onChange={onChange} className={ring} />;

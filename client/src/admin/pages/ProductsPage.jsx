@@ -1,5 +1,5 @@
-import { ExternalLink, ImageOff, Pencil, Plus, Search, Trash2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Download, ExternalLink, FileSpreadsheet, ImageOff, Loader2, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { Select } from "../components/FormField";
 import { Modal } from "../components/Modal";
 import { PageHeader } from "../components/PageHeader";
 import { formatNumber, formatRM } from "../format";
-import { deleteProduct, listCategories, listProducts } from "../services/productsService";
+import { deleteProduct, downloadInfoSheet, importInfoSheet, listCategories, listProducts } from "../services/productsService";
 
 export function ProductsPage() {
   const navigate = useNavigate();
@@ -22,6 +22,21 @@ export function ProductsPage() {
   const [status, setStatus] = useState("");
   const [toDelete, setToDelete] = useState(null);
   const [notice, setNotice] = useState(location.state?.notice ?? "");
+  const [sheetFile, setSheetFile] = useState(null);
+  const [downloading, setDownloading] = useState(false);
+  const sheetInput = useRef(null);
+
+  async function onDownloadSheet() {
+    setDownloading(true);
+    setLoadError("");
+    try {
+      await downloadInfoSheet();
+    } catch (err) {
+      setLoadError(err.message);
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   useEffect(() => {
     Promise.all([listProducts(), listCategories()])
@@ -129,12 +144,33 @@ export function ProductsPage() {
         title="Products"
         description={`${products.length} products · ${hiddenCount} hidden from the shop`}
         actions={
-          <Button asChild>
-            <Link to="/system/products/new">
-              <Plus />
-              Add product
-            </Link>
-          </Button>
+          <>
+            <Button variant="outline" onClick={onDownloadSheet} disabled={downloading}>
+              {downloading ? <Loader2 className="animate-spin" /> : <Download />}
+              Download info sheet
+            </Button>
+            <Button variant="outline" onClick={() => sheetInput.current.click()}>
+              <FileSpreadsheet />
+              Upload info sheet
+            </Button>
+            <input
+              ref={sheetInput}
+              type="file"
+              accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              className="sr-only"
+              tabIndex={-1}
+              onChange={(e) => {
+                setSheetFile(e.target.files[0] ?? null);
+                e.target.value = "";
+              }}
+            />
+            <Button asChild>
+              <Link to="/system/products/new">
+                <Plus />
+                Add product
+              </Link>
+            </Button>
+          </>
         }
       />
 
@@ -166,6 +202,17 @@ export function ProductsPage() {
       </div>
 
       <DataTable columns={columns} rows={filtered} isLoading={isLoading} emptyMessage="No products match." />
+
+      {sheetFile && (
+        <ImportSheetDialog
+          file={sheetFile}
+          onClose={() => setSheetFile(null)}
+          onApplied={(message) => {
+            setSheetFile(null);
+            setNotice(message);
+          }}
+        />
+      )}
 
       {toDelete && (
         <DeleteDialog
@@ -219,6 +266,108 @@ function DeleteDialog({ product, onClose, onDeleted }) {
       </p>
       <p className="text-muted-foreground mt-3 text-sm">To take it off the shop for a while instead, edit it and turn off "Show on shop".</p>
       {error && <p className="text-destructive mt-3 rounded-md bg-red-50 px-3 py-2 text-sm">{error}</p>}
+    </Modal>
+  );
+}
+
+const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+
+function ImportSheetDialog({ file, onClose, onApplied }) {
+  const [plan, setPlan] = useState(null);
+  const [busy, setBusy] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    importInfoSheet(file, false)
+      .then(setPlan)
+      .catch((err) => setError(err.message))
+      .finally(() => setBusy(false));
+  }, [file]);
+
+  const changes = plan ? plan.products.length + plan.variants.length + plan.faqs.length : 0;
+
+  async function onApply() {
+    setBusy(true);
+    setError("");
+    try {
+      const result = await importInfoSheet(file, true);
+      if (!result.applied) {
+        setPlan(result);
+        setBusy(false);
+        return;
+      }
+      onApplied(`Saved product information from ${file.name}: ${plural(result.products.length, "product")}, ${plural(result.variants.length, "variant")}, FAQ for ${plural(result.faqs.length, "product")}.`);
+    } catch (err) {
+      setError(err.message);
+      setBusy(false);
+    }
+  }
+
+  const section = (title, list) =>
+    list.length > 0 && (
+      <div>
+        <h3 className="mb-1 text-sm font-semibold">
+          {title} ({list.length})
+        </h3>
+        <ul className="divide-y rounded-md border text-sm">
+          {list.map((c) => (
+            <li key={c.id} className="px-3 py-1.5">
+              <span className="font-medium">{c.label}</span>
+              <span className="text-muted-foreground block text-xs">{c.changed.join(", ")}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      title="Upload info sheet"
+      className="sm:max-w-2xl"
+      footer={
+        <>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={onApply} disabled={busy || !plan || plan.errorCount > 0 || changes === 0}>
+            {busy && plan && <Loader2 className="animate-spin" />}
+            Save {changes > 0 ? plural(changes, "change") : "changes"}
+          </Button>
+        </>
+      }
+    >
+      <p className="text-muted-foreground mb-3 text-sm">{file.name}</p>
+      {busy && !plan && (
+        <p className="flex items-center gap-2 text-sm">
+          <Loader2 className="size-4 animate-spin" />
+          Reading the sheet…
+        </p>
+      )}
+      {error && <p className="text-destructive rounded-md bg-red-50 px-3 py-2 text-sm">{error}</p>}
+      {plan && (
+        <div className="flex flex-col gap-4">
+          {plan.errorCount > 0 && (
+            <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">
+              <p className="font-semibold">Fix {plural(plan.errorCount, "problem")} in the sheet and upload it again. Nothing has been saved.</p>
+              <ul className="mt-1 list-disc pl-5">
+                {plan.errors.map((e, i) => (
+                  <li key={i}>
+                    {e.sheet && `${e.sheet}${e.row ? ` row ${e.row}` : ""}: `}
+                    {e.message}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {plan.errorCount === 0 && changes === 0 && <p className="text-sm">No changes: the sheet matches what is already saved.</p>}
+          {plan.errorCount === 0 && changes > 0 && <p className="text-sm">Check the changes below, then save. Only the changed fields are listed.</p>}
+          {section("Products", plan.products)}
+          {section("Variants (weight and package size)", plan.variants)}
+          {section("FAQ", plan.faqs)}
+        </div>
+      )}
     </Modal>
   );
 }

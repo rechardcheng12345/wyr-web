@@ -6,6 +6,8 @@ dist/
 !.env.example
 .DS_Store
 .scratch/
+# Uploaded product photos and videos (UPLOAD_DIR)
+uploads/
 
 # Handoff run logs and archive (raw agent transcripts / duplicate of _handoff contents)
 _handoff/*.log
@@ -13,3 +15,16 @@ _handoff/*.tgz
 *.xlsx
 *.csv
 *.md
+# Customer documents and product source material (names, addresses)
+Samples/
+_handoff/claude-logs/post_tool_use.json
+_handoff/claude-logs/pre_tool_use.json
+claude-logs/debug.json
+claude-logs/notification.json
+claude-logs/post_tool_use.json
+claude-logs/pre_tool_use.json
+claude-logs/stop.json
+server/claude-logs/post_tool_use.json
+server/claude-logs/pre_tool_use.json
+/server/scripts/claude-logs
+logs/chat.json

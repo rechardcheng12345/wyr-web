@@ -1,5 +1,6 @@
-import { Building2, Check, CheckCheck, Copy, Download, ImageOff, Loader2, MapPin, PackageCheck, Phone, RefreshCw, StickyNote, Tag, Truck, Undo2 } from "lucide-react";
+import { Building2, Check, CheckCheck, Copy, Download, FileText, ImageOff, Loader2, MapPin, PackageCheck, Phone, RefreshCw, StickyNote, Tag, Truck, Undo2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -193,6 +194,7 @@ export function PendingOrdersPage() {
 
 function OrderCard({ order: o, onShip, onUnship, onComplete }) {
   const [copied, setCopied] = useState(false);
+  const navigate = useNavigate();
   const toShip = o.status === "paid" || o.status === "sent_to_bigseller";
   const pieces = o.items.reduce((s, i) => s + (i.qty ?? 0), 0);
 
@@ -304,8 +306,14 @@ function OrderCard({ order: o, onShip, onUnship, onComplete }) {
       </div>
 
       <footer className="flex flex-wrap items-center justify-end gap-2 border-t px-4 py-3">
-        <div className="mr-auto">
+        <div className="mr-auto flex gap-2">
           <PrintMenu order={o} />
+          {o.paidAt && (
+            <Button variant="outline" onClick={() => navigate("/system/documents?type=invoice", { state: { fromOrder: o } })} title="Formal invoice for this order">
+              <FileText />
+              Invoice
+            </Button>
+          )}
         </div>
         {toShip && (
           <Button onClick={onShip}>

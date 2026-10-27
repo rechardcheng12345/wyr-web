@@ -1,5 +1,14 @@
 import {
+  BANK_INFO,
   BULK_QUOTE_MIN_QTY,
+  COMPANY_ADDRESS,
+  COMPANY_EMAIL,
+  COMPANY_NAME,
+  COMPANY_PHONE,
+  DOCUMENT_PREPARED_BY,
+  INVOICE_FOOTER,
+  QUOTATION_TERMS,
+  QUOTATION_VALID_DAYS,
   FREE_SHIPPING_THRESHOLD_RM,
   LOW_PRICE_MIN_QTY,
   LOW_PRICE_THRESHOLD_RM,
@@ -30,6 +39,15 @@ function voucherCode(raw) {
   const v = String(raw ?? "").trim().toUpperCase();
   if (v && !/^[A-Z0-9_-]{1,40}$/.test(v)) throw new Error("Letters, digits, - and _ only (max 40)");
   return v;
+}
+
+function text(max, { required = false } = {}) {
+  return (raw) => {
+    const v = String(raw ?? "").replace(/\r\n/g, "\n").trim();
+    if (required && !v) throw new Error("Required");
+    if (v.length > max) throw new Error(`At most ${max} characters`);
+    return v;
+  };
 }
 
 function intBetween(min, max) {
@@ -191,6 +209,96 @@ export const SETTINGS = [
     type: "url",
     defaultValue: SHOPEE_SHOP_URL,
     parse: url,
+  },
+  {
+    key: "company_name",
+    group: "Documents (quotation, invoice, DO)",
+    label: "Company name",
+    help: "Printed under the logo on quotations, invoices and delivery orders.",
+    type: "text",
+    defaultValue: COMPANY_NAME,
+    parse: text(150, { required: true }),
+  },
+  {
+    key: "company_reg_no",
+    group: "Documents (quotation, invoice, DO)",
+    label: "Registration no. (SSM)",
+    help: "Printed after the company name. Leave empty to hide.",
+    type: "text",
+    defaultValue: "",
+    parse: text(60),
+  },
+  {
+    key: "company_address",
+    group: "Documents (quotation, invoice, DO)",
+    label: "Company address",
+    help: "One line per row, as it should appear on documents.",
+    type: "textarea",
+    defaultValue: COMPANY_ADDRESS,
+    parse: text(500, { required: true }),
+  },
+  {
+    key: "company_phone",
+    group: "Documents (quotation, invoice, DO)",
+    label: "Phone",
+    help: "As printed on documents, e.g. 012-597 8873.",
+    type: "text",
+    defaultValue: COMPANY_PHONE,
+    parse: text(40),
+  },
+  {
+    key: "company_email",
+    group: "Documents (quotation, invoice, DO)",
+    label: "Email",
+    help: "As printed on documents.",
+    type: "text",
+    defaultValue: COMPANY_EMAIL,
+    parse: text(150),
+  },
+  {
+    key: "bank_info",
+    group: "Documents (quotation, invoice, DO)",
+    label: "Bank information",
+    help: "Printed on invoices under \"Bank information\", e.g. bank, account name and number.",
+    type: "textarea",
+    defaultValue: BANK_INFO,
+    parse: text(500),
+  },
+  {
+    key: "document_prepared_by",
+    group: "Documents (quotation, invoice, DO)",
+    label: "Prepared by",
+    help: "Name printed on quotations.",
+    type: "text",
+    defaultValue: DOCUMENT_PREPARED_BY,
+    parse: text(100),
+  },
+  {
+    key: "quotation_valid_days",
+    group: "Documents (quotation, invoice, DO)",
+    label: "Quotation valid for (days)",
+    help: "Sets the \"valid until\" date on new quotations. You can still change it per quotation.",
+    type: "int",
+    defaultValue: QUOTATION_VALID_DAYS,
+    parse: intBetween(1, 365),
+  },
+  {
+    key: "quotation_terms",
+    group: "Documents (quotation, invoice, DO)",
+    label: "Quotation terms",
+    help: "Printed under the quotation total.",
+    type: "textarea",
+    defaultValue: QUOTATION_TERMS,
+    parse: text(2000),
+  },
+  {
+    key: "invoice_footer",
+    group: "Documents (quotation, invoice, DO)",
+    label: "Invoice footer",
+    help: "Small print at the bottom of invoices. Leave empty to hide.",
+    type: "textarea",
+    defaultValue: INVOICE_FOOTER,
+    parse: text(500),
   },
 ];
 

@@ -1,5 +1,5 @@
-import { ArrowDown, ArrowLeft, ArrowUp, ExternalLink, ImageOff, Loader2, Plus, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ArrowDown, ArrowLeft, ArrowUp, ExternalLink, ImageOff, Loader2, Plus, Trash2, Upload } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,10 +7,30 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { FormField, Select } from "../components/FormField";
 import { PageHeader } from "../components/PageHeader";
-import { getProduct, listCategories, saveProduct } from "../services/productsService";
+import { getProduct, listCategories, saveProduct, uploadFile } from "../services/productsService";
 
 const newKey = () => crypto.randomUUID();
-const emptyVariant = () => ({ key: newKey(), id: null, sku: "", name: "", price: "", specialPrice: "", weightG: "", stock: "0", reserved: 0, hasPriceTiers: false });
+const emptyVariant = () => ({ key: newKey(), id: null, sku: "", name: "", price: "", specialPrice: "", weightG: "", lengthCm: "", widthCm: "", heightCm: "", stock: "0", reserved: 0, hasPriceTiers: false });
+const DIMENSIONS = [
+  ["lengthCm", "length"],
+  ["widthCm", "width"],
+  ["heightCm", "height"],
+];
+
+// Product information master (server/src/product-info.js). rows = textarea height; otherwise a one-line input.
+const INFO_FIELDS = [
+  { key: "brand", label: "Brand", placeholder: "e.g. NXP, Impinj" },
+  { key: "model", label: "Model / part number" },
+  { key: "origin", label: "Country of origin", placeholder: "e.g. China" },
+  { key: "warranty", label: "Warranty", placeholder: "e.g. 1 year" },
+  { key: "specs", label: "Specifications", rows: 6, placeholder: "One per line, e.g.\nChip: NTAG215\nMemory: 504 bytes\nSize: 25 mm diameter" },
+  { key: "inTheBox", label: "In the box", rows: 3, placeholder: "What the buyer receives, one per line" },
+  { key: "compatibility", label: "Compatibility", rows: 3, placeholder: "Phones, readers or systems it works with" },
+  { key: "keywords", label: "Search keywords", rows: 2, placeholder: "Words buyers search for, comma separated" },
+  { key: "aiNotes", label: "Notes for AI", rows: 4, placeholder: "Selling points, who it's for, claims to avoid. Used when AI writes listings." },
+];
+const textareaClass =
+  "border-input focus-visible:border-ring focus-visible:ring-ring/50 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs outline-none focus-visible:ring-[3px] md:text-sm";
 
 const EMPTY = {
   name: "",
@@ -21,7 +41,10 @@ const EMPTY = {
   parentSku: "",
   description: "",
   isActive: true,
+  ...Object.fromEntries(INFO_FIELDS.map((f) => [f.key, ""])),
   images: [],
+  faqs: [],
+  videos: [],
   variants: [emptyVariant()],
   marketplaces: { shopee: "", lazada: "" },
 };
@@ -42,12 +65,17 @@ function fromServer(p) {
     ...p,
     categoryId: blank(p.categoryId),
     images: p.images.map((url) => ({ key: newKey(), url })),
+    faqs: p.faqs.map((f) => ({ ...f, key: newKey() })),
+    videos: p.videos.map((v) => ({ ...v, key: newKey() })),
     variants: p.variants.map((v) => ({
       ...v,
       key: newKey(),
       price: blank(v.price),
       specialPrice: blank(v.specialPrice),
       weightG: blank(v.weightG),
+      lengthCm: blank(v.lengthCm),
+      widthCm: blank(v.widthCm),
+      heightCm: blank(v.heightCm),
       stock: blank(v.stock),
     })),
   };
@@ -63,8 +91,22 @@ function toServer(form) {
     parentSku: form.parentSku,
     description: form.description,
     isActive: form.isActive,
+    ...Object.fromEntries(INFO_FIELDS.map((f) => [f.key, form[f.key]])),
     images: form.images.map((i) => i.url.trim()).filter(Boolean),
-    variants: form.variants.map(({ id, sku, name, price, specialPrice, weightG, stock }) => ({ id, sku, name, price, specialPrice, weightG, stock: stock === "" ? 0 : Number(stock) })),
+    faqs: form.faqs.map(({ question, answer }) => ({ question, answer })),
+    videos: form.videos.map(({ url, title }) => ({ url, title })),
+    variants: form.variants.map(({ id, sku, name, price, specialPrice, weightG, lengthCm, widthCm, heightCm, stock }) => ({
+      id,
+      sku,
+      name,
+      price,
+      specialPrice,
+      weightG,
+      lengthCm,
+      widthCm,
+      heightCm,
+      stock: stock === "" ? 0 : Number(stock),
+    })),
     marketplaces: form.marketplaces,
   };
 }
@@ -235,11 +277,33 @@ export function ProductFormPage() {
                   rows={8}
                   value={form.description}
                   onChange={(e) => set({ description: e.target.value })}
-                  className="border-input focus-visible:border-ring focus-visible:ring-ring/50 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs outline-none focus-visible:ring-[3px] md:text-sm"
+                  className={textareaClass}
                 />
               </FormField>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardContent className="grid gap-4 p-5 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <h2 className="font-semibold">Product information</h2>
+                <p className="text-muted-foreground text-xs">
+                  The master details AI will read to write Shopee, Lazada and website listings. Fill in what you know; for many products at once use Products › Download info sheet.
+                </p>
+              </div>
+              {INFO_FIELDS.map((f) => (
+                <FormField key={f.key} label={f.label} htmlFor={f.key} error={errors[f.key]} className={f.rows ? "sm:col-span-2" : undefined}>
+                  {f.rows ? (
+                    <textarea id={f.key} rows={f.rows} value={form[f.key]} placeholder={f.placeholder} onChange={(e) => set({ [f.key]: e.target.value })} className={textareaClass} />
+                  ) : (
+                    <Input id={f.key} value={form[f.key]} placeholder={f.placeholder} onChange={(e) => set({ [f.key]: e.target.value })} />
+                  )}
+                </FormField>
+              ))}
+            </CardContent>
+          </Card>
+
+          <FaqEditor faqs={form.faqs} errors={errors} onChange={(faqs) => set({ faqs })} />
 
           <Card>
             <CardContent className="p-5">
@@ -278,6 +342,11 @@ export function ProductFormPage() {
                         <FormField label="Weight (g)" error={err("weightG")}>
                           <Input type="number" min="0" step="1" value={v.weightG} placeholder="—" onChange={(e) => setVariant(v.key, { weightG: e.target.value })} />
                         </FormField>
+                        {DIMENSIONS.map(([key, label]) => (
+                          <FormField key={key} label={`Package ${label} (cm)`} error={err(key)} className={key === "heightCm" ? "col-span-2" : "sm:col-span-2"}>
+                            <Input type="number" min="0" step="0.1" value={v[key]} placeholder="—" onChange={(e) => setVariant(v.key, { [key]: e.target.value })} />
+                          </FormField>
+                        ))}
                       </div>
                       <div className="mt-2 flex items-center justify-between gap-2">
                         <p className="text-muted-foreground text-xs">
@@ -322,7 +391,7 @@ export function ProductFormPage() {
           <Card>
             <CardContent className="p-5">
               <h2 className="font-semibold">Photos</h2>
-              <p className="text-muted-foreground mb-3 text-xs">Paste image links (e.g. from Shopee) or /images/… for files in client/public/images. The first photo is the main one.</p>
+              <p className="text-muted-foreground mb-3 text-xs">Upload photos, or paste image links (e.g. from Shopee). The first photo is the main one.</p>
               {imageError && <p className="text-destructive mb-2 text-xs">{errors[imageError]}</p>}
               <ul className="flex flex-col gap-2">
                 {form.images.map((img, i) => (
@@ -362,6 +431,52 @@ export function ProductFormPage() {
                   Add
                 </Button>
               </div>
+              <UploadButton
+                kind="image"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                multiple
+                label="Upload photos"
+                onUploaded={(url) => setForm((f) => ({ ...f, images: [...f.images, { key: newKey(), url }] }))}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-5">
+              <h2 className="font-semibold">Videos</h2>
+              <p className="text-muted-foreground mb-3 text-xs">MP4, WebM or MOV, up to 200 MB each. Stored on the website server.</p>
+              {errors.videos && <p className="text-destructive mb-2 text-xs">{errors.videos}</p>}
+              <ul className="flex flex-col gap-3">
+                {form.videos.map((v, i) => (
+                  <li key={v.key} className={cn("rounded-lg border p-2", errors[`videos.${i}`] && "border-red-300 bg-red-50")}>
+                    <video src={v.url} controls preload="metadata" className="aspect-video w-full rounded-md bg-black" />
+                    <div className="mt-2 flex items-center gap-1">
+                      <Input
+                        value={v.title}
+                        placeholder="Title (optional)"
+                        aria-label="Video title"
+                        onChange={(e) => set({ videos: form.videos.map((x) => (x.key === v.key ? { ...x, title: e.target.value } : x)) })}
+                        className="h-8"
+                      />
+                      <Button type="button" variant="ghost" size="icon" className="size-7" disabled={i === 0} onClick={() => set({ videos: move(form.videos, i, -1) })} aria-label="Move up">
+                        <ArrowUp />
+                      </Button>
+                      <Button type="button" variant="ghost" size="icon" className="size-7" disabled={i === form.videos.length - 1} onClick={() => set({ videos: move(form.videos, i, 1) })} aria-label="Move down">
+                        <ArrowDown />
+                      </Button>
+                      <Button type="button" variant="ghost" size="icon" className="size-7 text-red-600" onClick={() => set({ videos: form.videos.filter((x) => x.key !== v.key) })} aria-label="Remove video">
+                        <Trash2 />
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <UploadButton
+                kind="video"
+                accept="video/mp4,video/webm,video/quicktime"
+                label="Upload video"
+                onUploaded={(url, file) => setForm((f) => ({ ...f, videos: [...f.videos, { key: newKey(), url, title: file.name.replace(/\.[^.]+$/, "") }] }))}
+              />
             </CardContent>
           </Card>
 
@@ -392,6 +507,85 @@ export function ProductFormPage() {
         </Button>
       </div>
     </form>
+  );
+}
+
+function UploadButton({ kind, accept, multiple, label, onUploaded }) {
+  const input = useRef(null);
+  const [progress, setProgress] = useState(null);
+  const [error, setError] = useState("");
+
+  async function onFiles(files) {
+    setError("");
+    for (const file of files) {
+      setProgress({ name: file.name, done: 0 });
+      try {
+        const { url } = await uploadFile(kind, file, (done) => setProgress({ name: file.name, done }));
+        onUploaded(url, file);
+      } catch (err) {
+        setError(`${file.name}: ${err.message}`);
+        break;
+      }
+    }
+    setProgress(null);
+    input.current.value = "";
+  }
+
+  return (
+    <div className="mt-3">
+      <input ref={input} type="file" accept={accept} multiple={multiple} className="sr-only" tabIndex={-1} onChange={(e) => onFiles([...e.target.files])} />
+      <Button type="button" variant="outline" className="w-full" disabled={!!progress} onClick={() => input.current.click()}>
+        {progress ? <Loader2 className="animate-spin" /> : <Upload />}
+        <span className="truncate">{progress ? `Uploading ${progress.name} · ${Math.round(progress.done * 100)}%` : label}</span>
+      </Button>
+      {error && <p className="text-destructive mt-2 text-xs">{error}</p>}
+    </div>
+  );
+}
+
+function FaqEditor({ faqs, errors, onChange }) {
+  const update = (key, patch) => onChange(faqs.map((f) => (f.key === key ? { ...f, ...patch } : f)));
+  return (
+    <Card>
+      <CardContent className="p-5">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <h2 className="font-semibold">FAQ</h2>
+            <p className="text-muted-foreground text-xs">Questions buyers often ask, with your answers.</p>
+          </div>
+          <Button type="button" variant="outline" size="sm" onClick={() => onChange([...faqs, { key: newKey(), question: "", answer: "" }])}>
+            <Plus />
+            Add question
+          </Button>
+        </div>
+        {errors.faqs && <p className="text-destructive mb-3 text-sm">{errors.faqs}</p>}
+        {faqs.length === 0 && <p className="text-muted-foreground text-sm">No questions yet.</p>}
+        <div className="flex flex-col gap-3">
+          {faqs.map((f, i) => (
+            <div key={f.key} className="flex flex-col gap-2 rounded-lg border p-3">
+              <FormField label={`Question ${i + 1}`} htmlFor={`faq-q-${f.key}`} error={errors[`faqs.${i}.question`]}>
+                <Input id={`faq-q-${f.key}`} value={f.question} placeholder="e.g. Does it work with iPhone?" onChange={(e) => update(f.key, { question: e.target.value })} />
+              </FormField>
+              <FormField label="Answer" htmlFor={`faq-a-${f.key}`} error={errors[`faqs.${i}.answer`]}>
+                <textarea id={`faq-a-${f.key}`} rows={3} value={f.answer} onChange={(e) => update(f.key, { answer: e.target.value })} className={textareaClass} />
+              </FormField>
+              <div className="flex justify-end">
+                <Button type="button" variant="ghost" size="icon" className="size-7" disabled={i === 0} onClick={() => onChange(move(faqs, i, -1))} aria-label="Move up">
+                  <ArrowUp />
+                </Button>
+                <Button type="button" variant="ghost" size="icon" className="size-7" disabled={i === faqs.length - 1} onClick={() => onChange(move(faqs, i, 1))} aria-label="Move down">
+                  <ArrowDown />
+                </Button>
+                <Button type="button" variant="ghost" size="sm" onClick={() => onChange(faqs.filter((x) => x.key !== f.key))} className="text-red-600 hover:bg-red-50 hover:text-red-700">
+                  <Trash2 />
+                  Remove
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

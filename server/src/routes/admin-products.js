@@ -2,6 +2,7 @@ import { Router } from "express";
 import { requireAdmin } from "../auth.js";
 import { cleanTitle } from "../display-name.js";
 import { prisma } from "../db.js";
+import { DIMENSIONS, INFO_FIELDS, parseCm, parseFaqs, parseInfo, parseVideos } from "../product-info.js";
 import { logStockMovement } from "../stock.js";
 
 export const adminProductsRouter = Router();
@@ -102,6 +103,7 @@ function parseInput(body) {
       price,
       specialPrice,
       weightG: optionalInt(v?.weightG, `variants.${i}.weightG`, fields),
+      ...Object.fromEntries(DIMENSIONS.map((d) => [d, parseCm(v?.[d], `variants.${i}.${d}`, fields)])),
       stock: optionalInt(v?.stock, `variants.${i}.stock`, fields) ?? 0,
     };
   });
@@ -120,6 +122,10 @@ function parseInput(body) {
     marketplaces[p] = url || null;
   }
 
+  const info = parseInfo(body, fields);
+  const faqs = parseFaqs(body?.faqs, fields);
+  const videos = parseVideos(body?.videos, fields);
+
   if (Object.keys(fields).length) throw new ValidationError("Please fix the highlighted fields", fields);
 
   return {
@@ -131,8 +137,11 @@ function parseInput(body) {
       parentSku: str(body?.parentSku, 80) || null,
       description: typeof body?.description === "string" ? body.description.trim().slice(0, 60_000) || null : null,
       isActive: body?.isActive !== false,
+      ...info,
     },
     images,
+    faqs,
+    videos,
     variants,
     marketplaces,
   };
@@ -184,6 +193,10 @@ async function writeChildren(tx, productId, input, existingVariantIds) {
   if (input.images.length) {
     await tx.productImage.createMany({ data: input.images.map((url, i) => ({ productId, url, sortOrder: i })) });
   }
+  await tx.productFaq.deleteMany({ where: { productId } });
+  if (input.faqs.length) await tx.productFaq.createMany({ data: input.faqs.map((f, i) => ({ productId, ...f, sortOrder: i })) });
+  await tx.productVideo.deleteMany({ where: { productId } });
+  if (input.videos.length) await tx.productVideo.createMany({ data: input.videos.map((v, i) => ({ productId, ...v, sortOrder: i })) });
 
   for (const p of PLATFORMS) {
     const url = input.marketplaces[p];
@@ -199,7 +212,7 @@ async function writeChildren(tx, productId, input, existingVariantIds) {
   }
 
   for (const v of input.variants) {
-    const data = { sku: v.sku, variationName: v.variationName, price: v.price, specialPrice: v.specialPrice, weightG: v.weightG };
+    const data = { sku: v.sku, variationName: v.variationName, price: v.price, specialPrice: v.specialPrice, weightG: v.weightG, lengthCm: v.lengthCm, widthCm: v.widthCm, heightCm: v.heightCm };
     let variantId = v.id;
     if (variantId && existingVariantIds.has(variantId)) {
       await tx.productVariant.update({ where: { id: variantId }, data });
@@ -247,7 +260,10 @@ function serializeForEdit(p) {
     parentSku: p.parentSku ?? "",
     description: p.description ?? "",
     isActive: p.isActive !== false,
+    ...Object.fromEntries(INFO_FIELDS.map((f) => [f.key, p[f.key] ?? ""])),
     images: p.images.map((i) => i.url).filter(Boolean),
+    faqs: p.faqs.map((f) => ({ question: f.question, answer: f.answer })),
+    videos: p.videos.map((v) => ({ url: v.url, title: v.title ?? "" })),
     variants: p.variants.map((v) => ({
       id: v.id,
       sku: v.sku,
@@ -255,6 +271,9 @@ function serializeForEdit(p) {
       price: toNumber(v.price),
       specialPrice: toNumber(v.specialPrice),
       weightG: v.weightG,
+      lengthCm: toNumber(v.lengthCm),
+      widthCm: toNumber(v.widthCm),
+      heightCm: toNumber(v.heightCm),
       stock: v.inventory?.available ?? 0,
       reserved: v.inventory?.reserved ?? 0,
       hasPriceTiers: v._count.priceTiers > 0,
@@ -267,6 +286,8 @@ const editInclude = {
   images: { where: { variantId: null }, orderBy: [{ sortOrder: "asc" }, { id: "asc" }] },
   variants: { include: { inventory: true, _count: { select: { priceTiers: true } } }, orderBy: { id: "asc" } },
   marketplaceListings: true,
+  faqs: { orderBy: [{ sortOrder: "asc" }, { id: "asc" }] },
+  videos: { orderBy: [{ sortOrder: "asc" }, { id: "asc" }] },
 };
 
 function sendError(res, err) {

@@ -1,0 +1,20 @@
+[
+  {
+    "cwd": "D:\\Github\\WYR Web\\client\\src\\admin\\pages",
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "c417cf76-8fb3-43aa-bf24-833425111970",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "command": "cd \"/d/Github/WYR Web/server/src\" \u0026\u0026 python - \u003c\u003c'EOF'\np = \"stock.js\"\ns = open(p, encoding=\"utf-8\").read()\na = \"\"\"export async function logStockMovement(db, { variantId, delta, reason, orderId = null, note = null }) {\n  if (!delta) return;\n  await db.stockMovement.create({ data: { variantId, delta, reason, orderId, note: note?.slice(0, 255) ?? null } });\"\"\"\nassert a in s\ns = s.replace(a, \"\"\"export async function logStockMovement(db, { variantId, delta, reason, orderId = null, documentId = null, note = null }) {\n  if (!delta) return;\n  await db.stockMovement.create({ data: { variantId, delta, reason, orderId, documentId, note: note?.slice(0, 255) ?? null } });\"\"\")\nopen(p, \"w\", encoding=\"utf-8\", newline=\"\\n\").write(s)\n\np = \"app.js\"\ns = open(p, encoding=\"utf-8\").read()\ns = s.replace('import { adminCostingRouter } from \"./routes/admin-costing.js\";\\n', 'import { adminCostingRouter } from \"./routes/admin-costing.js\";\\nimport { adminDocumentsRouter } from \"./routes/admin-documents.js\";\\n', 1)\ns = s.replace('  app.use(\"/api/admin/vouchers\", adminVouchersRouter);\\n', '  app.use(\"/api/admin/vouchers\", adminVouchersRouter);\\n  app.use(\"/api/admin/documents\", adminDocumentsRouter);\\n', 1)\nopen(p, \"w\", encoding=\"utf-8\", newline=\"\\n\").write(s)\nEOF\ngrep -n \"documents\" app.js",
+      "description": "Let stock movements link to documents; mount the router"
+    },
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_0134U5QXffJWTAnqaU7QqC4j",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  }
+]

@@ -19,7 +19,7 @@ export function minQtyFor(basePriceCents) {
   return basePriceCents < Math.round(getSetting("low_price_threshold") * 100) ? getSetting("low_price_min_qty") : 1;
 }
 
-export async function logStockMovement(db, { variantId, delta, reason, orderId = null, note = null }) {
+export async function logStockMovement(db, { variantId, delta, reason, orderId = null, documentId = null, note = null }) {
   if (!delta) return;
-  await db.stockMovement.create({ data: { variantId, delta, reason, orderId, note: note?.slice(0, 255) ?? null } });
+  await db.stockMovement.create({ data: { variantId, delta, reason, orderId, documentId, note: note?.slice(0, 255) ?? null } });
 }

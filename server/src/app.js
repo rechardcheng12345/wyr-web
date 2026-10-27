@@ -11,12 +11,15 @@ import { shippingSummary } from "./shipping.js";
 import { welcomeVoucher } from "./vouchers.js";
 import { accountRouter } from "./routes/account.js";
 import { adminCostingRouter } from "./routes/admin-costing.js";
+import { adminDocumentsRouter } from "./routes/admin-documents.js";
 import { adminInventoryRouter } from "./routes/admin-inventory.js";
 import { adminOrdersRouter } from "./routes/admin-orders.js";
+import { adminProductInfoRouter } from "./routes/admin-product-info.js";
 import { adminProductsRouter } from "./routes/admin-products.js";
 import { adminPurchasingRouter } from "./routes/admin-purchasing.js";
 import { adminSalesRouter } from "./routes/admin-sales.js";
 import { adminSettingsRouter } from "./routes/admin-settings.js";
+import { adminUploadsRouter, UPLOAD_DIR, UPLOAD_URL } from "./routes/admin-uploads.js";
 import { adminVouchersRouter } from "./routes/admin-vouchers.js";
 import { authRouter } from "./routes/auth.js";
 import { categoriesRouter } from "./routes/categories.js";
@@ -53,6 +56,8 @@ export function createApp() {
   app.use("/api/auth", authRouter);
   app.use("/api/account", accountRouter);
   app.use("/api/admin/products", adminProductsRouter);
+  app.use("/api/admin/product-info", adminProductInfoRouter);
+  app.use("/api/admin/uploads", adminUploadsRouter);
   app.use("/api/admin/orders", adminOrdersRouter);
   app.use("/api/admin/inventory", adminInventoryRouter);
   app.use("/api/admin/purchasing", adminPurchasingRouter);
@@ -60,6 +65,7 @@ export function createApp() {
   app.use("/api/admin/costing", adminCostingRouter);
   app.use("/api/admin/settings", adminSettingsRouter);
   app.use("/api/admin/vouchers", adminVouchersRouter);
+  app.use("/api/admin/documents", adminDocumentsRouter);
   app.use("/api/products", productsRouter);
   app.use("/api/categories", categoriesRouter);
   app.use("/api/checkout", checkoutRouter);
@@ -68,6 +74,11 @@ export function createApp() {
 
   app.use("/api", (_req, res) => {
     res.status(404).json({ error: "Not found" });
+  });
+
+  // Uploaded product photos and videos (both modes; Vite proxies /uploads in dev).
+  app.use(UPLOAD_URL, express.static(UPLOAD_DIR, { maxAge: "30d", immutable: true }), (_req, res) => {
+    res.status(404).end();
   });
 
   // Serve the built frontend from client/dist (production only).

@@ -49,11 +49,26 @@ model Product {
   productType         ProductType          @default(physical) @map("product_type")
   isActive            Boolean?             @default(true) @map("is_active")
   createdAt           DateTime?            @default(now()) @map("created_at") @db.Timestamp(0)
+  // Product information master, the source AI reads from to write marketplace listings.
+  // Edited on the product form or in bulk via the Excel sheet (src/routes/admin-product-info.js).
+  brand               String?              @db.VarChar(100)
+  model               String?              @db.VarChar(100)
+  origin              String?              @db.VarChar(80)
+  warranty            String?              @db.VarChar(255)
+  // One "Name: value" per line, e.g. "Chip: NTAG215".
+  specs               String?              @db.Text
+  inTheBox            String?              @map("in_the_box") @db.Text
+  compatibility       String?              @db.Text
+  keywords            String?              @db.Text
+  // Selling points, target buyers, claims to avoid: guidance for whoever (or whatever) writes listings.
+  aiNotes             String?              @map("ai_notes") @db.Text
   store               Store                @relation(fields: [storeId], references: [id])
   category            Category?            @relation(fields: [categoryId], references: [id])
   variants            ProductVariant[]
   images              ProductImage[]
   marketplaceListings MarketplaceListing[]
+  faqs                ProductFaq[]
+  videos              ProductVideo[]
 
   @@map("products")
 }
@@ -66,6 +81,10 @@ model ProductVariant {
   price         Decimal?      @db.Decimal(10, 2)
   specialPrice  Decimal?      @map("special_price") @db.Decimal(10, 2)
   weightG       Int?          @map("weight_g")
+  // Shipping package size in cm, as the marketplaces ask for it.
+  lengthCm      Decimal?      @map("length_cm") @db.Decimal(6, 1)
+  widthCm       Decimal?      @map("width_cm") @db.Decimal(6, 1)
+  heightCm      Decimal?      @map("height_cm") @db.Decimal(6, 1)
   // Pack sizes offered as quick-pick quantity buttons, e.g. [3, 5, 10]. Stock and prices stay per piece.
   quickQtys     Json?         @map("quick_qtys")
   product       Product       @relation(fields: [productId], references: [id])
@@ -74,6 +93,7 @@ model ProductVariant {
   platformSkus  PlatformSku[]
   priceTiers    PriceTier[]
   purchaseLines PurchaseOrderLine[]
+  documentLines DocumentLine[]
   stockMovements StockMovement[]
 
   @@map("product_variants")
@@ -102,6 +122,31 @@ model ProductImage {
   product   Product? @relation(fields: [productId], references: [id])
 
   @@map("product_images")
+}
+
+model ProductFaq {
+  id        Int     @id @default(autoincrement())
+  productId Int     @map("product_id")
+  question  String  @db.VarChar(500)
+  answer    String  @db.Text
+  sortOrder Int     @default(0) @map("sort_order")
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("product_faqs")
+}
+
+// Video files uploaded to UPLOAD_DIR and served from /uploads/videos/...
+model ProductVideo {
+  id        Int     @id @default(autoincrement())
+  productId Int     @map("product_id")
+  url       String  @db.VarChar(500)
+  title     String? @db.VarChar(200)
+  sortOrder Int     @default(0) @map("sort_order")
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("product_videos")
 }
 
 enum MarketplacePlatform {
@@ -196,6 +241,7 @@ model Order {
   items            OrderItem[]
   payments         Payment[]
   stockMovements   StockMovement[]
+  documents        Document[]
 
   @@index([status, expiresAt])
   @@index([customerId, id])
@@ -374,8 +420,99 @@ model StockMovement {
   createdAt DateTime       @default(now()) @map("created_at") @db.Timestamp(0)
   variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
   order     Order?         @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  documentId Int?          @map("document_id")
+  document  Document?      @relation(fields: [documentId], references: [id], onDelete: SetNull)
 
   @@index([variantId, createdAt])
   @@index([orderId])
   @@map("stock_movements")
+}
+
+// Business customers for quotations / invoices / delivery orders (separate from website accounts).
+// Saved automatically from the documents' "Bill to" so the next document can pick them.
+model Client {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique @db.VarChar(200)
+  address   String?    @db.Text
+  attention String?    @db.VarChar(150)
+  phone     String?    @db.VarChar(30)
+  email     String?    @db.VarChar(255)
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  documents Document[]
+
+  @@map("clients")
+}
+
+enum DocumentType {
+  quotation
+  invoice
+  delivery_order
+}
+
+// quotation / invoice: issued from creation, editable until void.
+// delivery_order: draft until issued; issuing takes its product lines out of stock, voiding puts them back.
+enum DocumentStatus {
+  draft
+  issued
+  void
+}
+
+// Quotations, invoices and delivery orders (see src/routes/admin-documents.js).
+// Numbered per type per year: 2026-Q101, 2026-001, DO-2026-001. Bill-to is a snapshot, so editing
+// the client later doesn't change documents already sent.
+model Document {
+  id             Int             @id @default(autoincrement())
+  type           DocumentType
+  year           Int
+  seq            Int
+  docNo          String          @unique @map("doc_no") @db.VarChar(30)
+  status         DocumentStatus  @default(issued)
+  docDate        DateTime        @map("doc_date") @db.Date
+  clientId       Int?            @map("client_id")
+  billToName     String          @map("bill_to_name") @db.VarChar(200)
+  billToAddress  String?         @map("bill_to_address") @db.Text
+  attention      String?         @db.VarChar(150)
+  // Customer's PO number or marketplace order number, printed next to the document number.
+  customerRef    String?         @map("customer_ref") @db.VarChar(100)
+  validUntil     DateTime?       @map("valid_until") @db.Date
+  otherLabel     String?         @map("other_label") @db.VarChar(100)
+  otherAmount    Decimal         @default(0) @map("other_amount") @db.Decimal(10, 2)
+  total          Decimal         @default(0) @db.Decimal(10, 2)
+  notes          String?         @db.Text
+  paidAt         DateTime?       @map("paid_at") @db.Date
+  issuedAt       DateTime?       @map("issued_at") @db.Timestamp(0)
+  // The quotation an invoice came from, or the invoice a delivery order came from.
+  sourceId       Int?            @map("source_id")
+  // Website order this was made for; its stock was already taken by the order, so DOs skip stock.
+  orderId        Int?            @map("order_id")
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt      DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  client         Client?         @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  source         Document?       @relation("DocumentSource", fields: [sourceId], references: [id], onDelete: SetNull)
+  derived        Document[]      @relation("DocumentSource")
+  order          Order?          @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  lines          DocumentLine[]
+  stockMovements StockMovement[]
+
+  @@unique([type, year, seq])
+  @@index([type, docDate])
+  @@index([orderId])
+  @@map("documents")
+}
+
+model DocumentLine {
+  id          Int             @id @default(autoincrement())
+  documentId  Int             @map("document_id")
+  variantId   Int?            @map("variant_id")
+  sku         String?         @db.VarChar(80)
+  description String          @db.Text
+  // Printed in italics under the description, e.g. "(Warranty 1 year upon delivery date)".
+  note        String?         @db.VarChar(500)
+  qty         Int
+  unitPrice   Decimal         @map("unit_price") @db.Decimal(10, 2)
+  document    Document        @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  variant     ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  @@map("document_lines")
 }
