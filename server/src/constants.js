@@ -6,8 +6,8 @@
 export const CORS_ORIGINS = ["http://localhost:5173"];
 
 /** Flat shipping in RM: Peninsular Malaysia, and East Malaysia (Sabah, Sarawak, Labuan). */
-export const SHIPPING_FLAT_WM_RM = 8;
-export const SHIPPING_FLAT_EM_RM = 15;
+export const SHIPPING_FLAT_WM_RM = 6.9;
+export const SHIPPING_FLAT_EM_RM = 6.9;
 
 /** How long an unpaid order holds its stock, in minutes. */
 export const ORDER_HOLD_MINUTES = 30;
@@ -24,7 +24,7 @@ export const SHOPEE_SHOP_URL = "https://shopee.com.my/shop/147356782";
 /** ToyyibPay payment channel: "0" = FPX only, "1" = card only, "2" = both (card must be enabled on the account). */
 export const TOYYIBPAY_PAYMENT_CHANNEL = "0";
 
-export const MIN_ORDER_SUBTOTAL_RM = 10;
+export const MIN_ORDER_SUBTOTAL_RM = 0;
 
 export const FREE_SHIPPING_THRESHOLD_RM = null;
 

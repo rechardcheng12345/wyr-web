@@ -27,7 +27,6 @@ import { ProductCard, ProductCardSkeleton, ProductGrid } from "@/components/Prod
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchCategories, fetchProducts } from "@/lib/api";
 import { useSiteInfo, whatsappLink } from "@/lib/site";
-import { cn } from "@/lib/utils";
 
 const CATEGORY_ICONS = {
   "nfc-tags": Nfc,
@@ -72,7 +71,7 @@ const PERKS = [
   { icon: Store, title: "Ready stock in KL", body: "Most orders ship the next working day." },
   { icon: BadgeCheck, title: "Tested chips", body: "Genuine NXP NTAG, MIFARE and Impinj inlays." },
   { icon: Smartphone, title: "Help programming", body: "Not sure which chip? We'll point you to the right one." },
-  { icon: Truck, title: "Ships nationwide", body: "Flat-rate shipping to Peninsular and East Malaysia." },
+  { icon: Truck, title: "Ships nationwide", body: "One flat shipping rate anywhere in Malaysia, Sabah and Sarawak included." },
 ];
 
 function useFeatured() {
@@ -82,37 +81,31 @@ function useFeatured() {
   });
 }
 
-function HeroCollage() {
-  const { data } = useFeatured();
-  const images = (data?.items ?? []).filter((p) => p.image).slice(0, 4);
-  const tiles = images.length === 4 ? images : Array.from({ length: 4 }, () => null);
-
+function ShopByNeed() {
   return (
-    <div className="relative mx-auto w-full max-w-md" aria-hidden>
-      <div className="bg-brand-orange/30 absolute -top-10 -right-6 size-48 rounded-full blur-3xl" />
-      <div className="bg-brand-blue/40 absolute -bottom-10 -left-6 size-56 rounded-full blur-3xl" />
-      <div className="relative grid grid-cols-2 gap-4">
-        {tiles.map((p, i) => (
-          <div
-            key={p?.id ?? i}
-            className={cn(
-              "overflow-hidden rounded-2xl bg-white/10 shadow-2xl ring-1 ring-white/15",
-              i % 2 === 1 && "translate-y-8",
-            )}
-          >
-            {p ? (
-              <img src={p.image} alt="" referrerPolicy="no-referrer" className="aspect-square w-full object-cover" />
-            ) : (
-              <div className="aspect-square w-full animate-pulse bg-white/10" />
-            )}
-          </div>
-        ))}
-      </div>
-      <div className="text-foreground absolute -bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2.5 rounded-full bg-white px-4 py-2 text-sm font-semibold shadow-xl">
-        <span className="bg-brand-orange grid size-7 place-items-center rounded-full text-white">
-          <Nfc className="size-4" />
-        </span>
-        Tap. Done.
+    <div className="relative">
+      <div className="bg-brand-orange/25 absolute -top-12 -right-10 size-56 rounded-full blur-3xl" aria-hidden />
+      <div className="bg-brand-blue/40 absolute -bottom-12 -left-10 size-56 rounded-full blur-3xl" aria-hidden />
+      <div className="relative">
+        <p className="text-xs font-semibold tracking-[0.14em] text-slate-300 uppercase">Shop by need</p>
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:gap-4">
+          {USE_CASES.map(({ icon: Icon, title, body, to }) => (
+            <Link
+              key={title}
+              to={to}
+              className="group hover:ring-brand-orange/60 focus-visible:ring-brand-orange flex flex-col rounded-2xl bg-white/[0.06] p-4 ring-1 ring-white/15 backdrop-blur-sm transition-all outline-none hover:-translate-y-0.5 hover:bg-white/10 focus-visible:ring-2 sm:p-5"
+            >
+              <span className="bg-brand-orange/15 text-brand-orange group-hover:bg-brand-orange grid size-10 place-items-center rounded-xl transition-colors group-hover:text-white">
+                <Icon className="size-5" />
+              </span>
+              <span className="mt-4 font-semibold leading-snug">{title}</span>
+              <span className="mt-1.5 hidden flex-1 text-sm leading-relaxed text-slate-300 sm:block">{body}</span>
+              <span className="text-brand-orange mt-3 inline-flex items-center gap-1 text-sm font-semibold">
+                Browse <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+              </span>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -132,7 +125,7 @@ function Hero({ whatsapp }) {
             NFC · RFID · UHF supplier in Malaysia
           </p>
           <h1 className="mt-5 text-4xl font-extrabold tracking-tight text-balance sm:text-5xl lg:text-[3.4rem] lg:leading-[1.08]">
-            Tap-ready <span className="text-brand-orange">NFC & RFID</span> hardware, shipped from Kuala Lumpur
+            Tap-ready <span className="text-brand-orange">NFC & RFID</span> hardware, shipped across Malaysia
           </h1>
           <p className="mt-5 max-w-lg text-lg text-slate-300">
             NTAG stickers, access cards, readers and tap-to-review standees for shops, offices and makers.
@@ -164,9 +157,7 @@ function Hero({ whatsapp }) {
             ))}
           </ul>
         </div>
-        <div className="hidden lg:block">
-          <HeroCollage />
-        </div>
+        <ShopByNeed />
       </div>
     </section>
   );
@@ -214,28 +205,6 @@ function Categories() {
                 </Link>
               );
             })}
-    </div>
-  );
-}
-
-function UseCases() {
-  return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {USE_CASES.map(({ icon: Icon, title, body, to }) => (
-        <Link
-          key={title}
-          to={to}
-          className="group bg-card focus-visible:ring-ring/50 relative flex flex-col overflow-hidden rounded-2xl border p-6 transition-shadow outline-none hover:shadow-lg focus-visible:ring-[3px]"
-        >
-          <div className="from-brand-blue to-brand-orange absolute inset-x-0 top-0 h-1 bg-gradient-to-r opacity-0 transition-opacity group-hover:opacity-100" />
-          <Icon className="text-primary size-8" strokeWidth={1.5} />
-          <h3 className="mt-5 font-semibold">{title}</h3>
-          <p className="text-muted-foreground mt-2 flex-1 text-sm leading-relaxed">{body}</p>
-          <span className="text-primary mt-5 inline-flex items-center gap-1 text-sm font-semibold">
-            Browse <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </span>
-        </Link>
-      ))}
     </div>
   );
 }
@@ -310,20 +279,6 @@ export function HomePage() {
       <Hero whatsapp={whatsapp} />
 
       <section className="mx-auto max-w-6xl px-4 pt-16">
-        <SectionHeading eyebrow="Categories" title="Shop by category" />
-        <div className="mt-8">
-          <Categories />
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-4 pt-20">
-        <SectionHeading eyebrow="Solutions" title="What customers use our tags for" />
-        <div className="mt-8">
-          <UseCases />
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-4 pt-20">
         <SectionHeading
           eyebrow="Featured"
           title="Popular products"
@@ -335,6 +290,13 @@ export function HomePage() {
         />
         <div className="mt-8">
           <Featured />
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pt-20">
+        <SectionHeading eyebrow="Categories" title="Shop by category" />
+        <div className="mt-8">
+          <Categories />
         </div>
       </section>
 

@@ -269,7 +269,7 @@ export function CheckoutPage() {
                     if (voucherInput.trim()) voucher.mutate(voucherInput.trim());
                   }
                 }}
-                placeholder="e.g. WELCOME5"
+                placeholder=""
                 className="min-w-0 flex-1 uppercase"
                 data-testid="voucher-input"
               />
@@ -315,7 +315,7 @@ export function CheckoutPage() {
               </div>
             )}
             <div className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">Shipping{buyer.state && ` (${eastMalaysia ? "East" : "Peninsular"} Malaysia)`}</dt>
+              <dt className="text-muted-foreground">Shipping{buyer.state && quote?.shippingRange && quote.shippingRange.westCents !== quote.shippingRange.eastCents && ` (${eastMalaysia ? "East" : "Peninsular"} Malaysia)`}</dt>
               <dd data-testid="checkout-shipping" className="text-right">
                 {shipping != null ? (
                   shipping === 0 ? "Free" : formatPrice(shipping)

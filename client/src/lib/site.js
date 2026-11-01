@@ -11,7 +11,9 @@ export function useSiteInfo() {
 
 export function shippingText(shipping) {
   if (!shipping) return null;
-  return `Shipping: RM${shipping.westRm} West Malaysia / RM${shipping.eastRm} East Malaysia`;
+  const rm = (v) => `RM${v.toFixed(2)}`;
+  if (shipping.westRm === shipping.eastRm) return `Shipping: ${rm(shipping.westRm)} flat rate anywhere in Malaysia`;
+  return `Shipping: ${rm(shipping.westRm)} West Malaysia / ${rm(shipping.eastRm)} East Malaysia`;
 }
 
 const DEFAULT_TITLE = "WYR Technology · NFC & RFID hardware";
