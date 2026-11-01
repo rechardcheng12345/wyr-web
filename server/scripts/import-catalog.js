@@ -27,6 +27,7 @@ import { fileURLToPath } from "node:url";
 import { parse as parseCsv } from "csv-parse/sync";
 import ExcelJS from "exceljs";
 import { defaultBundleCsv, planPriceTiers, reportPriceTiers, writePriceTiers } from "./price-tiers.js";
+import { discontinuedEntry } from "./discontinued-products.js";
 
 const SHOPEE_SHOP_ID = "147356782";
 const STORE_NAME = "WYR Technology";
@@ -522,6 +523,7 @@ async function writeCatalog(prisma, products, platformSkus, tiers) {
             slug: p.slug,
             description: p.description,
             productType: /review package/i.test(p.name) ? "digital" : "physical",
+            isActive: !p.discontinued,
             variants: {
               create: p.variants.map((v) => ({
                 sku: v.sku,
@@ -601,6 +603,13 @@ async function main() {
   const lazada = applyLazadaMapping(mappingCsv, products);
   products.push(...lazada.newProducts);
   for (const p of products) p.slug = uniqueSlug(p.name);
+  for (const p of products) {
+    const entry = discontinuedEntry(p.name, p.variants.map((v) => v.sku));
+    if (entry) {
+      p.discontinued = true;
+      warn(`"${p.name}" is discontinued (${entry.label}), imported as hidden`);
+    }
+  }
   const platformSkus = [...shopeeSkus, ...lazada.platformSkus];
 
   const variantCount = products.reduce((n, p) => n + p.variants.length, 0);

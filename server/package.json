@@ -15,6 +15,7 @@
     "seed:vouchers": "node scripts/seed-vouchers.js",
     "stock:crosscheck": "node scripts/stock-crosscheck.js",
     "stock:apply-shopee": "node scripts/stock-apply-shopee.js",
+    "hide:discontinued": "node scripts/hide-discontinued.js",
     "prisma": "node scripts/prisma.js"
   },
   "dependencies": {
