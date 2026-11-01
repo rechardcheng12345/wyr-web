@@ -26,7 +26,7 @@ export const TOYYIBPAY_PAYMENT_CHANNEL = "0";
 
 export const MIN_ORDER_SUBTOTAL_RM = 0;
 
-export const FREE_SHIPPING_THRESHOLD_RM = null;
+export const FREE_SHIPPING_THRESHOLD_RM = 50;
 
 export const LOW_PRICE_THRESHOLD_RM = 3;
 export const LOW_PRICE_MIN_QTY = 3;

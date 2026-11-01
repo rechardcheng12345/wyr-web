@@ -2,6 +2,7 @@ import { Menu, MessageCircle, Search, ShoppingCart, User, X } from "lucide-react
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { AnnouncementBar } from "@/components/PromoBanners";
 import { Input } from "@/components/ui/input";
 import { useCustomer } from "@/lib/account";
 import { useCart } from "@/lib/cart";
@@ -121,6 +122,7 @@ export function Layout() {
 
   return (
     <div className="flex min-h-svh flex-col">
+      <AnnouncementBar />
       <header className="bg-background/85 sticky top-0 z-40 border-b backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4">
           <Logo />

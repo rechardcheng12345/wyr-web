@@ -24,6 +24,7 @@ import {
 import { Link } from "react-router-dom";
 import { ErrorState } from "@/components/ErrorState";
 import { ProductCard, ProductCardSkeleton, ProductGrid } from "@/components/ProductCard";
+import { FreeShippingBanner } from "@/components/PromoBanners";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchCategories, fetchProducts } from "@/lib/api";
 import { useSiteInfo, whatsappLink } from "@/lib/site";
@@ -221,7 +222,7 @@ function Featured() {
   );
 }
 
-function Perks() {
+function Perks({ freeThresholdRm }) {
   return (
     <div className="bg-muted/50 grid gap-px overflow-hidden rounded-2xl border sm:grid-cols-2 lg:grid-cols-4">
       {PERKS.map(({ icon: Icon, title, body }) => (
@@ -230,7 +231,10 @@ function Perks() {
             <Icon className="size-5" />
           </span>
           <p className="mt-4 font-semibold">{title}</p>
-          <p className="text-muted-foreground mt-1 text-sm">{body}</p>
+          <p className="text-muted-foreground mt-1 text-sm">
+            {body}
+            {Icon === Truck && freeThresholdRm != null && ` Free shipping from RM${freeThresholdRm}.`}
+          </p>
         </div>
       ))}
     </div>
@@ -293,6 +297,10 @@ export function HomePage() {
         </div>
       </section>
 
+      <div className="mx-auto max-w-6xl px-4 pt-16">
+        <FreeShippingBanner />
+      </div>
+
       <section className="mx-auto max-w-6xl px-4 pt-20">
         <SectionHeading eyebrow="Categories" title="Shop by category" />
         <div className="mt-8">
@@ -303,7 +311,7 @@ export function HomePage() {
       <section className="mx-auto max-w-6xl px-4 pt-20">
         <SectionHeading eyebrow="Why WYR" title="Local stock, real support" />
         <div className="mt-8">
-          <Perks />
+          <Perks freeThresholdRm={site.shipping?.freeThresholdRm} />
         </div>
       </section>
 
