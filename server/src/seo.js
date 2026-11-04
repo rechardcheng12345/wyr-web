@@ -5,9 +5,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { prisma } from "./db.js";
+import { BUSINESS_NAME, businessJsonLd, shippingDetailsJsonLd, variantOffer, variantUrl, websiteJsonLd } from "./merchant.js";
 import { detailInclude, serializeDetail } from "./routes/products.js";
 
-const SITE_NAME = "WYR Technology";
+const SITE_NAME = BUSINESS_NAME;
 const DEFAULT_TITLE = "WYR Technology · NFC & RFID hardware";
 const DEFAULT_DESCRIPTION = "WYR Technology: NFC tags, RFID cards, readers and tap-to-review standees. Ready stock in Kuala Lumpur.";
 const DEFAULT_IMAGE = "/images/logo.jpeg";
@@ -59,25 +60,28 @@ function productDescription(product, name) {
 }
 
 function productJsonLd(product, raw, origin, url) {
-  const purchasable = product.variants.filter((v) => v.tiers.length > 0);
-  const inStock = purchasable.some((v) => v.stock != null && v.stock >= (v.minQty ?? 1));
-  const availability = `https://schema.org/${inStock ? "InStock" : "OutOfStock"}`;
   const seller = { "@type": "Organization", name: SITE_NAME };
-  const offers =
-    purchasable.length === 1
-      ? { "@type": "Offer", url, priceCurrency: "MYR", price: purchasable[0].tiers[0].unitPrice.toFixed(2), availability, seller }
-      : purchasable.length > 1
-        ? {
-            "@type": "AggregateOffer",
-            url,
-            priceCurrency: "MYR",
-            lowPrice: Math.min(...purchasable.map((v) => v.tiers[0].unitPrice)).toFixed(2),
-            highPrice: Math.max(...purchasable.map((v) => v.tiers[0].unitPrice)).toFixed(2),
-            offerCount: purchasable.length,
-            availability,
-            seller,
-          }
-        : undefined;
+  // One Offer per variant (Google merchant listings don't accept AggregateOffer). The price is
+  // per piece, as the page shows it; variants with a minimum quantity say so in eligibleQuantity.
+  const offers = product.variants.flatMap((v) => {
+    const o = variantOffer(v);
+    if (!o) return [];
+    return [
+      {
+        "@type": "Offer",
+        url: variantUrl(url, v),
+        sku: v.sku,
+        ...(v.name && { name: v.name }),
+        priceCurrency: "MYR",
+        price: o.unitPrice.toFixed(2),
+        ...(o.packQty > 1 && { eligibleQuantity: { "@type": "QuantitativeValue", minValue: o.packQty, unitCode: "C62" } }),
+        availability: `https://schema.org/${o.inStock ? "InStock" : "OutOfStock"}`,
+        itemCondition: "https://schema.org/NewCondition",
+        shippingDetails: shippingDetailsJsonLd(Math.round(o.packPrice * 100)),
+        seller,
+      },
+    ];
+  });
   return {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -89,7 +93,7 @@ function productJsonLd(product, raw, origin, url) {
     ...(raw.model && { model: raw.model }),
     ...(product.category?.name && { category: product.category.name }),
     url,
-    ...(offers && { offers }),
+    ...(offers.length && { offers }),
   };
 }
 
@@ -104,23 +108,14 @@ function breadcrumbJsonLd(product, origin, url) {
   };
 }
 
-function organizationJsonLd(origin) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: SITE_NAME,
-    url: `${origin}/`,
-    logo: `${origin}/images/wyr-logo-mark.png`,
-  };
-}
-
 // Decides what the <head> of a given URL should say, and its HTTP status.
 async function pageMeta(req, origin) {
   const p = req.path.length > 1 ? req.path.replace(/\/+$/, "") : "/";
 
   if (p === "/products" || STATIC_PAGES[p]) {
     const meta = { status: 200, ...STATIC_PAGES[p], canonical: `${origin}${p === "/" ? "/" : p}`, type: "website", jsonLd: [] };
-    if (p === "/") meta.jsonLd.push(organizationJsonLd(origin));
+    if (p === "/") meta.jsonLd.push(businessJsonLd(origin), websiteJsonLd(origin));
+    if (p === "/about" || p === "/contact") meta.jsonLd.push(businessJsonLd(origin));
     // Category listings are their own pages; searches and page numbers fold into /products.
     const category = typeof req.query.category === "string" ? req.query.category.trim() : "";
     if (p === "/products" && category) {

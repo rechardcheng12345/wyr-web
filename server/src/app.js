@@ -6,6 +6,7 @@ import { CORS_ORIGINS } from "./constants.js";
 import { SERVER_ROOT } from "./env.js";
 import { CheckoutError } from "./orders.js";
 import { bulkQuote } from "./pricing.js";
+import { merchantFeed } from "./merchant-feed.js";
 import { createSeo, redirectWww } from "./seo.js";
 import { getSetting } from "./settings.js";
 import { shippingSummary } from "./shipping.js";
@@ -93,6 +94,7 @@ export function createApp() {
       const seo = createSeo(CLIENT_DIST);
       app.get("/robots.txt", seo.robots);
       app.get("/sitemap.xml", seo.sitemap);
+      app.get("/merchant-feed.xml", merchantFeed);
       app.use("/system", (_req, res, next) => {
         res.set("X-Robots-Tag", "noindex, nofollow");
         next();

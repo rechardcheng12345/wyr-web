@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, MessageCircle, ShoppingCart, Truck } from "lucide-react";
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ErrorState } from "@/components/ErrorState";
 import { MarketplaceStrip } from "@/components/MarketplaceStrip";
 import { ProductImage } from "@/components/ProductCard";
@@ -53,8 +53,13 @@ function ProductView({ product }) {
   const name = product.displayName ?? product.name;
   usePageMeta(`${name} · WYR Technology`, metaDescription(product, name));
   const galleryImages = product.images.filter((i) => i.variantId === null);
-  const [variantId, setVariantId] = useState(product.variants.length === 1 ? product.variants[0].id : null);
-  const [imageUrl, setImageUrl] = useState(galleryImages[0]?.url ?? product.images[0]?.url ?? null);
+  // ?variant=<id> (used by Google Shopping links, see server/src/merchant-feed.js) preselects that variant.
+  const [searchParams] = useSearchParams();
+  const linked = product.variants.find((v) => String(v.id) === searchParams.get("variant") && isVariantPurchasable(v));
+  const [variantId, setVariantId] = useState(linked?.id ?? (product.variants.length === 1 ? product.variants[0].id : null));
+  const [imageUrl, setImageUrl] = useState(
+    (linked && product.images.find((i) => i.variantId === linked.id)?.url) ?? galleryImages[0]?.url ?? product.images[0]?.url ?? null,
+  );
 
   const variant = product.variants.find((v) => v.id === variantId) ?? null;
 
