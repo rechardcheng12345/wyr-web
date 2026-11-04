@@ -6,6 +6,7 @@ import { CORS_ORIGINS } from "./constants.js";
 import { SERVER_ROOT } from "./env.js";
 import { CheckoutError } from "./orders.js";
 import { bulkQuote } from "./pricing.js";
+import { createSeo, redirectWww } from "./seo.js";
 import { getSetting } from "./settings.js";
 import { shippingSummary } from "./shipping.js";
 import { welcomeVoucher } from "./vouchers.js";
@@ -35,6 +36,7 @@ export function createApp() {
   const app = express();
 
   app.set("trust proxy", "loopback");
+  if (!(process.env.NODE_ENV === "dev" || process.env.NODE_ENV === "development")) app.use(redirectWww);
   app.use(cors({ origin: CORS_ORIGINS }));
   app.use(express.json());
 
@@ -88,16 +90,30 @@ export function createApp() {
   const isDev = process.env.NODE_ENV === "dev" || process.env.NODE_ENV === "development";
   if (!isDev) {
     if (fs.existsSync(CLIENT_DIST)) {
+      const seo = createSeo(CLIENT_DIST);
+      app.get("/robots.txt", seo.robots);
+      app.get("/sitemap.xml", seo.sitemap);
       app.use("/system", (_req, res, next) => {
         res.set("X-Robots-Tag", "noindex, nofollow");
         next();
       });
-      app.use(express.static(CLIENT_DIST));
-      // SPA fallback: any other GET gets index.html so client-side routes like /checkout/return work.
-      app.use((req, res, next) => {
-        if (req.method !== "GET" && req.method !== "HEAD") return next();
-        res.sendFile(path.join(CLIENT_DIST, "index.html"));
+      // index: false so "/" goes through renderPage and gets its head tags.
+      app.use(
+        express.static(CLIENT_DIST, {
+          index: false,
+          setHeaders(res, filePath) {
+            // Vite puts a content hash in every /assets file name, so they never change.
+            if (filePath.includes(`${path.sep}assets${path.sep}`)) res.set("Cache-Control", "public, max-age=31536000, immutable");
+            else if (filePath.includes(`${path.sep}images${path.sep}`)) res.set("Cache-Control", "public, max-age=604800");
+          },
+        }),
+      );
+      // A missing hashed asset is a real 404, not the app shell.
+      app.use("/assets", (_req, res) => {
+        res.status(404).end();
       });
+      // SPA fallback: index.html with per-URL title/meta/JSON-LD, and a 404 status for unknown pages.
+      app.use(seo.renderPage);
     } else {
       console.warn(`[warn] frontend build not found at ${CLIENT_DIST}; run "npm run client:build" first`);
     }

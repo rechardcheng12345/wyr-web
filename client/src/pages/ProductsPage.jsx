@@ -7,6 +7,7 @@ import { ProductCard, ProductCardSkeleton, ProductGrid } from "@/components/Prod
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fetchCategories, fetchProducts } from "@/lib/api";
+import { usePageMeta } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 24;
@@ -48,6 +49,12 @@ export function ProductsPage() {
   });
 
   const activeCategory = categories.data?.find((c) => c.slug === category);
+  usePageMeta(
+    activeCategory?.name ? `${activeCategory.name} · WYR Technology` : "Shop NFC tags, RFID cards & readers · WYR Technology",
+    activeCategory?.name
+      ? `Shop ${activeCategory.name} at WYR Technology. Ready stock in Malaysia, ships from Kuala Lumpur.`
+      : "Browse NFC stickers, NTAG213/215/216 tags, RFID and DESFire cards, readers and tap-to-review standees. Ready stock in Malaysia, ships from Kuala Lumpur.",
+  );
   const totalPages = products.data ? Math.max(1, Math.ceil(products.data.total / PAGE_SIZE)) : 1;
 
   return (

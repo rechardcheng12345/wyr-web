@@ -1,6 +1,6 @@
 import { ArrowRight, BadgeCheck, HeartHandshake, MessageCircle, PackageCheck, Store } from "lucide-react";
 import { Link } from "react-router-dom";
-import { LOGO_SRC, useSiteInfo, whatsappLink } from "@/lib/site";
+import { LOGO_SRC, usePageMeta, useSiteInfo, whatsappLink } from "@/lib/site";
 
 const VALUES = [
   { icon: PackageCheck, title: "Stock you can count on", body: "We keep popular chips and readers on the shelf in Kuala Lumpur, so most orders ship the next working day." },
@@ -17,6 +17,7 @@ const WHAT_WE_SELL = [
 ];
 
 export function AboutPage() {
+  usePageMeta("About us · WYR Technology", "WYR Technology makes NFC and RFID easy to buy in Malaysia: genuine chips, ready stock in Kuala Lumpur and help choosing the right tag.");
   const site = useSiteInfo();
   const whatsapp = whatsappLink(site.whatsappNumber, "Hi WYR Technology, I have a question.");
 
