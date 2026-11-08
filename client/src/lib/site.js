@@ -17,6 +17,7 @@ export function shippingText(shipping) {
 }
 
 const DEFAULT_TITLE = "WYR Technology · NFC & RFID hardware";
+const DEFAULT_DESCRIPTION = "WYR Technology: NFC tags, RFID cards, readers and tap-to-review standees. Ready stock in Kuala Lumpur.";
 
 function setMetaDescription(content) {
   let tag = document.querySelector('meta[name="description"]');
@@ -31,13 +32,13 @@ function setMetaDescription(content) {
 export function usePageMeta(title, description) {
   useEffect(() => {
     if (!title) return;
-    const prevTitle = document.title;
-    const prevDescription = document.querySelector('meta[name="description"]')?.getAttribute("content") ?? "";
     document.title = title;
     if (description) setMetaDescription(description);
+    // Reset to the site defaults, not the previous value: the server injects the landing
+    // page's own title (server/src/seo.js), which would otherwise stick to other pages.
     return () => {
-      document.title = prevTitle || DEFAULT_TITLE;
-      setMetaDescription(prevDescription);
+      document.title = DEFAULT_TITLE;
+      setMetaDescription(DEFAULT_DESCRIPTION);
     };
   }, [title, description]);
 }

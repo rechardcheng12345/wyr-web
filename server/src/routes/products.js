@@ -15,7 +15,7 @@ const listInclude = {
   marketplaceListings: true,
 };
 
-const detailInclude = {
+export const detailInclude = {
   category: { select: { name: true, slug: true } },
   variants: { include: { inventory: true, priceTiers: true }, orderBy: { id: "asc" } },
   images: { orderBy: [{ sortOrder: "asc" }, { id: "asc" }] },
@@ -68,7 +68,7 @@ function serializeSummary(p) {
   };
 }
 
-function serializeDetail(p) {
+export function serializeDetail(p) {
   return {
     id: p.id,
     slug: p.slug,

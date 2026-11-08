@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { formatRM } from "../format";
 import { PrintSheet } from "./PrintOrder";
 
@@ -15,10 +17,122 @@ const printDate = (iso) => (iso ? new Date(`${iso}T00:00:00`).toLocaleDateString
  * @param {() => void} props.onDone
  */
 export function PrintDocument({ doc, company, onDone }) {
+  // The browser's "Save as PDF" suggests the page title as the file name.
+  useEffect(() => {
+    const prev = document.title;
+    document.title = documentFileName(doc);
+    return () => {
+      document.title = prev;
+    };
+  }, [doc]);
   return (
     <PrintSheet pageCss="@page { size: A4; margin: 14mm; }" onDone={onDone}>
       <DocumentSheet doc={doc} company={company} />
     </PrintSheet>
+  );
+}
+
+/** e.g. "Invoice_2026-001_Acme Sdn Bhd" (no extension), safe on Windows and macOS. */
+export function documentFileName(doc) {
+  const clean = (s) =>
+    String(s ?? "")
+      .replace(/[\\/:*?"<>|\r\n\t]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/[. ]+$/, "");
+  const customer = clean(doc.billToName).slice(0, 60);
+  return [DOC_TITLE[doc.type].replace(/ /g, ""), clean(doc.docNo), customer].filter(Boolean).join("_");
+}
+
+// A4 at the print margins: 210 x 297 mm page, 14 mm margins, so a 182 mm wide content area.
+const PAGE_W_MM = 210;
+const PAGE_H_MM = 297;
+const MARGIN_MM = 14;
+const CONTENT_W_MM = PAGE_W_MM - 2 * MARGIN_MM;
+const CONTENT_H_MM = PAGE_H_MM - 2 * MARGIN_MM;
+
+/**
+ * Renders the same sheet off-screen and saves it as an A4 PDF named by documentFileName().
+ * Pages break between table rows where possible. The libraries load on first use only.
+ * @param {object} props
+ * @param {object} props.doc
+ * @param {object} props.company
+ * @param {(error?: Error) => void} props.onDone Called after the download starts, or with the error.
+ */
+export function DownloadDocumentPdf({ doc, company, onDone }) {
+  const rootRef = useRef(null);
+  // Kept in a ref so a new callback on re-render doesn't start a second download.
+  const doneRef = useRef(onDone);
+  doneRef.current = onDone;
+
+  useEffect(() => {
+    let cancelled = false;
+    const onDone = (err) => doneRef.current(err);
+    (async () => {
+      try {
+        const [{ default: html2canvas }, { jsPDF }] = await Promise.all([import("html2canvas-pro"), import("jspdf")]);
+        const root = rootRef.current;
+        await Promise.all(
+          [...root.querySelectorAll("img")].map(
+            (img) =>
+              img.complete ||
+              new Promise((r) => {
+                img.addEventListener("load", r, { once: true });
+                img.addEventListener("error", r, { once: true });
+              }),
+          ),
+        );
+        if (cancelled) return;
+        const scale = 2;
+        const canvas = await html2canvas(root, { scale, backgroundColor: "#ffffff", useCORS: true, logging: false });
+        if (cancelled) return;
+
+        const pxPerMm = canvas.width / CONTENT_W_MM;
+        const pageHpx = Math.floor(CONTENT_H_MM * pxPerMm);
+        // Candidate break points: bottoms of table rows, in canvas pixels.
+        const top = root.getBoundingClientRect().top;
+        const rowBottoms = [...root.querySelectorAll("tr")].map((tr) => Math.round((tr.getBoundingClientRect().bottom - top) * scale)).sort((a, b) => a - b);
+
+        const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
+        pdf.setProperties({ title: documentFileName(doc), author: company?.name ?? "", creator: company?.name ?? "" });
+        let y = 0;
+        let first = true;
+        while (y < canvas.height - 1) {
+          let end = Math.min(y + pageHpx, canvas.height);
+          if (end < canvas.height) {
+            const fit = rowBottoms.filter((b) => b > y + pageHpx * 0.5 && b <= end).pop();
+            if (fit) end = fit;
+          }
+          const slice = document.createElement("canvas");
+          slice.width = canvas.width;
+          slice.height = end - y;
+          slice.getContext("2d").drawImage(canvas, 0, y, canvas.width, end - y, 0, 0, canvas.width, end - y);
+          if (!first) pdf.addPage();
+          pdf.addImage(slice.toDataURL("image/jpeg", 0.92), "JPEG", MARGIN_MM, MARGIN_MM, CONTENT_W_MM, (end - y) / pxPerMm);
+          first = false;
+          y = end;
+        }
+        pdf.save(`${documentFileName(doc)}.pdf`);
+        if (!cancelled) onDone();
+      } catch (err) {
+        if (!cancelled) onDone(err instanceof Error ? err : new Error(String(err)));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [doc, company]);
+
+  // Off-screen but laid out (display:none would give html2canvas nothing to measure).
+  return createPortal(
+    <div
+      ref={rootRef}
+      aria-hidden="true"
+      style={{ position: "fixed", left: "-10000px", top: 0, width: `${CONTENT_W_MM}mm`, background: "#fff", color: "#000" }}
+    >
+      <DocumentSheet doc={doc} company={company} />
+    </div>,
+    document.body,
   );
 }
 

@@ -64,6 +64,8 @@ accountRouter.post("/register", async (req, res) => {
   if (!email) errors.email = "Required";
   else if (!validEmail(email)) errors.email = "Enter a valid email address";
   const profile = parseProfile(req.body, errors);
+  // Required for new accounts only; profile edits still accept a blank phone for older accounts.
+  if (!profile.phone && !errors.phone) errors.phone = "Required";
   checkPassword(req.body?.password, "password", errors);
   fail(errors);
 

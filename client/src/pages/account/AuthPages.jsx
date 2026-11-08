@@ -152,8 +152,8 @@ export function RegisterPage() {
         <Field label="Email" error={fields.email}>
           <Input name="email" type="email" autoComplete="email" value={form.email} onChange={set("email")} required />
         </Field>
-        <Field label="Phone (optional)" error={fields.phone}>
-          <Input name="phone" type="tel" autoComplete="tel" placeholder="012-345 6789" value={form.phone} onChange={set("phone")} />
+        <Field label="Phone" error={fields.phone}>
+          <Input name="phone" type="tel" autoComplete="tel" placeholder="012-345 6789" value={form.phone} onChange={set("phone")} required />
         </Field>
         <Field label="Password" hint="At least 8 characters." error={fields.password}>
           <PasswordInput value={form.password} onChange={set("password")} autoComplete="new-password" />

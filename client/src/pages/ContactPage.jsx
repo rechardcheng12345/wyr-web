@@ -2,11 +2,12 @@ import { ExternalLink, MessageCircle, Send, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useSiteInfo, whatsappLink } from "@/lib/site";
+import { usePageMeta, useSiteInfo, whatsappLink } from "@/lib/site";
 
 const TOPICS = ["Product question", "Bulk / business quote", "Order help", "Something else"];
 
 export function ContactPage() {
+  usePageMeta("Contact us · WYR Technology", "Questions about NFC tags, RFID cards or bulk orders? Contact WYR Technology by WhatsApp or email.");
   const site = useSiteInfo();
   const [form, setForm] = useState({ name: "", company: "", topic: TOPICS[0], message: "" });
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));

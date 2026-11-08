@@ -1,5 +1,5 @@
-import { Ban, CheckCircle2, FileOutput, Pencil, Plus, Printer, Search, Send, Trash2, Truck, Undo2 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Ban, CheckCircle2, ChevronDown, FileDown, FileOutput, Loader2, Pencil, Plus, Printer, Search, Send, Trash2, Truck, Undo2, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { DataTable } from "../components/DataTable";
 import { FormField, Select } from "../components/FormField";
 import { Modal } from "../components/Modal";
 import { PageHeader } from "../components/PageHeader";
-import { DOC_TITLE, PrintDocument } from "../components/PrintDocument";
+import { DOC_TITLE, DownloadDocumentPdf, PrintDocument } from "../components/PrintDocument";
 import { formatDate, formatNumber, formatRM, localISODate } from "../format";
 import { deleteDocument, issueDocument, listDocuments, saveDocument, setInvoicePaid, voidDocument } from "../services/documentsService";
 import { listStock } from "../services/inventoryService";
@@ -136,6 +136,7 @@ export function DocumentsPage() {
   const [confirm, setConfirm] = useState(null);
   const [paying, setPaying] = useState(null);
   const [printing, setPrinting] = useState(null);
+  const [downloading, setDownloading] = useState(null);
 
   const load = useCallback(async () => {
     try {
@@ -249,6 +250,8 @@ export function DocumentsPage() {
         <RowActions
           doc={r}
           onPrint={() => setPrinting(r)}
+          onDownload={() => setDownloading(r)}
+          downloading={downloading?.id === r.id}
           onEdit={() => setEditing(r)}
           onConvert={(to) => setEditing(copyFrom(r, to))}
           onPaid={() => setPaying(r)}
@@ -349,11 +352,21 @@ export function DocumentsPage() {
         />
       )}
       {printing && data && <PrintDocument doc={printing} company={data.company} onDone={() => setPrinting(null)} />}
+      {downloading && data && (
+        <DownloadDocumentPdf
+          doc={downloading}
+          company={data.company}
+          onDone={(err) => {
+            if (err) setError(`Couldn't create the PDF: ${err.message}`);
+            setDownloading(null);
+          }}
+        />
+      )}
     </>
   );
 }
 
-function RowActions({ doc, onPrint, onEdit, onConvert, onPaid, onConfirm }) {
+function RowActions({ doc, onPrint, onDownload, downloading, onEdit, onConvert, onPaid, onConfirm }) {
   const isVoid = doc.status === "void";
   const editable = !isVoid && (doc.type !== "delivery_order" || doc.status === "draft");
   const icon = (label, Icon, onClick, className) => (
@@ -388,6 +401,9 @@ function RowActions({ doc, onPrint, onEdit, onConvert, onPaid, onConfirm }) {
         </Button>
       )}
       {icon("Print", Printer, onPrint)}
+      <Button variant="ghost" size="icon" onClick={onDownload} disabled={downloading} aria-label="Download PDF" title="Download PDF">
+        {downloading ? <Loader2 className="animate-spin" /> : <FileDown />}
+      </Button>
       {editable && icon("Edit", Pencil, onEdit)}
       {!isVoid && doc.type === "invoice" && doc.paidAt && icon("Mark unpaid", Undo2, () => onConfirm("unpaid"))}
       {doc.status === "draft" && icon("Delete", Trash2, () => onConfirm("delete"), "text-red-600 hover:bg-red-50 hover:text-red-700")}
@@ -550,12 +566,6 @@ function DocForm({ initial, tabType, next, clients, validDays, onClose, onSaved 
   useEffect(() => {
     listStock().then(setStock).catch(() => setStock([]));
   }, []);
-
-  const groups = useMemo(() => {
-    const map = new Map();
-    for (const v of stock) map.set(v.productName, [...(map.get(v.productName) ?? []), v]);
-    return [...map];
-  }, [stock]);
 
   const updateLine = (key, patch) => setLines((ls) => ls.map((l) => (l.key === key ? { ...l, ...patch } : l)));
 
@@ -736,20 +746,13 @@ function DocForm({ initial, tabType, next, clients, validDays, onClose, onSaved 
               return (
                 <div key={l.key} className="grid grid-cols-2 items-start gap-2 rounded-lg border p-3 sm:grid-cols-6">
                   <FormField label="Product" className="col-span-2 sm:col-span-2">
-                    <Select value={l.variantId ?? ""} onChange={(e) => pickVariant(l.key, e.target.value)}>
-                      <option value="">{isDO ? "Custom item (no stock change)" : "Custom item / service"}</option>
-                      {groups.map(([name, variants]) => (
-                        <optgroup key={name} label={name}>
-                          {variants.map((v) => (
-                            <option key={v.variantId} value={v.variantId}>
-                              {v.variantName ? `${v.variantName} · ` : ""}
-                              {v.sku}
-                              {isDO ? ` (stock ${v.available})` : ""}
-                            </option>
-                          ))}
-                        </optgroup>
-                      ))}
-                    </Select>
+                    <ProductPicker
+                      stock={stock}
+                      value={l.variantId}
+                      onChange={(id) => pickVariant(l.key, id == null ? "" : String(id))}
+                      customLabel={isDO ? "Custom item (no stock change)" : "Custom item / service"}
+                      showStock={isDO}
+                    />
                   </FormField>
                   <FormField label="Description" error={err("description")} className="col-span-2 sm:col-span-4">
                     <textarea
@@ -814,5 +817,162 @@ function DocForm({ initial, tabType, next, clients, validDays, onClose, onSaved 
         )}
       </form>
     </Modal>
+  );
+}
+
+const PICKER_LIMIT = 50;
+
+/**
+ * Searchable product picker for document lines: type part of a product name, variant or SKU.
+ * Every word typed must match somewhere, so "ntag 215 black" narrows quickly.
+ * @param {object} props
+ * @param {object[]} props.stock Rows from listStock() (variantId, productName, variantName, sku, available).
+ * @param {number|null} props.value Selected variantId, or null for a custom item.
+ * @param {(variantId: number|null) => void} props.onChange
+ * @param {string} props.customLabel Label for "no product" (custom item / service).
+ * @param {boolean} props.showStock Show available stock next to each option (delivery orders).
+ */
+function ProductPicker({ stock, value, onChange, customLabel, showStock }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [active, setActive] = useState(0);
+  const boxRef = useRef(null);
+  const listRef = useRef(null);
+
+  const selected = value == null ? null : stock.find((v) => v.variantId === value);
+  const label = (v) => [v.productName, v.variantName].filter(Boolean).join(" — ");
+
+  const matches = useMemo(() => {
+    const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+    const found = words.length
+      ? stock.filter((v) => {
+          const hay = `${v.productName ?? ""} ${v.variantName ?? ""} ${v.sku ?? ""}`.toLowerCase();
+          return words.every((w) => hay.includes(w));
+        })
+      : stock;
+    return found.slice(0, PICKER_LIMIT);
+  }, [stock, query]);
+  const total = useMemo(() => (query.trim() ? null : stock.length), [stock, query]);
+
+  // Option 0 is the custom item; products follow.
+  const options = [null, ...matches];
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (e) => {
+      if (!boxRef.current?.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [open]);
+
+  useEffect(() => {
+    listRef.current?.querySelector(`[data-index="${active}"]`)?.scrollIntoView({ block: "nearest" });
+  }, [active, open]);
+
+  function openList() {
+    setQuery("");
+    setActive(0);
+    setOpen(true);
+  }
+
+  function choose(v) {
+    onChange(v ? v.variantId : null);
+    setOpen(false);
+    setQuery("");
+  }
+
+  function onKeyDown(e) {
+    if (!open && (e.key === "ArrowDown" || e.key === "Enter")) {
+      e.preventDefault();
+      openList();
+      return;
+    }
+    if (!open) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActive((i) => Math.min(i + 1, options.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActive((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      choose(options[active]);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      setOpen(false);
+    }
+  }
+
+  return (
+    <div ref={boxRef} className="relative">
+      <div className="relative">
+        <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+        <Input
+          value={open ? query : selected ? label(selected) : ""}
+          placeholder={open ? "Search name, variant or SKU…" : customLabel}
+          onFocus={openList}
+          onClick={() => !open && openList()}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setActive(e.target.value.trim() ? 1 : 0);
+            setOpen(true);
+          }}
+          onKeyDown={onKeyDown}
+          role="combobox"
+          aria-expanded={open}
+          aria-autocomplete="list"
+          className="truncate pr-8 pl-8"
+          title={selected ? `${label(selected)} · ${selected.sku}` : undefined}
+        />
+        {selected && !open ? (
+          <button
+            type="button"
+            onClick={() => choose(null)}
+            className="text-muted-foreground hover:text-foreground absolute top-1/2 right-2 -translate-y-1/2"
+            aria-label="Clear product"
+            title="Clear (custom item)"
+          >
+            <X className="size-4" />
+          </button>
+        ) : (
+          <ChevronDown className="text-muted-foreground pointer-events-none absolute top-1/2 right-2.5 size-4 -translate-y-1/2" />
+        )}
+      </div>
+      {open && (
+        <ul ref={listRef} role="listbox" className="absolute z-50 mt-1 max-h-72 w-full min-w-72 overflow-auto rounded-md border bg-white py-1 text-sm shadow-lg">
+          {options.map((v, i) => (
+            <li
+              key={v ? v.variantId : "custom"}
+              data-index={i}
+              role="option"
+              aria-selected={i === active}
+              onMouseEnter={() => setActive(i)}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                choose(v);
+              }}
+              className={cn("cursor-pointer px-3 py-1.5", i === active && "bg-slate-100", i === 0 && "text-muted-foreground border-b italic")}
+            >
+              {v ? (
+                <>
+                  <div className="truncate font-medium">{v.productName}</div>
+                  <div className="text-muted-foreground flex justify-between gap-2 text-xs">
+                    <span className="truncate">{[v.variantName, v.sku].filter(Boolean).join(" · ")}</span>
+                    {showStock && <span className="shrink-0">stock {v.available}</span>}
+                  </div>
+                </>
+              ) : (
+                customLabel
+              )}
+            </li>
+          ))}
+          {matches.length === 0 && <li className="text-muted-foreground px-3 py-2">No products match “{query}”.</li>}
+          {(total ?? 0) > PICKER_LIMIT || (query.trim() && matches.length === PICKER_LIMIT) ? (
+            <li className="text-muted-foreground border-t px-3 py-1.5 text-xs">Showing the first {PICKER_LIMIT}. Type more to narrow down.</li>
+          ) : null}
+        </ul>
+      )}
+    </div>
   );
 }
