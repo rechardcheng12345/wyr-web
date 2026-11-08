@@ -37,6 +37,10 @@ export function fetchOrder(orderNo, email) {
   return get(`/api/orders/${encodeURIComponent(orderNo)}${email ? `?email=${encodeURIComponent(email)}` : ""}`);
 }
 
+export function orderInvoiceUrl(orderNo, email) {
+  return `${import.meta.env.VITE_API_URL ?? ""}/api/orders/${encodeURIComponent(orderNo)}/invoice.pdf${email ? `?email=${encodeURIComponent(email)}` : ""}`;
+}
+
 export function retryPayment(orderNo, email) {
   return post(`/api/orders/${encodeURIComponent(orderNo)}/pay`, { email });
 }

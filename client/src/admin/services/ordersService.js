@@ -27,3 +27,7 @@ export function exportPaidOrdersUrl(from, to) {
   const qs = params.toString();
   return `${import.meta.env.VITE_API_URL ?? ""}/api/admin/orders/export.csv${qs ? `?${qs}` : ""}`;
 }
+
+export function orderInvoiceUrl(id) {
+  return `${import.meta.env.VITE_API_URL ?? ""}/api/admin/orders/${id}/invoice.pdf`;
+}

@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Check, CheckCircle2, Clock, ExternalLink, Loader2, Truck, XCircle } from "lucide-react";
+import { Check, CheckCircle2, Clock, Download, ExternalLink, Loader2, Truck, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ErrorState } from "@/components/ErrorState";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCustomer } from "@/lib/account";
 import { ApiError } from "@/lib/api";
-import { fetchOrder, recallOrderEmail, rememberOrderEmail, retryPayment } from "@/lib/checkout";
+import { fetchOrder, orderInvoiceUrl, recallOrderEmail, rememberOrderEmail, retryPayment } from "@/lib/checkout";
 import { formatDateTime, trackingUrl } from "@/lib/orderStatus";
 import { cn, formatPrice } from "@/lib/utils";
 
@@ -238,6 +238,8 @@ function OrderTimeline({ order }) {
   );
 }
 
+const INVOICED = ["paid", "sent_to_bigseller", "shipped", "completed"];
+
 function OrderDetails({ order }) {
   const s = order.shipping;
   return (
@@ -289,6 +291,14 @@ function OrderDetails({ order }) {
             <dd data-testid="order-total">{formatPrice(order.total)}</dd>
           </div>
         </dl>
+        {order.paidAt && INVOICED.includes(order.status) && (
+          <Button asChild variant="outline" className="mt-4 w-full sm:w-auto">
+            <a href={orderInvoiceUrl(order.orderNo, order.email)} download data-testid="download-invoice">
+              <Download />
+              Download invoice (PDF)
+            </a>
+          </Button>
+        )}
         {order.note && (
           <div className="mt-4 border-t pt-4 text-sm">
             <p className="font-medium">Your note</p>

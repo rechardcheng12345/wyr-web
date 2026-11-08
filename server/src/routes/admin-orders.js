@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { requireAdmin } from "../auth.js";
 import { prisma } from "../db.js";
+import { sendOrderShippedEmail } from "../order-emails.js";
+import { hasInvoice, invoiceFileName, loadInvoiceOrder, renderOrderInvoice } from "../invoice-pdf.js";
 
 export const adminOrdersRouter = Router();
 adminOrdersRouter.use(requireAdmin);
@@ -163,6 +165,16 @@ adminOrdersRouter.get("/", async (req, res) => {
   res.json({ tab, orders: orders.map(serialize), counts });
 });
 
+adminOrdersRouter.get("/:id/invoice.pdf", async (req, res) => {
+  const id = Number(req.params.id);
+  const order = Number.isInteger(id) ? await loadInvoiceOrder({ id }) : null;
+  if (!order) return badRequest(res, 404, "Order not found");
+  if (!hasInvoice(order)) return badRequest(res, 409, "Only paid orders have an invoice");
+  const pdf = await renderOrderInvoice(order);
+  res.set("Cache-Control", "private, no-store");
+  res.attachment(invoiceFileName(order)).type("application/pdf").send(pdf);
+});
+
 adminOrdersRouter.post("/:id/ship", async (req, res) => {
   const order = await findOrder(req, res);
   if (!order) return;
@@ -174,6 +186,8 @@ adminOrdersRouter.post("/:id/ship", async (req, res) => {
     data: { status: "shipped", courier, trackingNo: trackingNo || null, shippedAt: order.shippedAt ?? new Date() },
   });
   if (count === 0) return badRequest(res, 409, `Can't ship an order that is ${order.status.replace(/_/g, " ")}`);
+  const changed = order.status !== "shipped" || order.courier !== courier || (order.trackingNo ?? "") !== trackingNo;
+  if (changed) sendOrderShippedEmail(order.id).catch((err) => console.error(`[mail] shipped email for ${order.orderNo} failed:`, err));
   await respondWithOrder(res, order.id);
 });
 

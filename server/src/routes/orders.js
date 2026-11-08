@@ -2,6 +2,7 @@ import { Router } from "express";
 import { getCustomer } from "../customer-auth.js";
 import { CheckoutError, findOrderForBuyer, findOrderForCustomer, serializeOrder } from "../orders.js";
 import { createLimiter } from "../rate-limit.js";
+import { hasInvoice, invoiceFileName, loadInvoiceOrder, renderOrderInvoice } from "../invoice-pdf.js";
 import { reconcileOrderPayments, startPayment } from "../payments/index.js";
 
 export const ordersRouter = Router();
@@ -51,6 +52,16 @@ ordersRouter.get("/:orderNo", async (req, res) => {
   let order = await findOrderForRequest(req, emailParam(req.query.email));
   if (await recheckPayment(order)) order = await findOrderForRequest(req, emailParam(req.query.email));
   res.json(serializeOrder(order));
+});
+
+// GET /api/orders/:orderNo/invoice.pdf?email=<buyer email>
+ordersRouter.get("/:orderNo/invoice.pdf", async (req, res) => {
+  const found = await findOrderForRequest(req, emailParam(req.query.email));
+  const order = await loadInvoiceOrder({ id: found.id });
+  if (!hasInvoice(order)) throw new CheckoutError(409, "The invoice is available once the order is paid.");
+  const pdf = await renderOrderInvoice(order);
+  res.set("Cache-Control", "private, no-store");
+  res.attachment(invoiceFileName(order)).type("application/pdf").send(pdf);
 });
 
 // POST /api/orders/:orderNo/pay { email }: a new bill for an unpaid order (e.g. after a failed payment).

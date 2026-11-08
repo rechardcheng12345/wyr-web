@@ -9,7 +9,7 @@ import { Modal } from "../components/Modal";
 import { PageHeader } from "../components/PageHeader";
 import { PrintMenu } from "../components/PrintOrder";
 import { formatRM } from "../format";
-import { completeOrder, exportPaidOrdersUrl, listOrders, shipOrder, unshipOrder } from "../services/ordersService";
+import { completeOrder, exportPaidOrdersUrl, listOrders, orderInvoiceUrl, shipOrder, unshipOrder } from "../services/ordersService";
 
 const TABS = [
   { key: "to_ship", label: "To ship" },
@@ -308,6 +308,14 @@ function OrderCard({ order: o, onShip, onUnship, onComplete }) {
       <footer className="flex flex-wrap items-center justify-end gap-2 border-t px-4 py-3">
         <div className="mr-auto flex gap-2">
           <PrintMenu order={o} />
+          {o.paidAt && (
+            <Button asChild variant="outline" title="Download this order's invoice as PDF">
+              <a href={orderInvoiceUrl(o.id)} download data-testid="admin-download-invoice">
+                <Download />
+                Invoice PDF
+              </a>
+            </Button>
+          )}
           {o.paidAt && (
             <Button variant="outline" onClick={() => navigate("/system/documents?type=invoice", { state: { fromOrder: o } })} title="Formal invoice for this order">
               <FileText />
