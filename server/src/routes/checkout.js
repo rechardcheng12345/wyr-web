@@ -2,6 +2,7 @@ import { Router } from "express";
 import { getCustomer } from "../customer-auth.js";
 import { prisma } from "../db.js";
 import { cancelUnpaidOrder, CheckoutError, createPendingOrder, parseBuyer, parseCartItems, parseOrderExtras, priceCart, quote } from "../orders.js";
+import { notifyOrderCreated } from "../notify.js";
 import { startPayment } from "../payments/index.js";
 import { isMalaysianState } from "../shipping.js";
 import { applyVoucher, normalizeCode } from "../vouchers.js";
@@ -50,5 +51,6 @@ checkoutRouter.post("/", async (req, res) => {
     await cancelUnpaidOrder(order.id);
     throw new CheckoutError(502, "We couldn't start the payment. Nothing has been charged; please try again in a moment.");
   }
+  notifyOrderCreated(order.id);
   res.status(201).json({ orderNo: order.orderNo, paymentUrl });
 });
