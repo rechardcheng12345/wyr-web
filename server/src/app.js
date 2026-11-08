@@ -30,6 +30,7 @@ import { checkoutRouter } from "./routes/checkout.js";
 import { ordersRouter } from "./routes/orders.js";
 import { paymentsRouter } from "./routes/payments.js";
 import { productsRouter } from "./routes/products.js";
+import { syncRouter } from "./routes/sync.js";
 
 const CLIENT_DIST = path.resolve(SERVER_ROOT, "../client/dist");
 
@@ -39,6 +40,8 @@ export function createApp() {
   app.set("trust proxy", "loopback");
   if (!(process.env.NODE_ENV === "dev" || process.env.NODE_ENV === "development")) app.use(redirectWww);
   app.use(cors({ origin: CORS_ORIGINS }));
+  // BigSeller sync (API key, larger bodies): mounted before the app-wide 100 kB JSON parser.
+  app.use("/api/sync", syncRouter);
   app.use(express.json());
 
   app.get("/api/health", (_req, res) => {
@@ -130,6 +133,10 @@ export function createApp() {
     }
     if (err?.type === "entity.parse.failed") {
       res.status(400).json({ error: "Invalid JSON" });
+      return;
+    }
+    if (err?.type === "entity.too.large") {
+      res.status(413).json({ error: "Request body too large" });
       return;
     }
     console.error(err);

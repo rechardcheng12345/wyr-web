@@ -1,0 +1,12 @@
+[
+  {
+    "cwd": "D:\\Github\\WYR Web\\server",
+    "hook_event_name": "Notification",
+    "message": "Claude needs your permission",
+    "notification_type": "permission_prompt",
+    "prompt_id": "a162705e-7ebc-4467-a747-9ee2ee707f3f",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  }
+]

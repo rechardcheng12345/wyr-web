@@ -11,6 +11,7 @@ import { CartPage } from "@/pages/CartPage";
 import { CheckoutPage } from "@/pages/CheckoutPage";
 import { CheckoutReturnPage } from "@/pages/CheckoutReturnPage";
 import { ContactPage } from "@/pages/ContactPage";
+import { EinkConverterPage } from "@/pages/EinkConverterPage";
 import { HomePage } from "@/pages/HomePage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { OrderPage } from "@/pages/OrderPage";
@@ -39,6 +40,7 @@ export function App() {
           <Route path="products/:slug" element={<ProductDetailPage />} />
           <Route path="about" element={<AboutPage />} />
           <Route path="contact" element={<ContactPage />} />
+          <Route path="eink-converter" element={<EinkConverterPage />} />
           <Route path="cart" element={<CartPage />} />
           <Route path="checkout" element={<CheckoutPage />} />
           <Route path="checkout/return" element={<CheckoutReturnPage />} />

@@ -1,0 +1,21 @@
+[
+  {
+    "cwd": "D:\\Github\\WYR Web\\client\\src\\pages",
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "ccfc43c3-102d-4ef4-abc0-9ff7891bf087",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\adfc42aa-92b0-4fbc-8ce8-e313f5728751\\scratchpad",
+    "session_id": "adfc42aa-92b0-4fbc-8ce8-e313f5728751",
+    "tool_input": {
+      "command": "cd \"/d/Github/WYR Web\" \u0026\u0026 npm run build 2\u003e\u00261 | tail -5",
+      "description": "Build the client for production",
+      "timeout": 300000
+    },
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_013isogA1Wrx84dR6QM1Czs6",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\adfc42aa-92b0-4fbc-8ce8-e313f5728751.jsonl"
+  }
+]

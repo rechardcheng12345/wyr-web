@@ -203,6 +203,7 @@ export function Layout() {
             <FooterLink to="/products?category=nfc-tags">NFC tags & stickers</FooterLink>
             <FooterLink to="/products?category=rfid-cards">RFID cards & key fobs</FooterLink>
             <FooterLink to="/products?category=readers-writers">Readers & writers</FooterLink>
+            <FooterLink to="/eink-converter">E-ink card image converter</FooterLink>
           </FooterColumn>
           <FooterColumn title="Company">
             <FooterLink to="/about">About us</FooterLink>

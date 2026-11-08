@@ -28,6 +28,10 @@ const STATIC_PAGES = {
     title: "Contact us · WYR Technology",
     description: "Questions about NFC tags, RFID cards or bulk orders? Contact WYR Technology by WhatsApp or email.",
   },
+  "/eink-converter": {
+    title: "E-ink card image converter · WYR Technology",
+    description: "Convert any photo into a 200 × 300 black, white, red and yellow picture that the e-ink NFC card accepts, ready to write with the NETME app on iPhone.",
+  },
 };
 
 // Real pages that shouldn't appear in search results (carts, accounts, order status).
