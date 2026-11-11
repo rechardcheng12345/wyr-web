@@ -8,6 +8,7 @@ import { CheckoutError } from "./orders.js";
 import { bulkQuote } from "./pricing.js";
 import { merchantFeed } from "./merchant-feed.js";
 import { createSeo, redirectWww } from "./seo.js";
+import { storeInfo } from "./merchant.js";
 import { getSetting } from "./settings.js";
 import { shippingSummary } from "./shipping.js";
 import { welcomeVoucher } from "./vouchers.js";
@@ -58,6 +59,7 @@ export function createApp() {
       minOrderSubtotalRm: getSetting("min_order_subtotal"),
       lowPriceMinQty: getSetting("low_price_min_qty"),
       welcomeVoucher: await welcomeVoucher(),
+      ...storeInfo(),
     });
   });
   app.use("/api/auth", authRouter);

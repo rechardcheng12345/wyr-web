@@ -46,3 +46,17 @@ export const QUOTATION_VALID_DAYS = 30;
 export const QUOTATION_TERMS =
   "All prices quoted are valid for 30 days from the date stated on the quotation.\nIf you have any questions concerning this quotation, please contact us by email or by phone.";
 export const INVOICE_FOOTER = "This is a computer-generated invoice. No signature is required.";
+
+/** Store policies shown on the website (Shipping, Returns & refunds, Contact) and told to Google. */
+export const PUBLIC_ADDRESS = "Setapak, 53000 Kuala Lumpur, Malaysia";
+export const BUSINESS_HOURS = "Monday to Friday, 9am to 6pm";
+/** Orders paid before this hour (Malaysia time) on a working day ship the same day. */
+export const DISPATCH_CUTOFF_HOUR = 15;
+/** Courier time after dispatch, in working days ("min-max"). */
+export const DELIVERY_WEST_DAYS = "2-4";
+export const DELIVERY_EAST_DAYS = "3-7";
+export const COURIERS = "";
+/** Days after delivery to report a defective, damaged or wrong item. */
+export const RETURN_DAYS = 7;
+/** Working days to refund once a return is approved. */
+export const REFUND_DAYS = 7;

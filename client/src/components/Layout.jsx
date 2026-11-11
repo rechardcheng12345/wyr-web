@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useCustomer } from "@/lib/account";
 import { useCart } from "@/lib/cart";
 import { LOGO_SRC, useSiteInfo, whatsappLink } from "@/lib/site";
+import { legalName, POLICY_LINKS, telHref } from "@/pages/PolicyPages";
 import { cn } from "@/lib/utils";
 
 function CartLink() {
@@ -188,7 +189,7 @@ export function Layout() {
       </main>
 
       <footer className="bg-brand-navy mt-20 text-slate-300">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-5">
           <div className="sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-2.5">
               <span className="rounded-lg bg-white p-1.5">
@@ -208,9 +209,16 @@ export function Layout() {
           <FooterColumn title="Company">
             <FooterLink to="/about">About us</FooterLink>
             <FooterLink to="/contact">Contact us</FooterLink>
-            <FooterLink to="/track">Track order</FooterLink>
             <FooterLink to="/account/orders">My account</FooterLink>
             {site.shopeeUrl && <FooterLink href={site.shopeeUrl}>Shopee store</FooterLink>}
+          </FooterColumn>
+          <FooterColumn title="Customer care">
+            <FooterLink to="/track">Track order</FooterLink>
+            {POLICY_LINKS.map((l) => (
+              <FooterLink key={l.to} to={l.to}>
+                {l.label}
+              </FooterLink>
+            ))}
           </FooterColumn>
           <FooterColumn title="Talk to us">
             {whatsapp ? (
@@ -221,10 +229,20 @@ export function Layout() {
             ) : (
               <FooterLink to="/contact">Contact options</FooterLink>
             )}
-            <p className="text-sm">Kuala Lumpur, Malaysia</p>
+            {site.business?.phone && (
+              <a href={telHref(site.business.phone)} className="w-fit text-sm hover:text-white">
+                {site.business.phone}
+              </a>
+            )}
+            {site.business?.email && (
+              <a href={`mailto:${site.business.email}`} className="w-fit text-sm break-all hover:text-white">
+                {site.business.email}
+              </a>
+            )}
+            <p className="text-sm whitespace-pre-line">{site.business?.address ?? "Kuala Lumpur, Malaysia"}</p>
           </FooterColumn>
         </div>
-        <p className="border-t border-white/10 py-5 text-center text-xs text-slate-400">© {new Date().getFullYear()} WYR Technology, Malaysia</p>
+        <p className="border-t border-white/10 py-5 text-center text-xs text-slate-400">© {new Date().getFullYear()} {legalName(site.business)}, Malaysia</p>
       </footer>
     </div>
   );

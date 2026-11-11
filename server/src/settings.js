@@ -1,5 +1,10 @@
 import {
   BANK_INFO,
+  BUSINESS_HOURS,
+  COURIERS,
+  DELIVERY_EAST_DAYS,
+  DELIVERY_WEST_DAYS,
+  DISPATCH_CUTOFF_HOUR,
   BULK_QUOTE_MIN_QTY,
   COMPANY_ADDRESS,
   COMPANY_EMAIL,
@@ -13,6 +18,9 @@ import {
   LOW_PRICE_MIN_QTY,
   LOW_PRICE_THRESHOLD_RM,
   MIN_ORDER_SUBTOTAL_RM,
+  PUBLIC_ADDRESS,
+  REFUND_DAYS,
+  RETURN_DAYS,
   STOCK_SAFETY_BUFFER,
   WELCOME_VOUCHER_CODE,
   ORDER_HOLD_MINUTES,
@@ -82,6 +90,15 @@ function oneOf(options) {
     if (!options.some((o) => o.value === v)) throw new Error("Pick one of the options");
     return v;
   };
+}
+
+/** A working-day range, saved as "2-4" ("3" means 3-3). Read it with getDayRange(). */
+function dayRange(raw) {
+  const m = String(raw ?? "").trim().match(/^(\d{1,2})\s*(?:[-–]\s*(\d{1,2}))?$/);
+  const min = m ? Number(m[1]) : NaN;
+  const max = m ? Number(m[2] ?? m[1]) : NaN;
+  if (!m || min < 0 || max < min || max > 60) throw new Error("A range of working days, e.g. 2-4");
+  return `${min}-${max}`;
 }
 
 const CHANNELS = [
@@ -223,7 +240,7 @@ export const SETTINGS = [
     key: "company_reg_no",
     group: "Documents (quotation, invoice, DO)",
     label: "Registration no. (SSM)",
-    help: "Printed after the company name. Leave empty to hide.",
+    help: "Printed after the company name on documents, and shown on the website footer, Contact and policy pages. Leave empty to hide.",
     type: "text",
     defaultValue: "",
     parse: text(60),
@@ -241,7 +258,7 @@ export const SETTINGS = [
     key: "company_phone",
     group: "Documents (quotation, invoice, DO)",
     label: "Phone",
-    help: "As printed on documents, e.g. 012-597 8873.",
+    help: "As printed on documents, e.g. 012-597 8873. Also shown on the website (Contact, footer, policies).",
     type: "text",
     defaultValue: COMPANY_PHONE,
     parse: text(40),
@@ -250,7 +267,7 @@ export const SETTINGS = [
     key: "company_email",
     group: "Documents (quotation, invoice, DO)",
     label: "Email",
-    help: "As printed on documents.",
+    help: "As printed on documents. Also shown on the website (Contact, footer, policies).",
     type: "text",
     defaultValue: COMPANY_EMAIL,
     parse: text(150),
@@ -300,6 +317,78 @@ export const SETTINGS = [
     defaultValue: INVOICE_FOOTER,
     parse: text(500),
   },
+  {
+    key: "public_address",
+    group: "Store policies (website)",
+    label: "Address shown on the website",
+    help: "On the Contact, footer and policy pages. The full street address earns more trust (Google checks it); the area alone is fine too.",
+    type: "textarea",
+    defaultValue: PUBLIC_ADDRESS,
+    parse: text(300, { required: true }),
+  },
+  {
+    key: "business_hours",
+    group: "Store policies (website)",
+    label: "Business hours",
+    help: "When customers can reach you, shown on the Contact and policy pages. Leave empty to hide.",
+    type: "text",
+    defaultValue: BUSINESS_HOURS,
+    parse: text(150),
+  },
+  {
+    key: "dispatch_cutoff_hour",
+    group: "Store policies (website)",
+    label: "Same-day dispatch cut-off (hour, 0-23)",
+    help: "Orders paid before this hour on a working day (Monday to Friday) ship the same day; later ones the next working day. 15 = 3pm.",
+    type: "int",
+    defaultValue: DISPATCH_CUTOFF_HOUR,
+    parse: intBetween(0, 23),
+  },
+  {
+    key: "delivery_west_days",
+    group: "Store policies (website)",
+    label: "Delivery time, Peninsular Malaysia (working days)",
+    help: "Courier time after dispatch, as a range: e.g. 2-4.",
+    type: "text",
+    defaultValue: DELIVERY_WEST_DAYS,
+    parse: dayRange,
+  },
+  {
+    key: "delivery_east_days",
+    group: "Store policies (website)",
+    label: "Delivery time, East Malaysia (working days)",
+    help: "Courier time after dispatch to Sabah, Sarawak and Labuan, as a range: e.g. 3-7.",
+    type: "text",
+    defaultValue: DELIVERY_EAST_DAYS,
+    parse: dayRange,
+  },
+  {
+    key: "couriers",
+    group: "Store policies (website)",
+    label: "Couriers",
+    help: "Named on the Shipping page, e.g. J&T Express, Pos Laju. Leave empty to hide.",
+    type: "text",
+    defaultValue: COURIERS,
+    parse: text(150),
+  },
+  {
+    key: "return_days",
+    group: "Store policies (website)",
+    label: "Report a problem within (days of delivery)",
+    help: "Defective, damaged or wrong items reported within this many days are replaced or refunded.",
+    type: "int",
+    defaultValue: RETURN_DAYS,
+    parse: intBetween(1, 60),
+  },
+  {
+    key: "refund_days",
+    group: "Store policies (website)",
+    label: "Refund within (working days)",
+    help: "How soon an approved refund is paid back.",
+    type: "int",
+    defaultValue: REFUND_DAYS,
+    parse: intBetween(1, 60),
+  },
 ];
 
 const BY_KEY = new Map(SETTINGS.map((s) => [s.key, s]));
@@ -323,6 +412,11 @@ export function getSetting(key) {
   const def = BY_KEY.get(key);
   if (!def) throw new Error(`Unknown setting ${key}`);
   return saved.has(key) ? saved.get(key).value : def.defaultValue;
+}
+
+/** A dayRange setting as [min, max]. */
+export function getDayRange(key) {
+  return getSetting(key).split("-").map(Number);
 }
 
 export function describeSettings() {

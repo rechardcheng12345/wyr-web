@@ -358,6 +358,21 @@ export function CheckoutPage() {
           <p className="text-muted-foreground mt-3 text-center text-xs">
             Secure payment by ToyyibPay. Your items are held for you while you pay.
           </p>
+          <p className="text-muted-foreground mt-2 text-center text-xs">
+            By paying you agree to our{" "}
+            <Link to="/terms" className="underline">
+              Terms
+            </Link>
+            ,{" "}
+            <Link to="/shipping" className="underline">
+              Shipping
+            </Link>{" "}
+            and{" "}
+            <Link to="/returns" className="underline">
+              Returns
+            </Link>{" "}
+            policies.
+          </p>
         </aside>
       </form>
     </div>
