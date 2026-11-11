@@ -113,6 +113,16 @@ export function ProductsPage() {
       ),
     },
     {
+      key: "google",
+      header: "Google",
+      render: (p) =>
+        p.isActive && !p.showOnGoogle ? (
+          <span className="rounded-md bg-amber-50 px-2 py-0.5 text-xs font-medium whitespace-nowrap text-amber-800" title="Sold on the site, but not in the Google Merchant Center feed">
+            Off Google
+          </span>
+        ) : null,
+    },
+    {
       key: "actions",
       header: "",
       align: "right",

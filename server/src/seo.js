@@ -5,7 +5,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { prisma } from "./db.js";
-import { BUSINESS_NAME, businessJsonLd, shippingDetailsJsonLd, variantOffer, variantUrl, websiteJsonLd } from "./merchant.js";
+import { BUSINESS_NAME, businessJsonLd, googleDescription, shippingDetailsJsonLd, variantOffer, variantUrl, websiteJsonLd } from "./merchant.js";
 import { detailInclude, serializeDetail } from "./routes/products.js";
 
 const SITE_NAME = BUSINESS_NAME;
@@ -106,7 +106,7 @@ function productJsonLd(product, raw, origin, url) {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.displayName ?? product.name,
-    description: truncate(product.description || product.name, 5000),
+    description: truncate(googleDescription(product.description) || product.name, 5000),
     image: product.images.map((i) => absolute(origin, i.url)).slice(0, 10),
     sku: product.parentSku ?? product.variants[0]?.sku,
     ...(raw.brand && { brand: { "@type": "Brand", name: raw.brand } }),
@@ -164,7 +164,8 @@ async function pageMeta(req, origin) {
       canonical: url,
       type: "product",
       image: product.images[0]?.url,
-      jsonLd: [productJsonLd(product, raw, origin, url), breadcrumbJsonLd(product, origin, url)],
+      // Products kept off Google get no Product markup either, so Google can't list them from the page.
+      jsonLd: [...(raw.showOnGoogle ? [productJsonLd(product, raw, origin, url)] : []), breadcrumbJsonLd(product, origin, url)],
     };
   }
 

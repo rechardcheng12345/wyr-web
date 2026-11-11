@@ -29,6 +29,40 @@ export function variantOffer(variant) {
   };
 }
 
+// Marketplace boilerplate in descriptions imported from Shopee: Google treats store banners,
+// links and emoji as promotional text, so the feed and structured data leave them out.
+const BANNERS = [
+  /welcome to wyr technology[.!]?/gi,
+  /ready stock\s*(?:&|and)\s*shipping\s*:?/gi,
+  /follow (?:our|us)\b[^.!\n]*[.!]?/gi,
+  /ready stock\s*(?:&|and|\|)\s*ship(?:ping)?\s+from\s+kl\b[.!]?/gi,
+  /(?:all products are )?ready stock(?: is)?(?: available)?(?: in kl)?(?: and available for immediate shipment)?[.!]?/gi,
+  /same[- ]day shipping[^.!\n]*[.!]?/gi,
+  /ship(?:ping)? from kl\b[.!]?/gi,
+  /fast processing and delivery[.!]?/gi,
+  /why buy from us\??/gi,
+];
+const PICTOGRAPHS = /[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}️‍]/gu;
+
+/** A product description with Shopee links, hashtags, emoji and store banners removed. */
+export function googleDescription(text) {
+  return String(text ?? "")
+    .replace(/\r\n?/g, "\n")
+    .split("\n")
+    .map((line) => {
+      let l = line
+        .replace(/https?:\/\/\S+/gi, "")
+        .replace(/(?:^|\s)#[\p{L}\p{N}_.]+/gu, " ")
+        .replace(PICTOGRAPHS, "")
+        .replace(/【([^】\n]*)】/g, "$1: ");
+      for (const re of BANNERS) l = l.replace(re, "");
+      return l.replace(/\s+/g, " ").replace(/^[\s:|,.&-]+/, "").replace(/\s*:\s*:/g, ":").trim();
+    })
+    // Drop lines left empty, or left as just the heading of what was removed (e.g. "Ready Stock & Shipping:").
+    .filter((l) => /[\p{L}\p{N}]/u.test(l) && !/^ready stock\b[^.]{0,30}:?$/i.test(l))
+    .join("\n");
+}
+
 /** Variant page URL: the product page with that variant preselected. */
 export function variantUrl(productUrl, variant) {
   return `${productUrl}?variant=${variant.id}`;
