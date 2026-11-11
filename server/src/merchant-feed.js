@@ -3,7 +3,7 @@
 // One item per variant, grouped by product. Variants that need a minimum quantity are
 // listed as a multipack of that size at the pack price, which is the least a buyer can pay.
 import { prisma } from "./db.js";
-import { variantOffer, variantUrl } from "./merchant.js";
+import { googleDescription, variantOffer, variantUrl } from "./merchant.js";
 import { detailInclude, serializeDetail } from "./routes/products.js";
 
 const escapeXml = (s) =>
@@ -34,7 +34,7 @@ function itemXml(origin, raw, product, variant) {
     ["g:id", variant.sku],
     ...(product.variants.length > 1 ? [["g:item_group_id", raw.parentSku ?? `product-${raw.id}`]] : []),
     ["g:title", clip(`${name}${variantName}${pack}`, 150)],
-    ["g:description", clip(product.description || name, 5000)],
+    ["g:description", clip(googleDescription(product.description) || name, 5000)],
     ["g:link", variantUrl(productUrl, variant)],
     ["g:image_link", images[0]],
     ...images.slice(1, 11).map((u) => ["g:additional_image_link", u]),
@@ -56,7 +56,7 @@ export async function merchantFeed(req, res, next) {
     const env = process.env.PUBLIC_BASE_URL?.trim().replace(/\/+$/, "");
     const origin = env || `${req.protocol}://${req.get("host")}`;
     const products = await prisma.product.findMany({
-      where: { isActive: true, slug: { not: null } },
+      where: { isActive: true, showOnGoogle: true, slug: { not: null } },
       include: detailInclude,
       orderBy: { id: "asc" },
     });

@@ -41,6 +41,7 @@ const EMPTY = {
   parentSku: "",
   description: "",
   isActive: true,
+  showOnGoogle: true,
   ...Object.fromEntries(INFO_FIELDS.map((f) => [f.key, ""])),
   images: [],
   faqs: [],
@@ -91,6 +92,7 @@ function toServer(form) {
     parentSku: form.parentSku,
     description: form.description,
     isActive: form.isActive,
+    showOnGoogle: form.showOnGoogle,
     ...Object.fromEntries(INFO_FIELDS.map((f) => [f.key, form[f.key]])),
     images: form.images.map((i) => i.url.trim()).filter(Boolean),
     faqs: form.faqs.map(({ question, answer }) => ({ question, answer })),
@@ -383,6 +385,14 @@ export function ProductFormPage() {
                   <span className="text-muted-foreground text-xs">Off = hidden from the public site, but kept here.</span>
                 </span>
                 <input type="checkbox" checked={form.isActive} onChange={(e) => set({ isActive: e.target.checked })} className="peer sr-only" />
+                <span className="relative mt-1 h-6 w-11 shrink-0 rounded-full bg-slate-300 transition-colors peer-checked:bg-emerald-500 peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/50 after:absolute after:top-0.5 after:left-0.5 after:size-5 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:after:translate-x-5" />
+              </label>
+              <label className="mt-4 flex cursor-pointer items-start border-t pt-4 justify-between gap-4">
+                <span>
+                  <span className="block font-semibold">Show on Google</span>
+                  <span className="text-muted-foreground text-xs">Off = still sold here, but left out of Google Shopping (the Merchant Center feed).</span>
+                </span>
+                <input type="checkbox" checked={form.showOnGoogle} onChange={(e) => set({ showOnGoogle: e.target.checked })} className="peer sr-only" />
                 <span className="relative mt-1 h-6 w-11 shrink-0 rounded-full bg-slate-300 transition-colors peer-checked:bg-emerald-500 peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/50 after:absolute after:top-0.5 after:left-0.5 after:size-5 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:after:translate-x-5" />
               </label>
             </CardContent>

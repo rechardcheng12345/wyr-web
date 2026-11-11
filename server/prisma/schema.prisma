@@ -48,6 +48,8 @@ model Product {
   description         String?              @db.Text
   productType         ProductType          @default(physical) @map("product_type")
   isActive            Boolean?             @default(true) @map("is_active")
+  // Off = still sold on the site, but left out of the Google feed and product structured data.
+  showOnGoogle        Boolean              @default(true) @map("show_on_google")
   createdAt           DateTime?            @default(now()) @map("created_at") @db.Timestamp(0)
   // Product information master, the source AI reads from to write marketplace listings.
   // Edited on the product form or in bulk via the Excel sheet (src/routes/admin-product-info.js).
