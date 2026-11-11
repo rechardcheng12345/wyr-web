@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Pagination, usePagination } from "@/components/Pagination";
 import { cn } from "@/lib/utils";
 import { FormField, Select } from "../components/FormField";
 import { PageHeader } from "../components/PageHeader";
@@ -38,6 +39,7 @@ export function CostingPage() {
   const [variantId, setVariantId] = useState("");
   const [detail, setDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const historyPaging = usePagination(detail?.history ?? [], { defaultPageSize: 10 });
   const [error, setError] = useState("");
   const [form, setForm] = useState(INITIAL);
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -205,7 +207,7 @@ export function CostingPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y">
-                    {detail.history.map((h, i) => (
+                    {historyPaging.pageRows.map((h, i) => (
                       <tr key={`${h.poId}-${i}`} className={cn(h.status !== "received" && "text-muted-foreground")}>
                         <td className="px-3 py-2 whitespace-nowrap">{formatDate(h.orderDate)}</td>
                         <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">{h.poNumber}</td>
@@ -222,6 +224,7 @@ export function CostingPage() {
                     ))}
                   </tbody>
                 </table>
+                <Pagination {...historyPaging} className="border-t px-3 py-2.5" />
               </div>
             )}
           </CardContent>

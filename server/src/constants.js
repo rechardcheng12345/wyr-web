@@ -62,3 +62,5 @@ export const COURIERS = "";
 export const RETURN_DAYS = 7;
 /** Working days to refund once a return is approved. */
 export const REFUND_DAYS = 7;
+
+export const SYNC_STALE_HOURS = 24;

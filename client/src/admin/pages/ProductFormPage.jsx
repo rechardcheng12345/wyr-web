@@ -35,6 +35,7 @@ const textareaClass =
 const EMPTY = {
   name: "",
   displayName: "",
+  soldBase: "0",
   autoDisplayName: "",
   slug: "",
   categoryId: "",
@@ -64,6 +65,7 @@ function fromServer(p) {
   return {
     ...p,
     categoryId: blank(p.categoryId),
+    soldBase: blank(p.soldBase ?? 0),
     images: p.images.map((url) => ({ key: newKey(), url })),
     faqs: p.faqs.map((f) => ({ ...f, key: newKey() })),
     videos: p.videos.map((v) => ({ ...v, key: newKey() })),
@@ -86,6 +88,7 @@ function toServer(form) {
     id: form.id,
     name: form.name,
     displayName: form.displayName,
+    soldBase: form.soldBase === "" ? 0 : Number(form.soldBase),
     slug: form.slug,
     categoryId: form.categoryId === "" ? null : Number(form.categoryId),
     parentSku: form.parentSku,
@@ -242,6 +245,12 @@ export function ProductFormPage() {
                 <p className="text-muted-foreground text-xs">
                   Shown on product cards, the product heading and the cart. Empty = the product name, cleaned up automatically
                   {form.autoDisplayName ? ` ("${form.autoDisplayName}")` : ""}.
+                </p>
+              </FormField>
+              <FormField label="Starting sold count" htmlFor="soldBase" error={errors.soldBase}>
+                <Input id="soldBase" type="number" min="0" step="1" value={form.soldBase} onChange={(e) => set({ soldBase: e.target.value })} />
+                <p className="text-muted-foreground text-xs">
+                  Pieces sold before the website and the marketplace sync started counting (for example your Shopee sold figure). The shop shows this number plus every sale since.
                 </p>
               </FormField>
               <FormField label="Page URL" htmlFor="slug" error={errors.slug} className="sm:col-span-2">

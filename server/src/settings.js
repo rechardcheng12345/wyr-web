@@ -22,6 +22,7 @@ import {
   REFUND_DAYS,
   RETURN_DAYS,
   STOCK_SAFETY_BUFFER,
+  SYNC_STALE_HOURS,
   WELCOME_VOUCHER_CODE,
   ORDER_HOLD_MINUTES,
   SHIPPING_FLAT_EM_RM,
@@ -187,6 +188,15 @@ export const SETTINGS = [
     type: "int",
     defaultValue: STOCK_SAFETY_BUFFER,
     parse: intBetween(0, 100_000),
+  },
+  {
+    key: "sync_stale_hours",
+    group: "Stock",
+    label: "Marketplace sync is stale after (hours)",
+    help: "If no stock count or marketplace order arrives from BigSeller for this long, the Inventory page marks stock as stale and a phone alert is sent. 0 turns the alert off.",
+    type: "int",
+    defaultValue: SYNC_STALE_HOURS,
+    parse: intBetween(0, 720),
   },
   {
     key: "orderHoldMinutes",

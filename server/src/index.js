@@ -4,6 +4,7 @@ import { USING_DEFAULT_ADMIN_LOGIN, USING_RANDOM_SESSION_SECRET } from "./auth.j
 import { startExpireOrdersJob } from "./jobs/expire-orders.js";
 import { paymentMode } from "./payments/index.js";
 import { loadSettings } from "./settings.js";
+import { startSyncHealthJob } from "./sync-health.js";
 
 const port = Number(process.env.PORT ?? 4000);
 
@@ -28,5 +29,6 @@ function start() {
     if (USING_DEFAULT_ADMIN_LOGIN) console.warn("ADMIN_USERNAME/ADMIN_PASSWORD not set: admin login is admin/admin123. Set real values before going live.");
     if (USING_RANDOM_SESSION_SECRET) console.warn("SESSION_SECRET not set: admin sessions end whenever the server restarts.");
     startExpireOrdersJob();
+    startSyncHealthJob();
   });
 }

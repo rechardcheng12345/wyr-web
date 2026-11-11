@@ -14,7 +14,7 @@ import { useCart } from "@/lib/cart";
 import { lineTotal, savingPct, tierFor } from "@/lib/pricing";
 import { shippingText, usePageMeta, useSiteInfo } from "@/lib/site";
 import { hourText } from "@/pages/PolicyPages";
-import { cn, formatPrice, formatPriceRange } from "@/lib/utils";
+import { cn, formatPrice, formatPriceRange, formatSold } from "@/lib/utils";
 import { NotFoundPage } from "./NotFoundPage";
 
 export function ProductDetailPage() {
@@ -117,6 +117,11 @@ function ProductView({ product }) {
         <div className="flex flex-col gap-6">
           <div>
             <h1 className="text-2xl leading-tight font-bold tracking-tight md:text-3xl">{name}</h1>
+            {product.sold > 0 && (
+              <p className="text-muted-foreground mt-1 text-sm" data-testid="sold-count">
+                {formatSold(product.sold)}
+              </p>
+            )}
             <div className="mt-3 flex items-baseline gap-3">
               <VariantPrice product={product} variant={variant} />
             </div>

@@ -4,6 +4,8 @@ import { settlePaidOrder, STOCK_TX, toCents } from "../orders.js";
 import { pushOrder } from "../integrations/bigseller.js";
 import { notifyOrderPaid } from "../notify.js";
 import { sendOrderConfirmedEmail } from "../order-emails.js";
+import { clearSoldCache } from "../sold.js";
+import { alertIfOrderOversold } from "../sync-health.js";
 import { mockGateway } from "./mock.js";
 import { toyyibPayGateway } from "./toyyibpay.js";
 
@@ -114,6 +116,8 @@ async function reconcilePayment(payment, callbackBody) {
       return settlePaidOrder(tx, payment.orderId);
     }, STOCK_TX);
     if (outcome === "paid" || outcome === "paid_after_expiry") {
+      clearSoldCache();
+      void alertIfOrderOversold(payment.orderId, payment.order.orderNo);
       pushOrder(payment.order).catch((err) => console.error(`[bigseller] push ${payment.order.orderNo} failed:`, err));
       sendOrderConfirmedEmail(payment.orderId).catch((err) => console.error(`[mail] confirmation for ${payment.order.orderNo} failed:`, err));
       notifyOrderPaid(payment.orderId, { afterExpiry: outcome === "paid_after_expiry" });

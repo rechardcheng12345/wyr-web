@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, Package, Truck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ErrorState } from "@/components/ErrorState";
+import { Pagination, usePagination } from "@/components/Pagination";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchMyOrders } from "@/lib/account";
@@ -15,6 +16,8 @@ export function StatusPill({ status }) {
 
 export function MyOrdersPage() {
   const { data: orders, isPending, isError, refetch } = useQuery({ queryKey: ["account-orders"], queryFn: fetchMyOrders, staleTime: 15_000 });
+
+  const paging = usePagination(orders ?? [], { defaultPageSize: 10 });
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
@@ -44,13 +47,16 @@ export function MyOrdersPage() {
             </div>
           </div>
         ) : (
-          <ul className="space-y-3">
-            {orders.map((o) => (
-              <li key={o.orderNo}>
-                <OrderRow order={o} />
-              </li>
-            ))}
-          </ul>
+          <>
+            <ul className="space-y-3">
+              {paging.pageRows.map((o) => (
+                <li key={o.orderNo}>
+                  <OrderRow order={o} />
+                </li>
+              ))}
+            </ul>
+            <Pagination {...paging} label="Orders" className="mt-5" />
+          </>
         )}
       </div>
     </div>

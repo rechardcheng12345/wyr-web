@@ -39,6 +39,14 @@ export function createApp() {
   const app = express();
 
   app.set("trust proxy", "loopback");
+  app.disable("x-powered-by");
+  app.use((req, res, next) => {
+    res.set("X-Content-Type-Options", "nosniff");
+    res.set("X-Frame-Options", "SAMEORIGIN");
+    res.set("Referrer-Policy", "strict-origin-when-cross-origin");
+    if (req.secure) res.set("Strict-Transport-Security", "max-age=15552000");
+    next();
+  });
   if (!(process.env.NODE_ENV === "dev" || process.env.NODE_ENV === "development")) app.use(redirectWww);
   app.use(cors({ origin: CORS_ORIGINS }));
   // BigSeller sync (API key, larger bodies): mounted before the app-wide 100 kB JSON parser.
@@ -139,6 +147,11 @@ export function createApp() {
     }
     if (err?.type === "entity.too.large") {
       res.status(413).json({ error: "Request body too large" });
+      return;
+    }
+    const status = err?.status ?? err?.statusCode;
+    if (err instanceof URIError || (Number.isInteger(status) && status >= 400 && status < 500)) {
+      res.status(err instanceof URIError ? 400 : status).json({ error: "Bad request" });
       return;
     }
     console.error(err);

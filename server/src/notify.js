@@ -76,3 +76,19 @@ export function notifyOrderPaid(orderId, { afterExpiry = false } = {}) {
     };
   });
 }
+
+export async function notifyAdmin({ title, body, tags = "warning", priority = "high", path = "/system/inventory" }) {
+  const url = topicUrl();
+  if (!url) return false;
+  try {
+    const headers = { Title: title, Tags: tags, Priority: priority };
+    const base = process.env.PUBLIC_BASE_URL?.trim().replace(/\/+$/, "");
+    if (base) headers.Click = `${base}${path}`;
+    const res = await fetch(url, { method: "POST", body, headers, signal: AbortSignal.timeout(10_000) });
+    if (!res.ok) throw new Error(`HTTP ${res.status} ${(await res.text()).slice(0, 200)}`);
+    return true;
+  } catch (err) {
+    console.error(`[ntfy] alert "${title}" failed: ${err.message}`);
+    return false;
+  }
+}

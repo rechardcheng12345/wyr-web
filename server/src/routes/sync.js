@@ -3,7 +3,9 @@ import express, { Router } from "express";
 import { safeEqual } from "../auth.js";
 import { prisma } from "../db.js";
 import { createLimiter } from "../rate-limit.js";
+import { clearSoldCache } from "../sold.js";
 import { logStockMovement } from "../stock.js";
+import { alertOversold, oversoldRows } from "../sync-health.js";
 
 // Machine-to-machine API for keeping the site in step with BigSeller:
 //   POST /api/sync/orders  marketplace orders (new or updated). Paid/shipped/completed orders take stock,
@@ -14,6 +16,7 @@ import { logStockMovement } from "../stock.js";
 
 export const syncRouter = Router();
 
+export const LAST_SYNC_KEY = "_last_sync_at";
 const MIN_KEY_LENGTH = 24;
 const MAX_ORDERS = 500;
 const MAX_ITEMS_PER_ORDER = 200;
@@ -65,6 +68,15 @@ function requireSyncKey(req, res, next) {
 }
 
 syncRouter.use(requireSyncKey);
+syncRouter.use((req, _res, next) => {
+  if (req.method === "POST" && !["1", "true", "yes"].includes(String(req.query.dryRun ?? "").toLowerCase())) {
+    const value = JSON.stringify(new Date().toISOString());
+    prisma.$executeRaw`INSERT INTO settings (\`key\`, value, updated_at) VALUES (${LAST_SYNC_KEY}, ${value}, NOW()) ON DUPLICATE KEY UPDATE value = VALUES(value), updated_at = NOW()`.catch((err) =>
+      console.error("[sync] could not record the sync time:", err.message),
+    );
+  }
+  next();
+});
 // Daily pushes can be large; the app-wide JSON parser stops at 100 kB.
 syncRouter.use(express.json({ limit: "5mb" }));
 
@@ -95,7 +107,7 @@ function timestamp(raw) {
   // Numbers are Unix time, in seconds or milliseconds. Strings should carry a time zone, e.g. +08:00.
   const ms = typeof raw === "number" ? (raw < 1e12 ? raw * 1000 : raw) : typeof raw === "string" ? Date.parse(raw) : NaN;
   if (!Number.isFinite(ms)) throw new InputError("orderedAt must be a date, e.g. 2026-10-27T14:30:00+08:00");
-  return new Date(ms);
+  return new Date(Math.round(ms / 1000) * 1000);
 }
 
 function parseOrder(raw) {
@@ -229,6 +241,18 @@ async function variantSkus(ids) {
   return new Map(rows.map((r) => [r.id, r.sku]));
 }
 
+const TO_SHIP = ["paid", "sent_to_bigseller"];
+
+async function lockedForWebsite(db, variantIds) {
+  if (!variantIds.length) return new Map();
+  const rows = await db.orderItem.groupBy({
+    by: ["variantId"],
+    where: { variantId: { in: variantIds }, order: { status: { in: TO_SHIP } } },
+    _sum: { qty: true },
+  });
+  return new Map(rows.map((r) => [r.variantId, r._sum.qty ?? 0]));
+}
+
 const isDryRun = (req) => ["1", "true", "yes"].includes(String(req.query.dryRun ?? "").toLowerCase());
 
 syncRouter.post("/orders", async (req, res, next) => {
@@ -278,10 +302,18 @@ syncRouter.post("/orders", async (req, res, next) => {
       results.push({ index: p.index, platform: order.platform, orderNo: order.orderNo, status: order.status, ...synced, unmatched });
     }
 
-    const skuOf = await variantSkus([...new Set(results.flatMap((r) => (r.changes ?? []).map((c) => c.variantId)))]);
+    const touched = [...new Set(results.flatMap((r) => (r.changes ?? []).map((c) => c.variantId)))];
+    const skuOf = await variantSkus(touched);
     const count = (result) => results.filter((r) => r.result === result).length;
+    let oversold = [];
+    if (apply) {
+      clearSoldCache();
+      oversold = await oversoldRows(touched);
+      if (oversold.length) void alertOversold(oversold, `After syncing ${results.length} marketplace order${results.length === 1 ? "" : "s"}.`);
+    }
     res.json({
       dryRun: !apply,
+      oversold,
       summary: { created: count("created"), updated: count("updated"), unchanged: count("unchanged"), failed: count("error") },
       unmatchedSkus: [...new Set(results.flatMap((r) => r.unmatched ?? []))],
       orders: results.map(({ changes, ...r }) => ({
@@ -333,6 +365,11 @@ syncRouter.post("/stock", async (req, res, next) => {
       return;
     }
     const apply = !isDryRun(req);
+    const basis = String(req.body.basis ?? "on_shelf").trim().toLowerCase();
+    if (basis !== "on_shelf" && basis !== "available") {
+      res.status(400).json({ error: 'basis must be "on_shelf" (a physical count, default) or "available" (already excludes paid website orders)' });
+      return;
+    }
 
     const rows = list.map((raw, index) => {
       try {
@@ -361,17 +398,19 @@ syncRouter.post("/stock", async (req, res, next) => {
           ? await tx.$queryRaw`SELECT variant_id AS variantId, available FROM inventory WHERE variant_id IN (${Prisma.join(ids)}) FOR UPDATE`
           : [];
         const before = new Map(current.map((c) => [Number(c.variantId), Number(c.available)]));
+        const locked = basis === "on_shelf" ? await lockedForWebsite(tx, ids) : new Map();
         const now = new Date();
         for (const r of counted) {
           r.before = before.get(r.variantId) ?? null;
-          r.after = r.qty;
-          r.delta = r.qty - (r.before ?? 0);
-          r.result = r.before === r.qty ? "unchanged" : "updated";
+          r.locked = locked.get(r.variantId) ?? 0;
+          r.after = r.qty - r.locked;
+          r.delta = r.after - (r.before ?? 0);
+          r.result = r.before === r.after ? "unchanged" : "updated";
           if (!apply) continue;
           await tx.inventory.upsert({
             where: { variantId: r.variantId },
-            create: { variantId: r.variantId, available: r.qty, syncedAt: now },
-            update: { available: r.qty, syncedAt: now },
+            create: { variantId: r.variantId, available: r.after, syncedAt: now },
+            update: { available: r.after, syncedAt: now },
           });
           await logStockMovement(tx, { variantId: r.variantId, delta: r.delta, reason: "stock_count", note });
         }
@@ -380,10 +419,17 @@ syncRouter.post("/stock", async (req, res, next) => {
     );
 
     const count = (result) => rows.filter((r) => r.result === result).length;
+    let oversold = [];
+    if (apply) {
+      oversold = await oversoldRows(counted.map((r) => r.variantId));
+      if (oversold.length) void alertOversold(oversold, "After a stock count: more pieces are locked for paid website orders than were counted.");
+    }
     res.json({
       dryRun: !apply,
+      basis,
+      oversold,
       summary: { updated: count("updated"), unchanged: count("unchanged"), unmatched: count("unmatched"), failed: count("error") },
-      items: rows.map(({ index, sku, result, before, after, delta, error }) => ({ index, sku, result, ...(error ? { error } : { before, after, delta }) })),
+      items: rows.map(({ index, sku, result, before, after, delta, locked, error }) => ({ index, sku, result, ...(error ? { error } : { before, after, delta, locked }) })),
     });
   } catch (err) {
     next(err);

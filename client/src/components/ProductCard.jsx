@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, formatSold } from "@/lib/utils";
 
 export function ProductImage({ src, alt, className }) {
   if (!src) {
@@ -39,6 +39,11 @@ export function ProductCard({ product }) {
             {formatPrice(minPrice)}
             {variantCount > 1 && <span className="text-muted-foreground ml-1.5 text-xs font-normal">· {variantCount} options</span>}
           </p>
+          {product.sold > 0 && (
+            <p className="text-muted-foreground text-xs" data-testid="sold-count">
+              {formatSold(product.sold)}
+            </p>
+          )}
         </div>
       </Card>
     </Link>

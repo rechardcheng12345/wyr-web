@@ -3,6 +3,7 @@ import { requireAdmin } from "../auth.js";
 import { cleanTitle } from "../display-name.js";
 import { prisma } from "../db.js";
 import { DIMENSIONS, INFO_FIELDS, parseCm, parseFaqs, parseInfo, parseVideos } from "../product-info.js";
+import { clearSoldCache } from "../sold.js";
 import { logStockMovement } from "../stock.js";
 
 export const adminProductsRouter = Router();
@@ -126,11 +127,15 @@ function parseInput(body) {
   const faqs = parseFaqs(body?.faqs, fields);
   const videos = parseVideos(body?.videos, fields);
 
+  const soldBase = body?.soldBase === "" || body?.soldBase == null ? 0 : Number(body.soldBase);
+  if (!Number.isInteger(soldBase) || soldBase < 0 || soldBase > 100_000_000) fields.soldBase = "Whole number, 0 or more";
+
   if (Object.keys(fields).length) throw new ValidationError("Please fix the highlighted fields", fields);
 
   return {
     product: {
       name,
+      soldBase,
       displayName: str(body?.displayName, 255) || null,
       slug,
       categoryId,
@@ -260,6 +265,7 @@ function serializeForEdit(p) {
     parentSku: p.parentSku ?? "",
     description: p.description ?? "",
     isActive: p.isActive !== false,
+    soldBase: p.soldBase ?? 0,
     ...Object.fromEntries(INFO_FIELDS.map((f) => [f.key, p[f.key] ?? ""])),
     images: p.images.map((i) => i.url).filter(Boolean),
     faqs: p.faqs.map((f) => ({ question: f.question, answer: f.answer })),
@@ -336,6 +342,7 @@ adminProductsRouter.post("/", async (req, res, next) => {
       return product.id;
     }, TX_OPTIONS);
     const product = await prisma.product.findUnique({ where: { id }, include: editInclude });
+    clearSoldCache();
     res.status(201).json(serializeForEdit(product));
   } catch (err) {
     if (!sendError(res, err)) next(err);
@@ -367,6 +374,7 @@ adminProductsRouter.put("/:id", async (req, res, next) => {
       await writeChildren(tx, id, input, existingIds);
     }, TX_OPTIONS);
     const product = await prisma.product.findUnique({ where: { id }, include: editInclude });
+    clearSoldCache();
     res.json(serializeForEdit(product));
   } catch (err) {
     if (!sendError(res, err)) next(err);

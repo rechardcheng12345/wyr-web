@@ -1,6 +1,7 @@
 import { Building2, Check, CheckCheck, Copy, Download, FileText, ImageOff, Loader2, MapPin, PackageCheck, Phone, RefreshCw, StickyNote, Tag, Truck, Undo2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Pagination, usePagination } from "@/components/Pagination";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -103,6 +104,7 @@ export function PendingOrdersPage() {
 
   const counts = data?.counts ?? {};
   const orders = data?.tab === tab ? data.orders : [];
+  const paging = usePagination(orders, { defaultPageSize: 10 });
 
   return (
     <>
@@ -131,6 +133,7 @@ export function PendingOrdersPage() {
             onClick={() => {
               setNotice("");
               setTab(t.key);
+              paging.setPage(1);
             }}
             className={cn(
               "-mb-px flex shrink-0 items-center gap-2 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors",
@@ -166,7 +169,7 @@ export function PendingOrdersPage() {
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          {orders.map((o) => (
+          {paging.pageRows.map((o) => (
             <OrderCard
               key={o.id}
               order={o}
@@ -175,6 +178,7 @@ export function PendingOrdersPage() {
               onComplete={() => run(completeOrder, o, `${o.orderNo} marked completed.`)}
             />
           ))}
+          <Pagination {...paging} label="Orders" />
         </div>
       )}
 

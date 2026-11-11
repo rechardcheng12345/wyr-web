@@ -7,16 +7,24 @@ import { ProductCard, ProductCardSkeleton, ProductGrid } from "@/components/Prod
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fetchCategories, fetchProducts } from "@/lib/api";
-import { usePageMeta } from "@/lib/site";
+import { usePageMeta, useSiteInfo, whatsappLink } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 24;
+const SORTS = [
+  { value: "", label: "Featured" },
+  { value: "popular", label: "Best selling" },
+  { value: "price_asc", label: "Price: low to high" },
+  { value: "price_desc", label: "Price: high to low" },
+  { value: "newest", label: "Newest" },
+];
 
 export function ProductsPage() {
   const [params, setParams] = useSearchParams();
   const category = params.get("category") ?? "";
   const q = params.get("q") ?? "";
   const page = Math.max(1, Number(params.get("page")) || 1);
+  const sort = SORTS.some((s) => s.value === params.get("sort")) ? params.get("sort") : "";
 
   // Local input state, pushed to the URL after a short pause.
   const [search, setSearch] = useState(q);
@@ -41,13 +49,21 @@ export function ProductsPage() {
     );
   }
 
+  const site = useSiteInfo();
   const categories = useQuery({ queryKey: ["categories"], queryFn: fetchCategories });
   const products = useQuery({
-    queryKey: ["products", { category, q, page }],
-    queryFn: () => fetchProducts({ category, q, page, pageSize: PAGE_SIZE }),
+    queryKey: ["products", { category, q, page, sort }],
+    queryFn: () => fetchProducts({ category, q, page, sort, pageSize: PAGE_SIZE }),
     placeholderData: keepPreviousData,
   });
+  const isEmpty = products.data?.items.length === 0;
+  const popular = useQuery({
+    queryKey: ["products", "popular"],
+    queryFn: () => fetchProducts({ sort: "popular", pageSize: 12 }),
+    enabled: Boolean(isEmpty),
+  });
 
+  const popularInStock = (popular.data?.items ?? []).filter((p) => p.inStock).slice(0, 4);
   const activeCategory = categories.data?.find((c) => c.slug === category);
   usePageMeta(
     activeCategory?.name ? `${activeCategory.name} · WYR Technology` : "Shop NFC tags, RFID cards & readers · WYR Technology",
@@ -66,15 +82,34 @@ export function ProductsPage() {
             {products.data ? `${products.data.total} product${products.data.total === 1 ? "" : "s"}` : " "}
             {q && <> matching “{q}”</>}
           </p>
+          {q && products.data?.fuzzy && (
+            <p className="text-muted-foreground mt-1 text-sm" data-testid="fuzzy-note">
+              No exact match, so these are the closest results.
+            </p>
+          )}
         </div>
+        <div className="flex w-full flex-col gap-2 sm:flex-row md:w-auto">
+          <select
+            value={sort}
+            onChange={(e) => update({ sort: e.target.value, page: "" })}
+            aria-label="Sort products"
+            className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+          >
+            {SORTS.map((s) => (
+              <option key={s.value} value={s.value}>
+                {s.value === "" && q ? "Best match" : s.label}
+              </option>
+            ))}
+          </select>
         <div className="relative w-full md:w-80">
           <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or SKU" className="pr-9 pl-9" aria-label="Search products" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search products, e.g. NTAG215 sticker" maxLength={100} className="pr-9 pl-9" aria-label="Search products" />
           {search && (
             <button type="button" onClick={() => setSearch("")} className="text-muted-foreground hover:text-foreground absolute top-1/2 right-2.5 -translate-y-1/2" aria-label="Clear search">
               <X className="size-4" />
             </button>
           )}
+        </div>
         </div>
       </div>
 
@@ -101,12 +136,33 @@ export function ProductsPage() {
             ))}
           </ProductGrid>
         ) : products.data.items.length === 0 ? (
-          <div className="text-muted-foreground rounded-xl border border-dashed py-16 text-center">
-            <p className="text-foreground font-medium">No products found</p>
-            <p className="mt-1 text-sm">Try a different search or category.</p>
-            <Button variant="outline" size="sm" className="mt-4" onClick={() => setParams({})}>
-              Clear filters
-            </Button>
+          <div data-testid="no-results">
+            <div className="text-muted-foreground rounded-xl border border-dashed px-4 py-12 text-center">
+              <p className="text-foreground font-medium">{q ? <>No products found for “{q}”</> : "No products found"}</p>
+              <p className="mt-1 text-sm">Check the spelling, try a shorter word such as “NTAG215” or “reader”, or pick another category.</p>
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => setParams({})}>
+                  Show all products
+                </Button>
+                {site.whatsappNumber && (
+                  <Button variant="outline" size="sm" asChild>
+                    <a href={whatsappLink(site.whatsappNumber, `Hi WYR, I'm looking for: ${q || "a product"}`)} target="_blank" rel="noreferrer">
+                      Ask us on WhatsApp
+                    </a>
+                  </Button>
+                )}
+              </div>
+            </div>
+            {popularInStock.length > 0 && (
+              <div className="mt-10">
+                <h2 className="mb-4 text-lg font-semibold">Popular products</h2>
+                <ProductGrid>
+                  {popularInStock.map((p) => (
+                    <ProductCard key={p.id} product={p} />
+                  ))}
+                </ProductGrid>
+              </div>
+            )}
           </div>
         ) : (
           <ProductGrid>
