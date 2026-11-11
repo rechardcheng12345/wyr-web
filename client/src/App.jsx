@@ -11,9 +11,11 @@ import { CartPage } from "@/pages/CartPage";
 import { CheckoutPage } from "@/pages/CheckoutPage";
 import { CheckoutReturnPage } from "@/pages/CheckoutReturnPage";
 import { ContactPage } from "@/pages/ContactPage";
+import { EinkConverterPage } from "@/pages/EinkConverterPage";
 import { HomePage } from "@/pages/HomePage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { OrderPage } from "@/pages/OrderPage";
+import { PrivacyPolicyPage, ReturnsPolicyPage, ShippingPolicyPage, TermsPage } from "@/pages/PolicyPages";
 import { ProductDetailPage } from "@/pages/ProductDetailPage";
 import { ProductsPage } from "@/pages/ProductsPage";
 import { TrackOrderPage } from "@/pages/TrackOrderPage";
@@ -39,6 +41,11 @@ export function App() {
           <Route path="products/:slug" element={<ProductDetailPage />} />
           <Route path="about" element={<AboutPage />} />
           <Route path="contact" element={<ContactPage />} />
+          <Route path="eink-converter" element={<EinkConverterPage />} />
+          <Route path="shipping" element={<ShippingPolicyPage />} />
+          <Route path="returns" element={<ReturnsPolicyPage />} />
+          <Route path="privacy" element={<PrivacyPolicyPage />} />
+          <Route path="terms" element={<TermsPage />} />
           <Route path="cart" element={<CartPage />} />
           <Route path="checkout" element={<CheckoutPage />} />
           <Route path="checkout/return" element={<CheckoutReturnPage />} />

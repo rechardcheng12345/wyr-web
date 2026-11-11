@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRight, MessageCircle, ShoppingCart, Truck } from "lucide-react";
+import { ChevronRight, MessageCircle, RotateCcw, ShoppingCart, Truck } from "lucide-react";
 import { useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ErrorState } from "@/components/ErrorState";
@@ -13,6 +13,7 @@ import { ApiError, fetchProduct } from "@/lib/api";
 import { useCart } from "@/lib/cart";
 import { lineTotal, savingPct, tierFor } from "@/lib/pricing";
 import { shippingText, usePageMeta, useSiteInfo } from "@/lib/site";
+import { hourText } from "@/pages/PolicyPages";
 import { cn, formatPrice, formatPriceRange } from "@/lib/utils";
 import { NotFoundPage } from "./NotFoundPage";
 
@@ -126,6 +127,18 @@ function ProductView({ product }) {
                 <span>
                   {shippingText(site.shipping)}
                   {site.shipping.freeThresholdRm != null && <> · free from {formatPrice(site.shipping.freeThresholdRm)}</>}
+                </span>
+              </p>
+            )}
+            {site.policies && (
+              <p className="text-muted-foreground mt-1.5 flex items-center gap-2 text-sm" data-testid="returns-note">
+                <RotateCcw className="size-4 shrink-0" />
+                <span>
+                  Ships the same working day if paid before {hourText(site.policies.dispatchCutoffHour)} ·{" "}
+                  <Link to="/returns" className="underline underline-offset-2">
+                    {site.policies.returnDays}-day returns
+                  </Link>{" "}
+                  for faulty or wrong items
                 </span>
               </p>
             )}

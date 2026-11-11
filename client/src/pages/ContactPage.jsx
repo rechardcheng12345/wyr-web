@@ -1,8 +1,9 @@
-import { ExternalLink, MessageCircle, Send, ShoppingBag } from "lucide-react";
+import { Building2, ExternalLink, MessageCircle, Send, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { usePageMeta, useSiteInfo, whatsappLink } from "@/lib/site";
+import { BusinessDetails } from "@/pages/PolicyPages";
 
 const TOPICS = ["Product question", "Bulk / business quote", "Order help", "Something else"];
 
@@ -37,7 +38,7 @@ export function ContactPage() {
         <div className="relative mx-auto max-w-6xl px-4 py-16 md:py-20">
           <p className="text-brand-orange text-xs font-semibold tracking-[0.14em] uppercase">Contact us</p>
           <h1 className="mt-3 max-w-2xl text-4xl font-extrabold tracking-tight sm:text-5xl">We're happy to help</h1>
-          <p className="mt-5 max-w-xl text-lg text-slate-300">Questions about a chip, a bulk order or an existing order? WhatsApp is the fastest way to reach us.</p>
+          <p className="mt-5 max-w-xl text-lg text-slate-300">Questions about a chip, a bulk order or an existing order? Call, email or WhatsApp us. WhatsApp is the fastest.</p>
         </div>
       </section>
 
@@ -53,6 +54,11 @@ export function ContactPage() {
               <p className="mt-2 text-xs">Number coming soon.</p>
             )}
           </ContactCard>
+          {site.business && (
+            <ContactCard icon={Building2} title="Phone, email and address">
+              <BusinessDetails className="text-foreground" />
+            </ContactCard>
+          )}
           {site.shopeeUrl && (
             <ContactCard icon={ShoppingBag} title="Shopee store">
               <p>Prefer marketplace vouchers? Message or order from our Shopee shop.</p>

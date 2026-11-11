@@ -8,6 +8,7 @@ import { CheckoutError } from "./orders.js";
 import { bulkQuote } from "./pricing.js";
 import { merchantFeed } from "./merchant-feed.js";
 import { createSeo, redirectWww } from "./seo.js";
+import { storeInfo } from "./merchant.js";
 import { getSetting } from "./settings.js";
 import { shippingSummary } from "./shipping.js";
 import { welcomeVoucher } from "./vouchers.js";
@@ -30,6 +31,7 @@ import { checkoutRouter } from "./routes/checkout.js";
 import { ordersRouter } from "./routes/orders.js";
 import { paymentsRouter } from "./routes/payments.js";
 import { productsRouter } from "./routes/products.js";
+import { syncRouter } from "./routes/sync.js";
 
 const CLIENT_DIST = path.resolve(SERVER_ROOT, "../client/dist");
 
@@ -39,6 +41,8 @@ export function createApp() {
   app.set("trust proxy", "loopback");
   if (!(process.env.NODE_ENV === "dev" || process.env.NODE_ENV === "development")) app.use(redirectWww);
   app.use(cors({ origin: CORS_ORIGINS }));
+  // BigSeller sync (API key, larger bodies): mounted before the app-wide 100 kB JSON parser.
+  app.use("/api/sync", syncRouter);
   app.use(express.json());
 
   app.get("/api/health", (_req, res) => {
@@ -55,6 +59,7 @@ export function createApp() {
       minOrderSubtotalRm: getSetting("min_order_subtotal"),
       lowPriceMinQty: getSetting("low_price_min_qty"),
       welcomeVoucher: await welcomeVoucher(),
+      ...storeInfo(),
     });
   });
   app.use("/api/auth", authRouter);
@@ -130,6 +135,10 @@ export function createApp() {
     }
     if (err?.type === "entity.parse.failed") {
       res.status(400).json({ error: "Invalid JSON" });
+      return;
+    }
+    if (err?.type === "entity.too.large") {
+      res.status(413).json({ error: "Request body too large" });
       return;
     }
     console.error(err);

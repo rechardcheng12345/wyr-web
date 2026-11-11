@@ -629,5 +629,480 @@
     },
     "tool_use_id": "toolu_01UrgFNbFnL44YqcCUyoF9rq",
     "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\client\\src\\admin\\pages",
+    "duration_ms": 719,
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "0ca87209-3603-4836-83fd-94f8a48c93e5",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\adfc42aa-92b0-4fbc-8ce8-e313f5728751\\scratchpad",
+    "session_id": "adfc42aa-92b0-4fbc-8ce8-e313f5728751",
+    "tool_input": {
+      "command": "cd \"/d/Github/WYR Web/client/src/admin/pages\"; node - \u003c\u003c'EOF'\nconst fs=require(\"fs\");const f=\"DocumentsPage.jsx\";let s=fs.readFileSync(f,\"utf8\");const crlf=s.includes(\"\\r\\n\");s=s.replace(/\\r\\n/g,\"\\n\");\nconst rep=(a,b)=\u003e{if(!s.includes(a))throw new Error(\"missing: \"+a.slice(0,60));s=s.replace(a,b);};\nrep(`import { Ban, CheckCircle2, FileOutput, Pencil, Plus, Printer, Search, Send, Trash2, Truck, Undo2 } from \"lucide-react\";`,\n    `import { Ban, CheckCircle2, ChevronDown, FileDown, FileOutput, Loader2, Pencil, Plus, Printer, Search, Send, Trash2, Truck, Undo2, X } from \"lucide-react\";`);\nrep(`import { useCallback, useEffect, useMemo, useState } from \"react\";`,`import { useCallback, useEffect, useMemo, useRef, useState } from \"react\";`);\nrep(`import { DOC_TITLE, PrintDocument } from \"../components/PrintDocument\";`,`import { DOC_TITLE, DownloadDocumentPdf, PrintDocument } from \"../components/PrintDocument\";`);\nrep(`  const [printing, setPrinting] = useState(null);\\n`,`  const [printing, setPrinting] = useState(null);\\n  const [downloading, setDownloading] = useState(null);\\n`);\nrep(`          onPrint={() =\u003e setPrinting(r)}\\n`,`          onPrint={() =\u003e setPrinting(r)}\\n          onDownload={() =\u003e setDownloading(r)}\\n          downloading={downloading?.id === r.id}\\n`);\nrep(`      {printing \u0026\u0026 data \u0026\u0026 \u003cPrintDocument doc={printing} company={data.company} onDone={() =\u003e setPrinting(null)} /\u003e}\\n`,\n`      {printing \u0026\u0026 data \u0026\u0026 \u003cPrintDocument doc={printing} company={data.company} onDone={() =\u003e setPrinting(null)} /\u003e}\n      {downloading \u0026\u0026 data \u0026\u0026 (\n        \u003cDownloadDocumentPdf\n          doc={downloading}\n          company={data.company}\n          onDone={(err) =\u003e {\n            if (err) setError(\\`Couldn't create the PDF: \\${err.message}\\`);\n            setDownloading(null);\n          }}\n        /\u003e\n      )}\n`);\nrep(`function RowActions({ doc, onPrint, onEdit, onConvert, onPaid, onConfirm }) {`,`function RowActions({ doc, onPrint, onDownload, downloading, onEdit, onConvert, onPaid, onConfirm }) {`);\nrep(`      {icon(\"Print\", Printer, onPrint)}\\n`,`      {icon(\"Print\", Printer, onPrint)}\n      \u003cButton variant=\"ghost\" size=\"icon\" onClick={onDownload} disabled={downloading} aria-label=\"Download PDF\" title=\"Download PDF\"\u003e\n        {downloading ? \u003cLoader2 className=\"animate-spin\" /\u003e : \u003cFileDown /\u003e}\n      \u003c/Button\u003e\n`);\n// Product picker\nconst selStart=s.indexOf(`                    \u003cSelect value={l.variantId ?? \"\"} onChange={(e) =\u003e pickVariant(l.key, e.target.value)}\u003e`);\nconst selEnd=s.indexOf(`\u003c/Select\u003e`,selStart)+`\u003c/Select\u003e`.length;\nif(selStart\u003c0)throw new Error(\"select not found\");\ns=s.slice(0,selStart)+`                    \u003cProductPicker\n                      stock={stock}\n                      value={l.variantId}\n                      onChange={(id) =\u003e pickVariant(l.key, id == null ? \"\" : String(id))}\n                      customLabel={isDO ? \"Custom item (no stock change)\" : \"Custom item / service\"}\n                      showStock={isDO}\n                    /\u003e`+s.slice(selEnd);\nif(crlf)s=s.replace(/\\n/g,\"\\r\\n\");fs.writeFileSync(f,s);\nEOF\ngrep -n \"groups\" DocumentsPage.jsx",
+      "description": "Wire PDF download and swap select for picker"
+    },
+    "tool_name": "Bash",
+    "tool_response": {
+      "bashEditDiff": {
+        "changedFiles": [
+          "D:\\Github\\WYR Web\\client\\src\\admin\\pages\\DocumentsPage.jsx"
+        ],
+        "files": [
+          {
+            "filePath": "D:\\Github\\WYR Web\\client\\src\\admin\\pages\\DocumentsPage.jsx",
+            "hunks": [
+              {
+                "lines": [
+                  "-import { Ban, CheckCircle2, FileOutput, Pencil, Plus, Printer, Search, Send, Trash2, Truck, Undo2 } from \"lucide-react\";",
+                  "-import { useCallback, useEffect, useMemo, useState } from \"react\";",
+                  "+import { Ban, CheckCircle2, ChevronDown, FileDown, FileOutput, Loader2, Pencil, Plus, Printer, Search, Send, Trash2, Truck, Undo2, X } from \"lucide-react\";",
+                  "+import { useCallback, useEffect, useMemo, useRef, useState } from \"react\";",
+                  " import { useLocation, useNavigate, useSearchParams } from \"react-router-dom\";",
+                  " import { Button } from \"@/components/ui/button\";",
+                  " import { Input } from \"@/components/ui/input\";"
+                ],
+                "newLines": 5,
+                "newStart": 1,
+                "oldLines": 5,
+                "oldStart": 1
+              },
+              {
+                "lines": [
+                  " import { FormField, Select } from \"../components/FormField\";",
+                  " import { Modal } from \"../components/Modal\";",
+                  " import { PageHeader } from \"../components/PageHeader\";",
+                  "-import { DOC_TITLE, PrintDocument } from \"../components/PrintDocument\";",
+                  "+import { DOC_TITLE, DownloadDocumentPdf, PrintDocument } from \"../components/PrintDocument\";",
+                  " import { formatDate, formatNumber, formatRM, localISODate } from \"../format\";",
+                  " import { deleteDocument, issueDocument, listDocuments, saveDocument, setInvoicePaid, voidDocument } from \"../services/documentsService\";",
+                  " import { listStock } from \"../services/inventoryService\";"
+                ],
+                "newLines": 7,
+                "newStart": 8,
+                "oldLines": 7,
+                "oldStart": 8
+              },
+              {
+                "lines": [
+                  "   const [confirm, setConfirm] = useState(null);",
+                  "   const [paying, setPaying] = useState(null);",
+                  "   const [printing, setPrinting] = useState(null);",
+                  "+  const [downloading, setDownloading] = useState(null);",
+                  " ",
+                  "   const load = useCallback(async () =\u003e {",
+                  "     try {"
+                ],
+                "newLines": 7,
+                "newStart": 136,
+                "oldLines": 6,
+                "oldStart": 136
+              },
+              {
+                "lines": [
+                  "         \u003cRowActions",
+                  "           doc={r}",
+                  "           onPrint={() =\u003e setPrinting(r)}",
+                  "+          onDownload={() =\u003e setDownloading(r)}",
+                  "+          downloading={downloading?.id === r.id}",
+                  "           onEdit={() =\u003e setEditing(r)}",
+                  "           onConvert={(to) =\u003e setEditing(copyFrom(r, to))}",
+                  "           onPaid={() =\u003e setPaying(r)}"
+                ],
+                "newLines": 8,
+                "newStart": 250,
+                "oldLines": 6,
+                "oldStart": 249
+              },
+              {
+                "lines": [
+                  "         /\u003e",
+                  "       )}",
+                  "       {printing \u0026\u0026 data \u0026\u0026 \u003cPrintDocument doc={printing} company={data.company} onDone={() =\u003e setPrinting(null)} /\u003e}",
+                  "+      {downloading \u0026\u0026 data \u0026\u0026 (",
+                  "+        \u003cDownloadDocumentPdf",
+                  "+          doc={downloading}",
+                  "+          company={data.company}",
+                  "+          onDone={(err) =\u003e {",
+                  "+            if (err) setError(`Couldn't create the PDF: ${err.message}`);",
+                  "+            setDownloading(null);",
+                  "+          }}",
+                  "+        /\u003e",
+                  "+      )}",
+                  "     \u003c/\u003e",
+                  "   );",
+                  " }",
+                  " ",
+                  "-function RowActions({ doc, onPrint, onEdit, onConvert, onPaid, onConfirm }) {",
+                  "+function RowActions({ doc, onPrint, onDownload, downloading, onEdit, onConvert, onPaid, onConfirm }) {",
+                  "   const isVoid = doc.status === \"void\";",
+                  "   const editable = !isVoid \u0026\u0026 (doc.type !== \"delivery_order\" || doc.status === \"draft\");",
+                  "   const icon = (label, Icon, onClick, className) =\u003e ("
+                ],
+                "newLines": 21,
+                "newStart": 352,
+                "oldLines": 11,
+                "oldStart": 349
+              },
+              {
+                "lines": [
+                  "         \u003c/Button\u003e",
+                  "       )}",
+                  "       {icon(\"Print\", Printer, onPrint)}",
+                  "+      \u003cButton variant=\"ghost\" size=\"icon\" onClick={onDownload} disabled={downloading} aria-label=\"Download PDF\" title=\"Download PDF\"\u003e",
+                  "+        {downloading ? \u003cLoader2 className=\"animate-spin\" /\u003e : \u003cFileDown /\u003e}",
+                  "+      \u003c/Button\u003e",
+                  "       {editable \u0026\u0026 icon(\"Edit\", Pencil, onEdit)}",
+                  "       {!isVoid \u0026\u0026 doc.type === \"invoice\" \u0026\u0026 doc.paidAt \u0026\u0026 icon(\"Mark unpaid\", Undo2, () =\u003e onConfirm(\"unpaid\"))}",
+                  "       {doc.status === \"draft\" \u0026\u0026 icon(\"Delete\", Trash2, () =\u003e onConfirm(\"delete\"), \"text-red-600 hover:bg-red-50 hover:text-red-700\")}"
+                ],
+                "newLines": 9,
+                "newStart": 401,
+                "oldLines": 6,
+                "oldStart": 388
+              },
+              {
+                "lines": [
+                  "               return (",
+                  "                 \u003cdiv key={l.key} className=\"grid grid-cols-2 items-start gap-2 rounded-lg border p-3 sm:grid-cols-6\"\u003e",
+                  "                   \u003cFormField label=\"Product\" className=\"col-span-2 sm:col-span-2\"\u003e",
+                  "-                    \u003cSelect value={l.variantId ?? \"\"} onChange={(e) =\u003e pickVariant(l.key, e.target.value)}\u003e",
+                  "-                      \u003coption value=\"\"\u003e{isDO ? \"Custom item (no stock change)\" : \"Custom item / service\"}\u003c/option\u003e",
+                  "-                      {groups.map(([name, variants]) =\u003e (",
+                  "-                        \u003coptgroup key={name} label={name}\u003e",
+                  "-                          {variants.map((v) =\u003e (",
+                  "-                            \u003coption key={v.variantId} value={v.variantId}\u003e",
+                  "-                              {v.variantName ? `${v.variantName} · ` : \"\"}",
+                  "-                              {v.sku}",
+                  "-                              {isDO ? ` (stock ${v.available})` : \"\"}",
+                  "-                            \u003c/option\u003e",
+                  "-                          ))}",
+                  "-                        \u003c/optgroup\u003e",
+                  "-                      ))}",
+                  "-                    \u003c/Select\u003e",
+                  "+                    \u003cProductPicker",
+                  "+                      stock={stock}",
+                  "+                      value={l.variantId}",
+                  "+                      onChange={(id) =\u003e pickVariant(l.key, id == null ? \"\" : String(id))}",
+                  "+                      customLabel={isDO ? \"Custom item (no stock change)\" : \"Custom item / service\"}",
+                  "+                      showStock={isDO}",
+                  "+                    /\u003e",
+                  "                   \u003c/FormField\u003e",
+                  "                   \u003cFormField label=\"Description\" error={err(\"description\")} className=\"col-span-2 sm:col-span-4\"\u003e",
+                  "                     \u003ctextarea"
+                ],
+                "newLines": 13,
+                "newStart": 752,
+                "oldLines": 20,
+                "oldStart": 736
+              }
+            ]
+          }
+        ],
+        "moreFiles": 0
+      },
+      "interrupted": false,
+      "isImage": false,
+      "noOutputExpected": false,
+      "stderr": "",
+      "stdout": "570:  const groups = useMemo(() =\u003e {"
+    },
+    "tool_use_id": "toolu_01HvCw7Gt5mANkRGNGWafdyv",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\adfc42aa-92b0-4fbc-8ce8-e313f5728751.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\client\\src\\admin\\pages",
+    "duration_ms": 19,
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "0ca87209-3603-4836-83fd-94f8a48c93e5",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\adfc42aa-92b0-4fbc-8ce8-e313f5728751\\scratchpad",
+    "session_id": "adfc42aa-92b0-4fbc-8ce8-e313f5728751",
+    "tool_input": {
+      "file_path": "D:\\Github\\WYR Web\\client\\src\\admin\\pages\\DocumentsPage.jsx",
+      "limit": 7,
+      "offset": 569
+    },
+    "tool_name": "Read",
+    "tool_response": {
+      "file": {
+        "content": "\n  const groups = useMemo(() =\u003e {\n    const map = new Map();\n    for (const v of stock) map.set(v.productName, [...(map.get(v.productName) ?? []), v]);\n    return [...map];\n  }, [stock]);\n",
+        "filePath": "D:\\Github\\WYR Web\\client\\src\\admin\\pages\\DocumentsPage.jsx",
+        "numLines": 7,
+        "startLine": 569,
+        "totalLines": 828
+      },
+      "type": "text"
+    },
+    "tool_use_id": "toolu_018UpyggxNiLo7zyaSVTUTp6",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\adfc42aa-92b0-4fbc-8ce8-e313f5728751.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\client\\src\\admin\\pages",
+    "duration_ms": 35,
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "0ca87209-3603-4836-83fd-94f8a48c93e5",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\adfc42aa-92b0-4fbc-8ce8-e313f5728751\\scratchpad",
+    "session_id": "adfc42aa-92b0-4fbc-8ce8-e313f5728751",
+    "tool_input": {
+      "file_path": "D:\\Github\\WYR Web\\client\\src\\admin\\pages\\DocumentsPage.jsx",
+      "new_string": "",
+      "old_string": "\n  const groups = useMemo(() =\u003e {\n    const map = new Map();\n    for (const v of stock) map.set(v.productName, [...(map.get(v.productName) ?? []), v]);\n    return [...map];\n  }, [stock]);\n",
+      "replace_all": false
+    },
+    "tool_name": "Edit",
+    "tool_response": {
+      "contentNotInModelContext": true,
+      "filePath": "D:\\Github\\WYR Web\\client\\src\\admin\\pages\\DocumentsPage.jsx",
+      "newString": "",
+      "oldString": "\n  const groups = useMemo(() =\u003e {\n    const map = new Map();\n    for (const v of stock) map.set(v.productName, [...(map.get(v.productName) ?? []), v]);\n    return [...map];\n  }, [stock]);\n",
+      "originalFile": "import { Ban, CheckCircle2, ChevronDown, FileDown, FileOutput, Loader2, Pencil, Plus, Printer, Search, Send, Trash2, Truck, Undo2, X } from \"lucide-react\";\nimport { useCallback, useEffect, useMemo, useRef, useState } from \"react\";\nimport { useLocation, useNavigate, useSearchParams } from \"react-router-dom\";\nimport { Button } from \"@/components/ui/button\";\nimport { Input } from \"@/components/ui/input\";\nimport { cn } from \"@/lib/utils\";\nimport { DataTable } from \"../components/DataTable\";\nimport { FormField, Select } from \"../components/FormField\";\nimport { Modal } from \"../components/Modal\";\nimport { PageHeader } from \"../components/PageHeader\";\nimport { DOC_TITLE, DownloadDocumentPdf, PrintDocument } from \"../components/PrintDocument\";\nimport { formatDate, formatNumber, formatRM, localISODate } from \"../format\";\nimport { deleteDocument, issueDocument, listDocuments, saveDocument, setInvoicePaid, voidDocument } from \"../services/documentsService\";\nimport { listStock } from \"../services/inventoryService\";\n\nconst TABS = [\n  { type: \"quotation\", label: \"Quotations\" },\n  { type: \"invoice\", label: \"Invoices\" },\n  { type: \"delivery_order\", label: \"Delivery orders\" },\n];\n\nconst FILTERS = {\n  quotation: [\n    [\"issued\", \"Issued\"],\n    [\"void\", \"Void\"],\n  ],\n  invoice: [\n    [\"unpaid\", \"Unpaid\"],\n    [\"paid\", \"Paid\"],\n    [\"void\", \"Void\"],\n  ],\n  delivery_order: [\n    [\"draft\", \"Draft\"],\n    [\"issued\", \"Issued\"],\n    [\"void\", \"Void\"],\n  ],\n};\n\nconst textareaClass =\n  \"border-input focus-visible:border-ring focus-visible:ring-ring/50 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs outline-none focus-visible:ring-[3px] md:text-sm\";\n\nconst newKey = () =\u003e crypto.randomUUID();\nconst emptyLine = () =\u003e ({ key: newKey(), variantId: null, sku: \"\", description: \"\", note: \"\", qty: \"1\", unitPrice: \"\" });\n\nfunction addDays(iso, days) {\n  const d = new Date(`${iso}T00:00:00`);\n  d.setDate(d.getDate() + days);\n  return localISODate(d);\n}\n\nfunction matchesFilter(doc, filter) {\n  if (!filter) return true;\n  if (filter === \"void\") return doc.status === \"void\";\n  if (doc.status === \"void\") return false;\n  if (filter === \"paid\") return Boolean(doc.paidAt);\n  if (filter === \"unpaid\") return !doc.paidAt;\n  return doc.status === filter;\n}\n\nfunction Pill({ className, children }) {\n  return \u003cspan className={cn(\"rounded-md px-2 py-0.5 text-xs font-medium whitespace-nowrap\", className)}\u003e{children}\u003c/span\u003e;\n}\n\nfunction StatusPill({ doc }) {\n  if (doc.status === \"void\") return \u003cPill className=\"bg-red-50 text-red-700\"\u003eVoid\u003c/Pill\u003e;\n  if (doc.type === \"invoice\") {\n    return doc.paidAt ? \u003cPill className=\"bg-emerald-50 text-emerald-700\"\u003ePaid {formatDate(doc.paidAt)}\u003c/Pill\u003e : \u003cPill className=\"bg-amber-50 text-amber-700\"\u003eUnpaid\u003c/Pill\u003e;\n  }\n  if (doc.type === \"delivery_order\") {\n    return doc.status === \"draft\" ? \u003cPill className=\"bg-slate-100 text-slate-700\"\u003eDraft\u003c/Pill\u003e : \u003cPill className=\"bg-emerald-50 text-emerald-700\"\u003eIssued\u003c/Pill\u003e;\n  }\n  const invoiced = doc.derived.find((x) =\u003e x.type === \"invoice\" \u0026\u0026 x.status !== \"void\");\n  return invoiced ? \u003cPill className=\"bg-blue-50 text-blue-700\"\u003eInvoiced {invoiced.docNo}\u003c/Pill\u003e : \u003cPill className=\"bg-slate-100 text-slate-700\"\u003eIssued\u003c/Pill\u003e;\n}\n\n/** Form values for a new document copied from another one (quotation → invoice → DO). */\nfunction copyFrom(doc, type) {\n  return {\n    type,\n    sourceId: doc.id,\n    clientId: doc.clientId,\n    billToName: doc.billToName,\n    billToAddress: doc.billToAddress,\n    attention: doc.attention,\n    customerRef: doc.customerRef,\n    otherLabel: type === \"invoice\" ? doc.otherLabel : \"\",\n    otherAmount: type === \"invoice\" ? doc.otherAmount : 0,\n    // A website order's invoice also has a Shipping line, which isn't something to deliver.\n    lines: doc.lines.filter((l) =\u003e type !== \"delivery_order\" || doc.orderId == null || l.sku).map(({ id: _id, ...l }) =\u003e l),\n    fromLabel: `${DOC_TITLE[doc.type]} ${doc.docNo}`,\n  };\n}\n\n/** Form values for a formal invoice of a website order (already paid, stock already taken). */\nfunction invoiceForOrder(o) {\n  const s = o.shipping;\n  const lines = o.items.map((i) =\u003e ({\n    variantId: null,\n    sku: i.sku ?? \"\",\n    description: [i.productName, i.variantName].filter(Boolean).join(\" — \"),\n    note: \"\",\n    qty: i.qty,\n    unitPrice: i.unitPrice,\n  }));\n  if (o.shippingFee \u003e 0) lines.push({ variantId: null, sku: \"\", description: \"Shipping\", note: \"\", qty: 1, unitPrice: o.shippingFee });\n  return {\n    type: \"invoice\",\n    orderId: o.id,\n    docDate: o.paidAt ? localISODate(new Date(o.paidAt)) : localISODate(),\n    paidAt: o.paidAt ? localISODate(new Date(o.paidAt)) : null,\n    billToName: o.companyName || s.name,\n    billToAddress: [s.address, [s.postcode, s.city].filter(Boolean).join(\" \"), s.state].filter(Boolean).join(\"\\n\"),\n    attention: o.companyName ? s.name : \"\",\n    phone: s.phone ?? \"\",\n    email: o.email ?? \"\",\n    customerRef: o.orderNo,\n    otherLabel: o.discount \u003e 0 ? `Voucher ${o.voucherCode ?? \"\"}`.trim() : \"\",\n    otherAmount: o.discount \u003e 0 ? -o.discount : 0,\n    lines,\n    fromLabel: `website order ${o.orderNo}`,\n  };\n}\n\nexport function DocumentsPage() {\n  const [params, setParams] = useSearchParams();\n  const type = TABS.some((t) =\u003e t.type === params.get(\"type\")) ? params.get(\"type\") : \"quotation\";\n  const location = useLocation();\n  const navigate = useNavigate();\n  const [data, setData] = useState(null);\n  const [isLoading, setIsLoading] = useState(true);\n  const [error, setError] = useState(\"\");\n  const [notice, setNotice] = useState(\"\");\n  const [query, setQuery] = useState(\"\");\n  const [filter, setFilter] = useState(\"\");\n  const [editing, setEditing] = useState(null);\n  const [confirm, setConfirm] = useState(null);\n  const [paying, setPaying] = useState(null);\n  const [printing, setPrinting] = useState(null);\n  const [downloading, setDownloading] = useState(null);\n\n  const load = useCallback(async () =\u003e {\n    try {\n      const result = await listDocuments(type);\n      setData({ ...result, type });\n      setError(\"\");\n    } catch (err) {\n      setError(err.message);\n    } finally {\n      setIsLoading(false);\n    }\n  }, [type]);\n\n  useEffect(() =\u003e {\n    setIsLoading(true);\n    setFilter(\"\");\n    load();\n  }, [load]);\n\n  // \"Invoice\" on a website order lands here with the order in the navigation state.\n  const fromOrder = location.state?.fromOrder;\n  useEffect(() =\u003e {\n    if (!fromOrder || data?.type !== \"invoice\") return;\n    navigate(location.pathname + location.search, { replace: true, state: null });\n    const existing = data.documents.find((d) =\u003e d.orderId === fromOrder.id \u0026\u0026 d.status !== \"void\");\n    if (existing) {\n      setNotice(`Order ${fromOrder.orderNo} already has invoice ${existing.docNo}.`);\n      setQuery(existing.docNo);\n    } else {\n      setEditing(invoiceForOrder(fromOrder));\n    }\n  }, [fromOrder, data, navigate, location.pathname, location.search]);\n\n  // The Customers page links here to start a document for a customer, or to show one document.\n  const fromCustomer = location.state?.newFor;\n  const showDoc = location.state?.search;\n  useEffect(() =\u003e {\n    if ((!fromCustomer \u0026\u0026 !showDoc) || data?.type !== type) return;\n    navigate(location.pathname + location.search, { replace: true, state: null });\n    if (showDoc) setQuery(showDoc);\n    else\n      setEditing({\n        type,\n        clientId: fromCustomer.id,\n        billToName: fromCustomer.name,\n        billToAddress: fromCustomer.address,\n        attention: fromCustomer.attention,\n        phone: fromCustomer.phone,\n        email: fromCustomer.email,\n      });\n  }, [fromCustomer, showDoc, data, type, navigate, location.pathname, location.search]);\n\n  const docs = data?.type === type ? data.documents : [];\n  const rows = useMemo(() =\u003e {\n    const q = query.trim().toLowerCase();\n    return docs.filter(\n      (d) =\u003e matchesFilter(d, filter) \u0026\u0026 (!q || [d.docNo, d.billToName, d.attention, d.customerRef, d.orderNo].some((v) =\u003e v?.toLowerCase().includes(q))),\n    );\n  }, [docs, filter, query]);\n\n  const unpaid = type === \"invoice\" ? docs.filter((d) =\u003e d.status !== \"void\" \u0026\u0026 !d.paidAt) : [];\n\n  function switchTab(t) {\n    setQuery(\"\");\n    setNotice(\"\");\n    setParams({ type: t });\n  }\n\n  function onSaved(doc, wasNew) {\n    setEditing(null);\n    setNotice(`${wasNew ? \"Created\" : \"Saved\"} ${DOC_TITLE[doc.type].toLowerCase()} ${doc.docNo}.`);\n    if (doc.type !== type) setParams({ type: doc.type });\n    else load();\n  }\n\n  const columns = [\n    { key: \"docNo\", header: \"Number\", className: \"font-mono text-xs whitespace-nowrap\" },\n    { key: \"docDate\", header: \"Date\", className: \"whitespace-nowrap\", render: (r) =\u003e formatDate(r.docDate) },\n    {\n      key: \"billTo\",\n      header: type === \"delivery_order\" ? \"Deliver to\" : \"Bill to\",\n      className: \"min-w-48\",\n      render: (r) =\u003e (\n        \u003c\u003e\n          \u003cp className=\"font-medium\"\u003e{r.billToName}\u003c/p\u003e\n          {r.attention \u0026\u0026 \u003cp className=\"text-muted-foreground text-xs\"\u003eAttn: {r.attention}\u003c/p\u003e}\n        \u003c/\u003e\n      ),\n    },\n    {\n      key: \"ref\",\n      header: \"Ref\",\n      className: \"text-xs\",\n      render: (r) =\u003e (\n        \u003cdiv className=\"text-muted-foreground flex flex-col whitespace-nowrap\"\u003e\n          {r.customerRef \u0026\u0026 \u003cspan\u003e{r.customerRef}\u003c/span\u003e}\n          {r.source \u0026\u0026 \u003cspan\u003efrom {r.source.docNo}\u003c/span\u003e}\n          {r.orderNo \u0026\u0026 r.orderNo !== r.customerRef \u0026\u0026 \u003cspan\u003eorder {r.orderNo}\u003c/span\u003e}\n        \u003c/div\u003e\n      ),\n    },\n    type === \"delivery_order\"\n      ? { key: \"items\", header: \"Items\", align: \"right\", render: (r) =\u003e formatNumber(r.lines.reduce((s, l) =\u003e s + l.qty, 0)) }\n      : { key: \"total\", header: \"Total\", align: \"right\", render: (r) =\u003e \u003cspan className=\"font-medium\"\u003e{formatRM(r.total)}\u003c/span\u003e },\n    { key: \"status\", header: \"Status\", render: (r) =\u003e \u003cStatusPill doc={r} /\u003e },\n    {\n      key: \"actions\",\n      header: \"\",\n      align: \"right\",\n      render: (r) =\u003e (\n        \u003cRowActions\n          doc={r}\n          onPrint={() =\u003e setPrinting(r)}\n          onDownload={() =\u003e setDownloading(r)}\n          downloading={downloading?.id === r.id}\n          onEdit={() =\u003e setEditing(r)}\n          onConvert={(to) =\u003e setEditing(copyFrom(r, to))}\n          onPaid={() =\u003e setPaying(r)}\n          onConfirm={(action) =\u003e setConfirm({ action, doc: r })}\n        /\u003e\n      ),\n    },\n  ];\n\n  return (\n    \u003c\u003e\n      \u003cPageHeader\n        title=\"Documents\"\n        description=\"Quotations, invoices and delivery orders for walk-in and company customers. Issuing a delivery order takes its products out of stock.\"\n        actions={\n          \u003cButton onClick={() =\u003e setEditing({ type })}\u003e\n            \u003cPlus /\u003e\n            New {DOC_TITLE[type].toLowerCase()}\n          \u003c/Button\u003e\n        }\n      /\u003e\n\n      \u003cdiv className=\"mb-4 flex gap-1 overflow-x-auto border-b\"\u003e\n        {TABS.map((t) =\u003e (\n          \u003cbutton\n            key={t.type}\n            onClick={() =\u003e switchTab(t.type)}\n            className={cn(\n              \"-mb-px border-b-2 px-4 py-2 text-sm font-medium whitespace-nowrap\",\n              t.type === type ? \"border-primary text-primary\" : \"text-muted-foreground hover:text-foreground border-transparent\",\n            )}\n          \u003e\n            {t.label}\n          \u003c/button\u003e\n        ))}\n      \u003c/div\u003e\n\n      {notice \u0026\u0026 (\n        \u003cp role=\"status\" className=\"mb-4 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-700\"\u003e\n          {notice}\n        \u003c/p\u003e\n      )}\n      {error \u0026\u0026 \u003cp className=\"text-destructive mb-4 rounded-md bg-red-50 px-3 py-2 text-sm\"\u003e{error}\u003c/p\u003e}\n      {unpaid.length \u003e 0 \u0026\u0026 (\n        \u003cp className=\"mb-4 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800\"\u003e\n          {unpaid.length} unpaid invoice{unpaid.length === 1 ? \"\" : \"s\"} · {formatRM(unpaid.reduce((s, d) =\u003e s + d.total, 0))} outstanding\n        \u003c/p\u003e\n      )}\n\n      \u003cdiv className=\"mb-4 flex flex-col gap-2 sm:flex-row\"\u003e\n        \u003cdiv className=\"relative sm:w-72\"\u003e\n          \u003cSearch className=\"text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2\" /\u003e\n          \u003cInput value={query} onChange={(e) =\u003e setQuery(e.target.value)} placeholder=\"Search number, customer, ref\" className=\"bg-white pl-9\" /\u003e\n        \u003c/div\u003e\n        \u003cSelect value={filter} onChange={(e) =\u003e setFilter(e.target.value)} className=\"bg-white sm:w-44\"\u003e\n          \u003coption value=\"\"\u003eAll\u003c/option\u003e\n          {FILTERS[type].map(([k, label]) =\u003e (\n            \u003coption key={k} value={k}\u003e\n              {label}\n            \u003c/option\u003e\n          ))}\n        \u003c/Select\u003e\n      \u003c/div\u003e\n\n      \u003cDataTable columns={columns} rows={rows} isLoading={isLoading} emptyMessage={docs.length ? \"Nothing matches.\" : `No ${TABS.find((t) =\u003e t.type === type).label.toLowerCase()} yet.`} /\u003e\n\n      {editing \u0026\u0026 data \u0026\u0026 (\n        \u003cDocForm\n          initial={editing}\n          tabType={type}\n          next={data.next}\n          clients={data.clients}\n          validDays={data.company.quotationValidDays}\n          onClose={() =\u003e setEditing(null)}\n          onSaved={(doc) =\u003e onSaved(doc, !editing.id)}\n        /\u003e\n      )}\n      {confirm \u0026\u0026 (\n        \u003cConfirmDialog\n          {...confirm}\n          onClose={() =\u003e setConfirm(null)}\n          onDone={(message) =\u003e {\n            setConfirm(null);\n            setNotice(message);\n            load();\n          }}\n        /\u003e\n      )}\n      {paying \u0026\u0026 (\n        \u003cPaidDialog\n          doc={paying}\n          onClose={() =\u003e setPaying(null)}\n          onDone={(message) =\u003e {\n            setPaying(null);\n            setNotice(message);\n            load();\n          }}\n        /\u003e\n      )}\n      {printing \u0026\u0026 data \u0026\u0026 \u003cPrintDocument doc={printing} company={data.company} onDone={() =\u003e setPrinting(null)} /\u003e}\n      {downloading \u0026\u0026 data \u0026\u0026 (\n        \u003cDownloadDocumentPdf\n          doc={downloading}\n          company={data.company}\n          onDone={(err) =\u003e {\n            if (err) setError(`Couldn't create the PDF: ${err.message}`);\n            setDownloading(null);\n          }}\n        /\u003e\n      )}\n    \u003c/\u003e\n  );\n}\n\nfunction RowActions({ doc, onPrint, onDownload, downloading, onEdit, onConvert, onPaid, onConfirm }) {\n  const isVoid = doc.status === \"void\";\n  const editable = !isVoid \u0026\u0026 (doc.type !== \"delivery_order\" || doc.status === \"draft\");\n  const icon = (label, Icon, onClick, className) =\u003e (\n    \u003cButton variant=\"ghost\" size=\"icon\" onClick={onClick} aria-label={label} title={label} className={className}\u003e\n      \u003cIcon /\u003e\n    \u003c/Button\u003e\n  );\n  return (\n    \u003cdiv className=\"flex justify-end gap-1\"\u003e\n      {!isVoid \u0026\u0026 doc.type === \"quotation\" \u0026\u0026 (\n        \u003cButton size=\"sm\" variant=\"outline\" onClick={() =\u003e onConvert(\"invoice\")} title=\"Create an invoice from this quotation\"\u003e\n          \u003cFileOutput /\u003e\n          Invoice\n        \u003c/Button\u003e\n      )}\n      {!isVoid \u0026\u0026 doc.type === \"invoice\" \u0026\u0026 !doc.paidAt \u0026\u0026 (\n        \u003cButton size=\"sm\" onClick={onPaid}\u003e\n          \u003cCheckCircle2 /\u003e\n          Paid\n        \u003c/Button\u003e\n      )}\n      {!isVoid \u0026\u0026 doc.type === \"invoice\" \u0026\u0026 (\n        \u003cButton size=\"sm\" variant=\"outline\" onClick={() =\u003e onConvert(\"delivery_order\")} title=\"Create a delivery order from this invoice\"\u003e\n          \u003cTruck /\u003e\n          DO\n        \u003c/Button\u003e\n      )}\n      {doc.type === \"delivery_order\" \u0026\u0026 doc.status === \"draft\" \u0026\u0026 (\n        \u003cButton size=\"sm\" onClick={() =\u003e onConfirm(\"issue\")}\u003e\n          \u003cSend /\u003e\n          Issue\n        \u003c/Button\u003e\n      )}\n      {icon(\"Print\", Printer, onPrint)}\n      \u003cButton variant=\"ghost\" size=\"icon\" onClick={onDownload} disabled={downloading} aria-label=\"Download PDF\" title=\"Download PDF\"\u003e\n        {downloading ? \u003cLoader2 className=\"animate-spin\" /\u003e : \u003cFileDown /\u003e}\n      \u003c/Button\u003e\n      {editable \u0026\u0026 icon(\"Edit\", Pencil, onEdit)}\n      {!isVoid \u0026\u0026 doc.type === \"invoice\" \u0026\u0026 doc.paidAt \u0026\u0026 icon(\"Mark unpaid\", Undo2, () =\u003e onConfirm(\"unpaid\"))}\n      {doc.status === \"draft\" \u0026\u0026 icon(\"Delete\", Trash2, () =\u003e onConfirm(\"delete\"), \"text-red-600 hover:bg-red-50 hover:text-red-700\")}\n      {!isVoid \u0026\u0026 doc.status !== \"draft\" \u0026\u0026 icon(\"Void\", Ban, () =\u003e onConfirm(\"void\"), \"text-red-600 hover:bg-red-50 hover:text-red-700\")}\n    \u003c/div\u003e\n  );\n}\n\nconst CONFIRM = {\n  issue: { title: \"Issue delivery order?\", button: \"Issue \u0026 take out of stock\", run: issueDocument, done: (d) =\u003e `${d.docNo} issued.` },\n  void: { title: \"Void document?\", button: \"Void\", danger: true, run: voidDocument, done: (d) =\u003e `${d.docNo} voided.` },\n  delete: { title: \"Delete draft?\", button: \"Delete\", danger: true, run: deleteDocument, done: (d) =\u003e `${d.docNo} deleted.` },\n  unpaid: { title: \"Mark invoice unpaid?\", button: \"Mark unpaid\", run: (id) =\u003e setInvoicePaid(id, null), done: (d) =\u003e `${d.docNo} marked unpaid.` },\n};\n\nfunction ConfirmDialog({ action, doc, onClose, onDone }) {\n  const cfg = CONFIRM[action];\n  const [busy, setBusy] = useState(false);\n  const [error, setError] = useState(\"\");\n  const stockLines = doc.type === \"delivery_order\" \u0026\u0026 doc.orderId == null ? doc.lines.filter((l) =\u003e l.variantId != null) : [];\n  const showStock = (action === \"issue\" || (action === \"void\" \u0026\u0026 doc.status === \"issued\")) \u0026\u0026 doc.type === \"delivery_order\";\n\n  async function go() {\n    setBusy(true);\n    setError(\"\");\n    try {\n      await cfg.run(doc.id);\n      onDone(cfg.done(doc));\n    } catch (err) {\n      setError(err.message);\n      setBusy(false);\n    }\n  }\n\n  return (\n    \u003cModal\n      open\n      onClose={onClose}\n      title={cfg.title}\n      footer={\n        \u003c\u003e\n          \u003cButton variant=\"outline\" onClick={onClose}\u003e\n            Back\n          \u003c/Button\u003e\n          \u003cButton onClick={go} disabled={busy} className={cfg.danger ? \"bg-red-600 hover:bg-red-700\" : undefined}\u003e\n            {cfg.button}\n          \u003c/Button\u003e\n        \u003c/\u003e\n      }\n    \u003e\n      \u003cp className=\"text-sm\"\u003e\n        \u003cspan className=\"font-mono font-semibold\"\u003e{doc.docNo}\u003c/span\u003e · {doc.billToName}\n      \u003c/p\u003e\n      {showStock \u0026\u0026 doc.orderId != null \u0026\u0026 (\n        \u003cp className=\"text-muted-foreground mt-3 text-sm\"\u003eThis delivery order belongs to website order {doc.orderNo}, which already took its stock, so stock doesn't change.\u003c/p\u003e\n      )}\n      {showStock \u0026\u0026 doc.orderId == null \u0026\u0026 (\n        \u003c\u003e\n          \u003cul className=\"mt-3 space-y-1 rounded-lg border p-3 text-sm\"\u003e\n            {stockLines.map((l) =\u003e (\n              \u003cli key={l.id} className=\"flex justify-between gap-3\"\u003e\n                \u003cspan className=\"truncate\"\u003e{l.description}\u003c/span\u003e\n                \u003cspan className={cn(\"font-semibold whitespace-nowrap\", action === \"issue\" ? \"text-red-700\" : \"text-emerald-700\")}\u003e\n                  {action === \"issue\" ? \"−\" : \"+\"}\n                  {formatNumber(l.qty)}\n                \u003c/span\u003e\n              \u003c/li\u003e\n            ))}\n            {stockLines.length === 0 \u0026\u0026 \u003cli className=\"text-muted-foreground\"\u003eNo lines are linked to a product, so stock doesn't change.\u003c/li\u003e}\n          \u003c/ul\u003e\n          {action === \"void\" \u0026\u0026 \u003cp className=\"text-muted-foreground mt-2 text-xs\"\u003eThe quantities go back into stock.\u003c/p\u003e}\n        \u003c/\u003e\n      )}\n      {action === \"void\" \u0026\u0026 doc.type !== \"delivery_order\" \u0026\u0026 (\n        \u003cp className=\"text-muted-foreground mt-3 text-sm\"\u003eThe number stays on record and the document can't be edited afterwards.\u003c/p\u003e\n      )}\n      {error \u0026\u0026 \u003cp className=\"text-destructive mt-3 rounded-md bg-red-50 px-3 py-2 text-sm\"\u003e{error}\u003c/p\u003e}\n    \u003c/Modal\u003e\n  );\n}\n\nfunction PaidDialog({ doc, onClose, onDone }) {\n  const [paidAt, setPaidAt] = useState(localISODate());\n  const [busy, setBusy] = useState(false);\n  const [error, setError] = useState(\"\");\n\n  async function go(e) {\n    e.preventDefault();\n    setBusy(true);\n    setError(\"\");\n    try {\n      await setInvoicePaid(doc.id, paidAt);\n      onDone(`${doc.docNo} marked paid.`);\n    } catch (err) {\n      setError(err.message);\n      setBusy(false);\n    }\n  }\n\n  return (\n    \u003cModal\n      open\n      onClose={onClose}\n      title={`Mark ${doc.docNo} paid`}\n      footer={\n        \u003c\u003e\n          \u003cButton variant=\"outline\" onClick={onClose}\u003e\n            Cancel\n          \u003c/Button\u003e\n          \u003cButton type=\"submit\" form=\"paid-form\" disabled={busy}\u003e\n            Mark paid\n          \u003c/Button\u003e\n        \u003c/\u003e\n      }\n    \u003e\n      \u003cform id=\"paid-form\" onSubmit={go} className=\"flex flex-col gap-3\"\u003e\n        \u003cp className=\"text-sm\"\u003e\n          {doc.billToName} · \u003cspan className=\"font-semibold\"\u003e{formatRM(doc.total)}\u003c/span\u003e\n        \u003c/p\u003e\n        \u003cFormField label=\"Payment date\" htmlFor=\"paidAt\"\u003e\n          \u003cInput id=\"paidAt\" type=\"date\" value={paidAt} onChange={(e) =\u003e setPaidAt(e.target.value)} required /\u003e\n        \u003c/FormField\u003e\n        {error \u0026\u0026 \u003cp className=\"text-destructive text-sm\"\u003e{error}\u003c/p\u003e}\n      \u003c/form\u003e\n    \u003c/Modal\u003e\n  );\n}\n\nfunction DocForm({ initial, tabType, next, clients, validDays, onClose, onSaved }) {\n  const isNew = !initial.id;\n  const type = initial.type;\n  const isDO = type === \"delivery_order\";\n  const [seq, setSeq] = useState(\"\");\n  const [docDate, setDocDate] = useState(initial.docDate ?? localISODate());\n  const [validUntil, setValidUntil] = useState(initial.validUntil ?? (type === \"quotation\" ? addDays(initial.docDate ?? localISODate(), validDays) : \"\"));\n  const [validTouched, setValidTouched] = useState(Boolean(initial.validUntil));\n  const [billToName, setBillToName] = useState(initial.billToName ?? \"\");\n  const [billToAddress, setBillToAddress] = useState(initial.billToAddress ?? \"\");\n  const [attention, setAttention] = useState(initial.attention ?? \"\");\n  const findClient = (name) =\u003e clients.find((c) =\u003e c.name.toLowerCase() === name.trim().toLowerCase());\n  const initialClient = clients.find((c) =\u003e c.id === initial.clientId) ?? findClient(initial.billToName ?? \"\");\n  // The saved customer the bill-to currently matches; picking a different one fills in its details.\n  const [matchedId, setMatchedId] = useState(initialClient?.id ?? null);\n  const [phone, setPhone] = useState(initial.phone ?? initialClient?.phone ?? \"\");\n  const [email, setEmail] = useState(initial.email ?? initialClient?.email ?? \"\");\n  const [customerRef, setCustomerRef] = useState(initial.customerRef ?? \"\");\n  const [otherLabel, setOtherLabel] = useState(initial.otherLabel ?? \"\");\n  const [otherAmount, setOtherAmount] = useState(initial.otherAmount ? String(initial.otherAmount) : \"\");\n  const [notes, setNotes] = useState(initial.notes ?? \"\");\n  const [lines, setLines] = useState(\n    initial.lines?.length\n      ? initial.lines.map((l) =\u003e ({ ...l, key: newKey(), note: l.note ?? \"\", qty: String(l.qty), unitPrice: isDO \u0026\u0026 !l.unitPrice ? \"\" : String(l.unitPrice) }))\n      : [emptyLine()],\n  );\n  const [stock, setStock] = useState([]);\n  const [errors, setErrors] = useState({});\n  const [formError, setFormError] = useState(\"\");\n  const [saving, setSaving] = useState(false);\n\n  useEffect(() =\u003e {\n    listStock().then(setStock).catch(() =\u003e setStock([]));\n  }, []);\n\n  const groups = useMemo(() =\u003e {\n    const map = new Map();\n    for (const v of stock) map.set(v.productName, [...(map.get(v.productName) ?? []), v]);\n    return [...map];\n  }, [stock]);\n\n  const updateLine = (key, patch) =\u003e setLines((ls) =\u003e ls.map((l) =\u003e (l.key === key ? { ...l, ...patch } : l)));\n\n  function pickVariant(key, value) {\n    if (!value) return updateLine(key, { variantId: null, sku: \"\" });\n    const v = stock.find((s) =\u003e String(s.variantId) === value);\n    updateLine(key, { variantId: v.variantId, sku: v.sku, description: [v.productName, v.variantName].filter(Boolean).join(\" — \") });\n  }\n\n  function changeDate(value) {\n    setDocDate(value);\n    if (type === \"quotation\" \u0026\u0026 !validTouched \u0026\u0026 value) setValidUntil(addDays(value, validDays));\n  }\n\n  function changeBillTo(value) {\n    setBillToName(value);\n    const client = findClient(value);\n    if (client \u0026\u0026 client.id !== matchedId) {\n      setBillToAddress(client.address);\n      setAttention(client.attention);\n      setPhone(client.phone);\n      setEmail(client.email);\n    }\n    setMatchedId(client?.id ?? null);\n  }\n\n  const subtotal = lines.reduce((s, l) =\u003e s + (Number(l.qty) || 0) * (Number(l.unitPrice) || 0), 0);\n  const total = subtotal + (type === \"invoice\" ? Number(otherAmount) || 0 : 0);\n  const numberHint = type === tabType \u0026\u0026 Number(docDate.slice(0, 4)) === next.year ? `Leave empty for ${next.docNo}` : \"Leave empty for the next number\";\n\n  async function onSubmit(e) {\n    e.preventDefault();\n    setSaving(true);\n    setErrors({});\n    setFormError(\"\");\n    try {\n      const saved = await saveDocument({\n        id: initial.id,\n        type,\n        seq: isNew \u0026\u0026 seq ? Number(seq) : undefined,\n        sourceId: initial.sourceId,\n        orderId: initial.orderId,\n        paidAt: isNew ? initial.paidAt : undefined,\n        docDate,\n        validUntil: type === \"quotation\" ? validUntil : null,\n        billToName,\n        billToAddress,\n        attention,\n        phone,\n        email,\n        customerRef,\n        otherLabel,\n        otherAmount: otherAmount === \"\" ? 0 : Number(otherAmount),\n        notes,\n        lines: lines.map((l) =\u003e ({\n          variantId: l.variantId,\n          sku: l.sku,\n          description: l.description,\n          note: l.note,\n          qty: Number(l.qty),\n          unitPrice: l.unitPrice === \"\" ? null : Number(l.unitPrice),\n        })),\n      });\n      onSaved(saved);\n    } catch (err) {\n      setErrors(err.body?.fields ?? {});\n      setFormError(err.message);\n      setSaving(false);\n    }\n  }\n\n  const title = isNew ? `New ${DOC_TITLE[type].toLowerCase()}` : `Edit ${initial.docNo}`;\n\n  return (\n    \u003cModal\n      open\n      onClose={onClose}\n      title={title}\n      className=\"max-w-4xl\"\n      footer={\n        \u003c\u003e\n          \u003cButton variant=\"outline\" onClick={onClose}\u003e\n            Cancel\n          \u003c/Button\u003e\n          \u003cButton type=\"submit\" form=\"doc-form\" disabled={saving}\u003e\n            {isNew ? (isDO ? \"Save draft\" : \"Create\") : \"Save\"}\n          \u003c/Button\u003e\n        \u003c/\u003e\n      }\n    \u003e\n      \u003cform id=\"doc-form\" onSubmit={onSubmit} className=\"flex flex-col gap-5\"\u003e\n        {initial.fromLabel \u0026\u0026 \u003cp className=\"rounded-md bg-blue-50 px-3 py-2 text-sm text-blue-800\"\u003eCopied from {initial.fromLabel}. Check the details, then save.\u003c/p\u003e}\n        {isDO \u0026\u0026 isNew \u0026\u0026 !initial.orderId \u0026\u0026 \u003cp className=\"text-muted-foreground text-sm\"\u003eSaved as a draft. Stock only changes when you issue it.\u003c/p\u003e}\n\n        \u003cdiv className=\"grid gap-4 sm:grid-cols-3\"\u003e\n          {isNew ? (\n            \u003cFormField label=\"Number (optional)\" htmlFor=\"seq\" error={errors.seq}\u003e\n              \u003cInput id=\"seq\" type=\"number\" min=\"1\" step=\"1\" value={seq} onChange={(e) =\u003e setSeq(e.target.value)} placeholder=\"Auto\" /\u003e\n              \u003cp className=\"text-muted-foreground text-xs\"\u003e{numberHint}\u003c/p\u003e\n            \u003c/FormField\u003e\n          ) : (\n            \u003cFormField label=\"Number\"\u003e\n              \u003cInput value={initial.docNo} disabled /\u003e\n            \u003c/FormField\u003e\n          )}\n          \u003cFormField label=\"Date\" htmlFor=\"docDate\" error={errors.docDate}\u003e\n            \u003cInput id=\"docDate\" type=\"date\" value={docDate} onChange={(e) =\u003e changeDate(e.target.value)} /\u003e\n          \u003c/FormField\u003e\n          {type === \"quotation\" ? (\n            \u003cFormField label=\"Valid until\" htmlFor=\"validUntil\" error={errors.validUntil}\u003e\n              \u003cInput\n                id=\"validUntil\"\n                type=\"date\"\n                value={validUntil}\n                onChange={(e) =\u003e {\n                  setValidUntil(e.target.value);\n                  setValidTouched(true);\n                }}\n              /\u003e\n            \u003c/FormField\u003e\n          ) : (\n            \u003cFormField label={isDO ? \"Customer PO (optional)\" : \"Customer ref / PO (optional)\"} htmlFor=\"customerRef\"\u003e\n              \u003cInput id=\"customerRef\" value={customerRef} onChange={(e) =\u003e setCustomerRef(e.target.value)} /\u003e\n            \u003c/FormField\u003e\n          )}\n        \u003c/div\u003e\n\n        \u003cdiv className=\"grid gap-4 sm:grid-cols-2\"\u003e\n          \u003cdiv className=\"flex flex-col gap-4\"\u003e\n            \u003cFormField label={isDO ? \"Deliver to (company or name)\" : \"Bill to (company or name)\"} htmlFor=\"billToName\" error={errors.billToName}\u003e\n              \u003cInput id=\"billToName\" list=\"client-list\" value={billToName} onChange={(e) =\u003e changeBillTo(e.target.value)} autoComplete=\"off\" /\u003e\n              \u003cdatalist id=\"client-list\"\u003e\n                {clients.map((c) =\u003e (\n                  \u003coption key={c.id} value={c.name} /\u003e\n                ))}\n              \u003c/datalist\u003e\n              {billToName.trim() \u0026\u0026 (\n                \u003cp className=\"text-muted-foreground text-xs\"\u003e\n                  {matchedId ? \"Saved customer: details filled in. Changes here update the customer too.\" : \"New customer: saved when you save this document.\"}\n                \u003c/p\u003e\n              )}\n            \u003c/FormField\u003e\n            \u003cFormField label=\"Attention (optional)\" htmlFor=\"attention\"\u003e\n              \u003cInput id=\"attention\" value={attention} onChange={(e) =\u003e setAttention(e.target.value)} placeholder=\"Contact person\" /\u003e\n            \u003c/FormField\u003e\n            \u003cdiv className=\"grid gap-4 sm:grid-cols-2\"\u003e\n              \u003cFormField label=\"Phone (optional)\" htmlFor=\"phone\"\u003e\n                \u003cInput id=\"phone\" type=\"tel\" value={phone} onChange={(e) =\u003e setPhone(e.target.value)} /\u003e\n              \u003c/FormField\u003e\n              \u003cFormField label=\"Email (optional)\" htmlFor=\"email\" error={errors.email}\u003e\n                \u003cInput id=\"email\" type=\"email\" value={email} onChange={(e) =\u003e setEmail(e.target.value)} /\u003e\n              \u003c/FormField\u003e\n            \u003c/div\u003e\n            \u003cp className=\"text-muted-foreground -mt-2 text-xs\"\u003ePhone and email are kept with the customer, not printed.\u003c/p\u003e\n            {type === \"quotation\" \u0026\u0026 (\n              \u003cFormField label=\"Customer ref (optional)\" htmlFor=\"customerRef\"\u003e\n                \u003cInput id=\"customerRef\" value={customerRef} onChange={(e) =\u003e setCustomerRef(e.target.value)} /\u003e\n              \u003c/FormField\u003e\n            )}\n          \u003c/div\u003e\n          \u003cFormField label=\"Address\" htmlFor=\"billToAddress\"\u003e\n            \u003ctextarea id=\"billToAddress\" rows={5} value={billToAddress} onChange={(e) =\u003e setBillToAddress(e.target.value)} className={textareaClass} /\u003e\n          \u003c/FormField\u003e\n        \u003c/div\u003e\n\n        \u003cdiv\u003e\n          \u003cdiv className=\"mb-2 flex items-center justify-between\"\u003e\n            \u003ch3 className=\"text-sm font-semibold\"\u003eItems\u003c/h3\u003e\n            \u003cButton type=\"button\" variant=\"outline\" size=\"sm\" onClick={() =\u003e setLines((ls) =\u003e [...ls, emptyLine()])}\u003e\n              \u003cPlus /\u003e\n              Add line\n            \u003c/Button\u003e\n          \u003c/div\u003e\n          {errors.lines \u0026\u0026 \u003cp className=\"text-destructive mb-2 text-sm\"\u003e{errors.lines}\u003c/p\u003e}\n          \u003cdiv className=\"flex flex-col gap-3\"\u003e\n            {lines.map((l, i) =\u003e {\n              const err = (f) =\u003e errors[`lines.${i}.${f}`];\n              return (\n                \u003cdiv key={l.key} className=\"grid grid-cols-2 items-start gap-2 rounded-lg border p-3 sm:grid-cols-6\"\u003e\n                  \u003cFormField label=\"Product\" className=\"col-span-2 sm:col-span-2\"\u003e\n                    \u003cProductPicker\n                      stock={stock}\n                      value={l.variantId}\n                      onChange={(id) =\u003e pickVariant(l.key, id == null ? \"\" : String(id))}\n                      customLabel={isDO ? \"Custom item (no stock change)\" : \"Custom item / service\"}\n                      showStock={isDO}\n                    /\u003e\n                  \u003c/FormField\u003e\n                  \u003cFormField label=\"Description\" error={err(\"description\")} className=\"col-span-2 sm:col-span-4\"\u003e\n                    \u003ctextarea\n                      rows={Math.min(Math.max(l.description.split(\"\\n\").length, 1), 6)}\n                      value={l.description}\n                      onChange={(e) =\u003e updateLine(l.key, { description: e.target.value })}\n                      className={textareaClass}\n                    /\u003e\n                  \u003c/FormField\u003e\n                  \u003cFormField label=\"Note (optional, italic)\" className=\"col-span-2 sm:col-span-3\"\u003e\n                    \u003cInput value={l.note} onChange={(e) =\u003e updateLine(l.key, { note: e.target.value })} placeholder=\"e.g. Warranty 1 year upon delivery date\" /\u003e\n                  \u003c/FormField\u003e\n                  \u003cFormField label=\"Qty\" error={err(\"qty\")} className={isDO ? \"sm:col-span-2\" : undefined}\u003e\n                    \u003cInput type=\"number\" min=\"1\" step=\"1\" value={l.qty} onChange={(e) =\u003e updateLine(l.key, { qty: e.target.value })} /\u003e\n                  \u003c/FormField\u003e\n                  {!isDO \u0026\u0026 (\n                    \u003cFormField label=\"Unit price (RM)\" error={err(\"unitPrice\")}\u003e\n                      \u003cInput type=\"number\" step=\"0.01\" value={l.unitPrice} onChange={(e) =\u003e updateLine(l.key, { unitPrice: e.target.value })} /\u003e\n                    \u003c/FormField\u003e\n                  )}\n                  \u003cdiv className=\"col-span-2 flex items-center justify-between sm:col-span-6\"\u003e\n                    \u003cspan className=\"text-muted-foreground text-xs\"\u003e{!isDO \u0026\u0026 `Amount ${formatRM((Number(l.qty) || 0) * (Number(l.unitPrice) || 0))}`}\u003c/span\u003e\n                    \u003cButton\n                      type=\"button\"\n                      variant=\"ghost\"\n                      size=\"sm\"\n                      disabled={lines.length === 1}\n                      onClick={() =\u003e setLines((ls) =\u003e ls.filter((x) =\u003e x.key !== l.key))}\n                      className=\"text-red-600 hover:bg-red-50 hover:text-red-700\"\n                    \u003e\n                      \u003cTrash2 /\u003e\n                      Remove\n                    \u003c/Button\u003e\n                  \u003c/div\u003e\n                \u003c/div\u003e\n              );\n            })}\n          \u003c/div\u003e\n        \u003c/div\u003e\n\n        {type === \"invoice\" \u0026\u0026 (\n          \u003cdiv className=\"grid gap-4 sm:grid-cols-3\"\u003e\n            \u003cFormField label=\"Other charge / discount label\" htmlFor=\"otherLabel\" className=\"sm:col-span-2\"\u003e\n              \u003cInput id=\"otherLabel\" value={otherLabel} onChange={(e) =\u003e setOtherLabel(e.target.value)} placeholder=\"e.g. Delivery, Discount\" /\u003e\n            \u003c/FormField\u003e\n            \u003cFormField label=\"Amount (RM, minus for discount)\" htmlFor=\"otherAmount\" error={errors.otherAmount}\u003e\n              \u003cInput id=\"otherAmount\" type=\"number\" step=\"0.01\" value={otherAmount} onChange={(e) =\u003e setOtherAmount(e.target.value)} placeholder=\"0.00\" /\u003e\n            \u003c/FormField\u003e\n          \u003c/div\u003e\n        )}\n\n        \u003cFormField label=\"Remarks (optional, printed)\" htmlFor=\"notes\"\u003e\n          \u003ctextarea id=\"notes\" rows={2} value={notes} onChange={(e) =\u003e setNotes(e.target.value)} className={textareaClass} /\u003e\n        \u003c/FormField\u003e\n\n        {formError \u0026\u0026 \u003cp className=\"text-destructive text-sm\"\u003e{formError}\u003c/p\u003e}\n        {!isDO \u0026\u0026 (\n          \u003cdiv className=\"flex justify-end border-t pt-4 text-base\"\u003e\n            \u003cspan className=\"text-muted-foreground mr-3\"\u003eTotal\u003c/span\u003e\n            \u003cspan className=\"font-bold tabular-nums\"\u003e{formatRM(total)}\u003c/span\u003e\n          \u003c/div\u003e\n        )}\n      \u003c/form\u003e\n    \u003c/Modal\u003e\n  );\n}\n",
+      "replaceAll": false,
+      "structuredPatch": [
+        {
+          "lines": [
+            "     listStock().then(setStock).catch(() =\u003e setStock([]));",
+            "   }, []);",
+            " ",
+            "-  const groups = useMemo(() =\u003e {",
+            "-    const map = new Map();",
+            "-    for (const v of stock) map.set(v.productName, [...(map.get(v.productName) ?? []), v]);",
+            "-    return [...map];",
+            "-  }, [stock]);",
+            "-",
+            "   const updateLine = (key, patch) =\u003e setLines((ls) =\u003e ls.map((l) =\u003e (l.key === key ? { ...l, ...patch } : l)));",
+            " ",
+            "   function pickVariant(key, value) {"
+          ],
+          "newLines": 6,
+          "newStart": 567,
+          "oldLines": 12,
+          "oldStart": 567
+        }
+      ],
+      "userModified": false
+    },
+    "tool_use_id": "toolu_01XKNctDdp2aJsZgCEeA1QBK",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\adfc42aa-92b0-4fbc-8ce8-e313f5728751.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\client\\src\\admin\\pages",
+    "duration_ms": 829,
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "0ca87209-3603-4836-83fd-94f8a48c93e5",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\adfc42aa-92b0-4fbc-8ce8-e313f5728751\\scratchpad",
+    "session_id": "adfc42aa-92b0-4fbc-8ce8-e313f5728751",
+    "tool_input": {
+      "command": "cd \"/d/Github/WYR Web/client/src/admin/pages\"; cat \u003e\u003e DocumentsPage.jsx \u003c\u003c'EOF'\n\nconst PICKER_LIMIT = 50;\n\n/**\n * Searchable product picker for document lines: type part of a product name, variant or SKU.\n * Every word typed must match somewhere, so \"ntag 215 black\" narrows quickly.\n * @param {object} props\n * @param {object[]} props.stock Rows from listStock() (variantId, productName, variantName, sku, available).\n * @param {number|null} props.value Selected variantId, or null for a custom item.\n * @param {(variantId: number|null) =\u003e void} props.onChange\n * @param {string} props.customLabel Label for \"no product\" (custom item / service).\n * @param {boolean} props.showStock Show available stock next to each option (delivery orders).\n */\nfunction ProductPicker({ stock, value, onChange, customLabel, showStock }) {\n  const [open, setOpen] = useState(false);\n  const [query, setQuery] = useState(\"\");\n  const [active, setActive] = useState(0);\n  const boxRef = useRef(null);\n  const inputRef = useRef(null);\n  const listRef = useRef(null);\n\n  const selected = value == null ? null : stock.find((v) =\u003e v.variantId === value);\n  const label = (v) =\u003e [v.productName, v.variantName].filter(Boolean).join(\" — \");\n\n  const matches = useMemo(() =\u003e {\n    const words = query.toLowerCase().split(/\\s+/).filter(Boolean);\n    const found = words.length\n      ? stock.filter((v) =\u003e {\n          const hay = `${v.productName ?? \"\"} ${v.variantName ?? \"\"} ${v.sku ?? \"\"}`.toLowerCase();\n          return words.every((w) =\u003e hay.includes(w));\n        })\n      : stock;\n    return found.slice(0, PICKER_LIMIT);\n  }, [stock, query]);\n  const total = useMemo(() =\u003e (query.trim() ? null : stock.length), [stock, query]);\n\n  // Option 0 is the custom item; products follow.\n  const options = [null, ...matches];\n\n  useEffect(() =\u003e {\n    if (!open) return;\n    const close = (e) =\u003e {\n      if (!boxRef.current?.contains(e.target)) setOpen(false);\n    };\n    document.addEventListener(\"mousedown\", close);\n    return () =\u003e document.removeEventListener(\"mousedown\", close);\n  }, [open]);\n\n  useEffect(() =\u003e {\n    listRef.current?.querySelector(`[data-index=\"${active}\"]`)?.scrollIntoView({ block: \"nearest\" });\n  }, [active, open]);\n\n  function openList() {\n    setQuery(\"\");\n    setActive(0);\n    setOpen(true);\n  }\n\n  function choose(v) {\n    onChange(v ? v.variantId : null);\n    setOpen(false);\n    setQuery(\"\");\n  }\n\n  function onKeyDown(e) {\n    if (!open \u0026\u0026 (e.key === \"ArrowDown\" || e.key === \"Enter\")) {\n      e.preventDefault();\n      openList();\n      return;\n    }\n    if (!open) return;\n    if (e.key === \"ArrowDown\") {\n      e.preventDefault();\n      setActive((i) =\u003e Math.min(i + 1, options.length - 1));\n    } else if (e.key === \"ArrowUp\") {\n      e.preventDefault();\n      setActive((i) =\u003e Math.max(i - 1, 0));\n    } else if (e.key === \"Enter\") {\n      e.preventDefault();\n      choose(options[active]);\n    } else if (e.key === \"Escape\") {\n      e.preventDefault();\n      setOpen(false);\n    }\n  }\n\n  return (\n    \u003cdiv ref={boxRef} className=\"relative\"\u003e\n      \u003cdiv className=\"relative\"\u003e\n        \u003cSearch className=\"text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2\" /\u003e\n        \u003cInput\n          ref={inputRef}\n          value={open ? query : selected ? label(selected) : \"\"}\n          placeholder={open ? \"Search name, variant or SKU…\" : customLabel}\n          onFocus={openList}\n          onClick={() =\u003e !open \u0026\u0026 openList()}\n          onChange={(e) =\u003e {\n            setQuery(e.target.value);\n            setActive(e.target.value.trim() ? 1 : 0);\n            setOpen(true);\n          }}\n          onKeyDown={onKeyDown}\n          role=\"combobox\"\n          aria-expanded={open}\n          aria-autocomplete=\"list\"\n          className=\"truncate pr-8 pl-8\"\n          title={selected ? `${label(selected)} · ${selected.sku}` : undefined}\n        /\u003e\n        {selected \u0026\u0026 !open ? (\n          \u003cbutton\n            type=\"button\"\n            onClick={() =\u003e choose(null)}\n            className=\"text-muted-foreground hover:text-foreground absolute top-1/2 right-2 -translate-y-1/2\"\n            aria-label=\"Clear product\"\n            title=\"Clear (custom item)\"\n          \u003e\n            \u003cX className=\"size-4\" /\u003e\n          \u003c/button\u003e\n        ) : (\n          \u003cChevronDown className=\"text-muted-foreground pointer-events-none absolute top-1/2 right-2.5 size-4 -translate-y-1/2\" /\u003e\n        )}\n      \u003c/div\u003e\n      {open \u0026\u0026 (\n        \u003cul ref={listRef} role=\"listbox\" className=\"bg-popover absolute z-50 mt-1 max-h-72 w-full min-w-72 overflow-auto rounded-md border bg-white py-1 text-sm shadow-lg\"\u003e\n          {options.map((v, i) =\u003e (\n            \u003cli\n              key={v ? v.variantId : \"custom\"}\n              data-index={i}\n              role=\"option\"\n              aria-selected={i === active}\n              onMouseEnter={() =\u003e setActive(i)}\n              onMouseDown={(e) =\u003e {\n                e.preventDefault();\n                choose(v);\n              }}\n              className={cn(\"cursor-pointer px-3 py-1.5\", i === active \u0026\u0026 \"bg-slate-100\", i === 0 \u0026\u0026 \"text-muted-foreground border-b italic\")}\n            \u003e\n              {v ? (\n                \u003c\u003e\n                  \u003cdiv className=\"truncate font-medium\"\u003e{v.productName}\u003c/div\u003e\n                  \u003cdiv className=\"text-muted-foreground flex justify-between gap-2 text-xs\"\u003e\n                    \u003cspan className=\"truncate\"\u003e{[v.variantName, v.sku].filter(Boolean).join(\" · \")}\u003c/span\u003e\n                    {showStock \u0026\u0026 \u003cspan className=\"shrink-0\"\u003estock {v.available}\u003c/span\u003e}\n                  \u003c/div\u003e\n                \u003c/\u003e\n              ) : (\n                customLabel\n              )}\n            \u003c/li\u003e\n          ))}\n          {matches.length === 0 \u0026\u0026 \u003cli className=\"text-muted-foreground px-3 py-2\"\u003eNo products match “{query}”.\u003c/li\u003e}\n          {(total ?? 0) \u003e PICKER_LIMIT || (query.trim() \u0026\u0026 matches.length === PICKER_LIMIT) ? (\n            \u003cli className=\"text-muted-foreground border-t px-3 py-1.5 text-xs\"\u003eShowing the first {PICKER_LIMIT}. Type more to narrow down.\u003c/li\u003e\n          ) : null}\n        \u003c/ul\u003e\n      )}\n    \u003c/div\u003e\n  );\n}\nEOF\ngrep -n \"forwardRef\\|function Input\\|ref\" ../../components/ui/input.jsx | head -5; grep -n \"Search\\b\" DocumentsPage.jsx | head -3",
+      "description": "Add searchable ProductPicker component"
+    },
+    "tool_name": "Bash",
+    "tool_response": {
+      "bashEditDiff": {
+        "changedFiles": [
+          "D:\\Github\\WYR Web\\client\\src\\admin\\pages\\DocumentsPage.jsx"
+        ],
+        "files": [
+          {
+            "filePath": "D:\\Github\\WYR Web\\client\\src\\admin\\pages\\DocumentsPage.jsx",
+            "hunks": [
+              {
+                "lines": [
+                  "     \u003c/Modal\u003e",
+                  "   );",
+                  " }",
+                  "+",
+                  "+const PICKER_LIMIT = 50;",
+                  "+",
+                  "+/**",
+                  "+ * Searchable product picker for document lines: type part of a product name, variant or SKU.",
+                  "+ * Every word typed must match somewhere, so \"ntag 215 black\" narrows quickly.",
+                  "+ * @param {object} props",
+                  "+ * @param {object[]} props.stock Rows from listStock() (variantId, productName, variantName, sku, available).",
+                  "+ * @param {number|null} props.value Selected variantId, or null for a custom item.",
+                  "+ * @param {(variantId: number|null) =\u003e void} props.onChange",
+                  "+ * @param {string} props.customLabel Label for \"no product\" (custom item / service).",
+                  "+ * @param {boolean} props.showStock Show available stock next to each option (delivery orders).",
+                  "+ */",
+                  "+function ProductPicker({ stock, value, onChange, customLabel, showStock }) {",
+                  "+  const [open, setOpen] = useState(false);",
+                  "+  const [query, setQuery] = useState(\"\");",
+                  "+  const [active, setActive] = useState(0);",
+                  "+  const boxRef = useRef(null);",
+                  "+  const inputRef = useRef(null);",
+                  "+  const listRef = useRef(null);",
+                  "+",
+                  "+  const selected = value == null ? null : stock.find((v) =\u003e v.variantId === value);",
+                  "+  const label = (v) =\u003e [v.productName, v.variantName].filter(Boolean).join(\" — \");",
+                  "+",
+                  "+  const matches = useMemo(() =\u003e {",
+                  "+    const words = query.toLowerCase().split(/\\s+/).filter(Boolean);",
+                  "+    const found = words.length",
+                  "+      ? stock.filter((v) =\u003e {",
+                  "+          const hay = `${v.productName ?? \"\"} ${v.variantName ?? \"\"} ${v.sku ?? \"\"}`.toLowerCase();",
+                  "+          return words.every((w) =\u003e hay.includes(w));",
+                  "+        })",
+                  "+      : stock;",
+                  "+    return found.slice(0, PICKER_LIMIT);",
+                  "+  }, [stock, query]);",
+                  "+  const total = useMemo(() =\u003e (query.trim() ? null : stock.length), [stock, query]);",
+                  "+",
+                  "+  // Option 0 is the custom item; products follow.",
+                  "+  const options = [null, ...matches];",
+                  "+",
+                  "+  useEffect(() =\u003e {",
+                  "+    if (!open) return;",
+                  "+    const close = (e) =\u003e {",
+                  "+      if (!boxRef.current?.contains(e.target)) setOpen(false);",
+                  "+    };",
+                  "+    document.addEventListener(\"mousedown\", close);",
+                  "+    return () =\u003e document.removeEventListener(\"mousedown\", close);",
+                  "+  }, [open]);",
+                  "+",
+                  "+  useEffect(() =\u003e {",
+                  "+    listRef.current?.querySelector(`[data-index=\"${active}\"]`)?.scrollIntoView({ block: \"nearest\" });",
+                  "+  }, [active, open]);",
+                  "+",
+                  "+  function openList() {",
+                  "+    setQuery(\"\");",
+                  "+    setActive(0);",
+                  "+    setOpen(true);",
+                  "+  }",
+                  "+",
+                  "+  function choose(v) {",
+                  "+    onChange(v ? v.variantId : null);",
+                  "+    setOpen(false);",
+                  "+    setQuery(\"\");",
+                  "+  }",
+                  "+",
+                  "+  function onKeyDown(e) {",
+                  "+    if (!open \u0026\u0026 (e.key === \"ArrowDown\" || e.key === \"Enter\")) {",
+                  "+      e.preventDefault();",
+                  "+      openList();",
+                  "+      return;",
+                  "+    }",
+                  "+    if (!open) return;",
+                  "+    if (e.key === \"ArrowDown\") {",
+                  "+      e.preventDefault();",
+                  "+      setActive((i) =\u003e Math.min(i + 1, options.length - 1));",
+                  "+    } else if (e.key === \"ArrowUp\") {",
+                  "+      e.preventDefault();",
+                  "+      setActive((i) =\u003e Math.max(i - 1, 0));",
+                  "+    } else if (e.key === \"Enter\") {",
+                  "+      e.preventDefault();",
+                  "+      choose(options[active]);",
+                  "+    } else if (e.key === \"Escape\") {",
+                  "+      e.preventDefault();",
+                  "+      setOpen(false);",
+                  "+    }",
+                  "+  }",
+                  "+",
+                  "+  return (",
+                  "+    \u003cdiv ref={boxRef} className=\"relative\"\u003e",
+                  "+      \u003cdiv className=\"relative\"\u003e",
+                  "+        \u003cSearch className=\"text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2\" /\u003e",
+                  "+        \u003cInput",
+                  "+          ref={inputRef}",
+                  "+          value={open ? query : selected ? label(selected) : \"\"}",
+                  "+          placeholder={open ? \"Search name, variant or SKU…\" : customLabel}",
+                  "+          onFocus={openList}",
+                  "+          onClick={() =\u003e !open \u0026\u0026 openList()}",
+                  "+          onChange={(e) =\u003e {",
+                  "+            setQuery(e.target.value);",
+                  "+            setActive(e.target.value.trim() ? 1 : 0);",
+                  "+            setOpen(true);",
+                  "+          }}",
+                  "+          onKeyDown={onKeyDown}",
+                  "+          role=\"combobox\"",
+                  "+          aria-expanded={open}",
+                  "+          aria-autocomplete=\"list\"",
+                  "+          className=\"truncate pr-8 pl-8\"",
+                  "+          title={selected ? `${label(selected)} · ${selected.sku}` : undefined}",
+                  "+        /\u003e",
+                  "+        {selected \u0026\u0026 !open ? (",
+                  "+          \u003cbutton",
+                  "+            type=\"button\"",
+                  "+            onClick={() =\u003e choose(null)}",
+                  "+            className=\"text-muted-foreground hover:text-foreground absolute top-1/2 right-2 -translate-y-1/2\"",
+                  "+            aria-label=\"Clear product\"",
+                  "+            title=\"Clear (custom item)\"",
+                  "+          \u003e",
+                  "+            \u003cX className=\"size-4\" /\u003e",
+                  "+          \u003c/button\u003e",
+                  "+        ) : (",
+                  "+          \u003cChevronDown className=\"text-muted-foreground pointer-events-none absolute top-1/2 right-2.5 size-4 -translate-y-1/2\" /\u003e",
+                  "+        )}",
+                  "+      \u003c/div\u003e",
+                  "+      {open \u0026\u0026 (",
+                  "+        \u003cul ref={listRef} role=\"listbox\" className=\"bg-popover absolute z-50 mt-1 max-h-72 w-full min-w-72 overflow-auto rounded-md border bg-white py-1 text-sm shadow-lg\"\u003e",
+                  "+          {options.map((v, i) =\u003e (",
+                  "+            \u003cli",
+                  "+              key={v ? v.variantId : \"custom\"}",
+                  "+              data-index={i}",
+                  "+              role=\"option\"",
+                  "+              aria-selected={i === active}",
+                  "+              onMouseEnter={() =\u003e setActive(i)}",
+                  "+              onMouseDown={(e) =\u003e {",
+                  "+                e.preventDefault();",
+                  "+                choose(v);",
+                  "+              }}",
+                  "+              className={cn(\"cursor-pointer px-3 py-1.5\", i === active \u0026\u0026 \"bg-slate-100\", i === 0 \u0026\u0026 \"text-muted-foreground border-b italic\")}",
+                  "+            \u003e",
+                  "+              {v ? (",
+                  "+                \u003c\u003e",
+                  "+                  \u003cdiv className=\"truncate font-medium\"\u003e{v.productName}\u003c/div\u003e",
+                  "+                  \u003cdiv className=\"text-muted-foreground flex justify-between gap-2 text-xs\"\u003e",
+                  "+                    \u003cspan className=\"truncate\"\u003e{[v.variantName, v.sku].filter(Boolean).join(\" · \")}\u003c/span\u003e",
+                  "+                    {showStock \u0026\u0026 \u003cspan className=\"shrink-0\"\u003estock {v.available}\u003c/span\u003e}",
+                  "+                  \u003c/div\u003e",
+                  "+                \u003c/\u003e",
+                  "+              ) : (",
+                  "+                customLabel",
+                  "+              )}",
+                  "+            \u003c/li\u003e",
+                  "+          ))}",
+                  "+          {matches.length === 0 \u0026\u0026 \u003cli className=\"text-muted-foreground px-3 py-2\"\u003eNo products match “{query}”.\u003c/li\u003e}",
+                  "+          {(total ?? 0) \u003e PICKER_LIMIT || (query.trim() \u0026\u0026 matches.length === PICKER_LIMIT) ? (",
+                  "+            \u003cli className=\"text-muted-foreground border-t px-3 py-1.5 text-xs\"\u003eShowing the first {PICKER_LIMIT}. Type more to narrow down.\u003c/li\u003e",
+                  "+          ) : null}",
+                  "+        \u003c/ul\u003e",
+                  "+      )}",
+                  "+    \u003c/div\u003e",
+                  "+  );",
+                  "+}"
+                ],
+                "newLines": 162,
+                "newStart": 819,
+                "oldLines": 3,
+                "oldStart": 819
+              }
+            ]
+          }
+        ],
+        "moreFiles": 0
+      },
+      "interrupted": false,
+      "isImage": false,
+      "noOutputExpected": false,
+      "staleReadFileStateHint": "[This command modified 1 file you've previously read: DocumentsPage.jsx. Call Read before editing.]",
+      "stderr": "",
+      "stdout": "3:function Input({ className, type, ...props }) {\n1:import { Ban, CheckCircle2, ChevronDown, FileDown, FileOutput, Loader2, Pencil, Plus, Printer, Search, Send, Trash2, Truck, Undo2, X } from \"lucide-react\";\n306:          \u003cSearch className=\"text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2\" /\u003e\n307:          \u003cInput value={query} onChange={(e) =\u003e setQuery(e.target.value)} placeholder=\"Search number, customer, ref\" className=\"bg-white pl-9\" /\u003e"
+    },
+    "tool_use_id": "toolu_01XLF5XhRGAj8BFDYSAr1cyd",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\adfc42aa-92b0-4fbc-8ce8-e313f5728751.jsonl"
   }
 ]

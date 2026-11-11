@@ -1,0 +1,18 @@
+[
+  {
+    "event": "notification_start",
+    "notify": true,
+    "timestamp": "2026-10-27T13:23:08+08:00"
+  },
+  {
+    "event": "notification_send",
+    "message": "Your agent needs your input",
+    "timestamp": "2026-10-27T13:23:08+08:00"
+  },
+  {
+    "error": "",
+    "event": "notification_result",
+    "success": true,
+    "timestamp": "2026-10-27T13:23:08+08:00"
+  }
+]

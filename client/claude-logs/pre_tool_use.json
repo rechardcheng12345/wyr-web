@@ -1,0 +1,20 @@
+[
+  {
+    "cwd": "D:\\Github\\WYR Web\\client",
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "4853186a-8cb4-43ba-be22-5894e434a63d",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\31b03233-27dc-4d48-b6a3-cb2c7dfa7f9d\\scratchpad",
+    "session_id": "31b03233-27dc-4d48-b6a3-cb2c7dfa7f9d",
+    "tool_input": {
+      "command": "cd \"D:/Github/WYR Web\" \u0026\u0026 npm run build -w client 2\u003e\u00261 | tail -8",
+      "description": "Build the client workspace"
+    },
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_019DRi7zNsSaA3jSj8vFTv2u",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\31b03233-27dc-4d48-b6a3-cb2c7dfa7f9d.jsonl"
+  }
+]

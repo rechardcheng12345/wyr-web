@@ -28,6 +28,26 @@ const STATIC_PAGES = {
     title: "Contact us · WYR Technology",
     description: "Questions about NFC tags, RFID cards or bulk orders? Contact WYR Technology by WhatsApp or email.",
   },
+  "/shipping": {
+    title: "Shipping policy · WYR Technology",
+    description: "Shipping fees, dispatch times and delivery times for WYR Technology orders across Peninsular and East Malaysia.",
+  },
+  "/returns": {
+    title: "Returns & refunds · WYR Technology",
+    description: "How to return a defective, damaged or wrong item from WYR Technology, and how refunds are paid.",
+  },
+  "/privacy": {
+    title: "Privacy policy · WYR Technology",
+    description: "What personal data WYR Technology collects, how it is used and your rights under Malaysia's PDPA.",
+  },
+  "/terms": {
+    title: "Terms & conditions · WYR Technology",
+    description: "The terms that apply when you buy from WYR Technology: orders, prices, payment, delivery and returns.",
+  },
+  "/eink-converter": {
+    title: "E-ink card image converter · WYR Technology",
+    description: "Convert any photo into a 200 × 300 black, white, red and yellow picture that the e-ink NFC card accepts, ready to write with the NETME app on iPhone.",
+  },
 };
 
 // Real pages that shouldn't appear in search results (carts, accounts, order status).
