@@ -24,6 +24,8 @@ export const SHOPEE_SHOP_URL = "https://shopee.com.my/shop/147356782";
 /** ToyyibPay payment channel: "0" = FPX only, "1" = card only, "2" = both (card must be enabled on the account). */
 export const TOYYIBPAY_PAYMENT_CHANNEL = "0";
 
+export const TOYYIBPAY_DUITNOW_QR = "0";
+
 export const MIN_ORDER_SUBTOTAL_RM = 0;
 
 export const FREE_SHIPPING_THRESHOLD_RM = 50;

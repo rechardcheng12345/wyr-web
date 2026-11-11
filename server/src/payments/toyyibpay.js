@@ -45,6 +45,10 @@ export function toyyibPayGateway() {
   const categoryCode = requireEnv("TOYYIBPAY_CATEGORY_CODE");
   // 0 = FPX, 1 = card, 2 = both (card must be enabled on the ToyyibPay account).
   const channel = () => getSetting("toyyibpayPaymentChannel");
+  const duitNowFields = () => {
+    const charge = getSetting("toyyibpayDuitNowQr");
+    return charge === "0" || charge === "1" ? { enableDuitNowQR: "1", chargeDuitNowQR: charge } : {};
+  };
 
   async function post(path, fields) {
     const res = await fetch(`${baseUrl}/index.php/api/${path}`, {
@@ -82,6 +86,7 @@ export function toyyibPayGateway() {
         billPhone: input.buyerPhone,
         billPaymentChannel: channel(),
         billExpiryDate: toyyibDate(input.expiresAt),
+        ...duitNowFields(),
       });
       const billCode = Array.isArray(body) ? body[0]?.BillCode : undefined;
       if (!billCode) throw new Error(`ToyyibPay createBill failed: ${JSON.stringify(body).slice(0, 300)}`);

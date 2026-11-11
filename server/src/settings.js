@@ -19,6 +19,7 @@ import {
   SHIPPING_FLAT_EM_RM,
   SHIPPING_FLAT_WM_RM,
   SHOPEE_SHOP_URL,
+  TOYYIBPAY_DUITNOW_QR,
   TOYYIBPAY_PAYMENT_CHANNEL,
   WHATSAPP_NUMBER,
 } from "./constants.js";
@@ -88,6 +89,12 @@ const CHANNELS = [
   { value: "0", label: "FPX online banking only" },
   { value: "1", label: "Credit / debit card only" },
   { value: "2", label: "FPX and card (card must be enabled on your ToyyibPay account)" },
+];
+
+const DUITNOW_QR = [
+  { value: "off", label: "Off" },
+  { value: "0", label: "On, shop pays the DuitNow fee" },
+  { value: "1", label: "On, customer pays the DuitNow fee" },
 ];
 
 export const SETTINGS = [
@@ -182,6 +189,16 @@ export const SETTINGS = [
     options: CHANNELS,
     defaultValue: TOYYIBPAY_PAYMENT_CHANNEL,
     parse: oneOf(CHANNELS),
+  },
+  {
+    key: "toyyibpayDuitNowQr",
+    group: "Checkout & payment",
+    label: "DuitNow QR",
+    help: "Adds DuitNow QR to the ToyyibPay page, next to the methods above. Needs DuitNow QR activated on the ToyyibPay account.",
+    type: "select",
+    options: DUITNOW_QR,
+    defaultValue: TOYYIBPAY_DUITNOW_QR,
+    parse: oneOf(DUITNOW_QR),
   },
   {
     key: "bulkQuoteMinQty",
