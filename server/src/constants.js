@@ -18,6 +18,9 @@ export const BULK_QUOTE_MIN_QTY = 50;
 /** WhatsApp number for "Bulk / business quote" links: digits with country code, no + or spaces. */
 export const WHATSAPP_NUMBER = "60125978873";
 
+/** Google Analytics 4 Measurement ID (property "WYR Gadget"); empty turns tracking off. */
+export const GA_MEASUREMENT_ID = "G-WR11J67WQD";
+
 /** WYR's Shopee shop, linked from the public site's header, footer and contact page. */
 export const SHOPEE_SHOP_URL = "https://shopee.com.my/shop/147356782";
 

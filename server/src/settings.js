@@ -31,6 +31,7 @@ import {
   TOYYIBPAY_DUITNOW_QR,
   TOYYIBPAY_PAYMENT_CHANNEL,
   WHATSAPP_NUMBER,
+  GA_MEASUREMENT_ID,
 } from "./constants.js";
 import { prisma } from "./db.js";
 
@@ -84,6 +85,12 @@ function url(raw) {
   } catch {
     throw new Error("Enter a full link starting with https://");
   }
+}
+
+function gaId(raw) {
+  const v = String(raw ?? "").trim().toUpperCase();
+  if (v && !/^G-[A-Z0-9]{4,20}$/.test(v)) throw new Error("A Measurement ID like G-XXXXXXXXXX, or empty to turn tracking off");
+  return v;
 }
 
 function oneOf(options) {
@@ -244,6 +251,15 @@ export const SETTINGS = [
     type: "phone",
     defaultValue: WHATSAPP_NUMBER,
     parse: phone,
+  },
+  {
+    key: "gaMeasurementId",
+    group: "Sales & contact",
+    label: "Google Analytics Measurement ID",
+    help: "Website traffic tracking (analytics.google.com › Admin › Data streams). Public shop pages only, not admin. Leave empty to turn it off.",
+    type: "text",
+    defaultValue: GA_MEASUREMENT_ID,
+    parse: gaId,
   },
   {
     key: "shopeeUrl",
