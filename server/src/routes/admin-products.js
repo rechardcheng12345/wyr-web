@@ -271,7 +271,7 @@ function serializeForEdit(p) {
     showOnGoogle: p.showOnGoogle,
     ...Object.fromEntries(INFO_FIELDS.map((f) => [f.key, p[f.key] ?? ""])),
     images: p.images.map((i) => i.url).filter(Boolean),
-    faqs: p.faqs.map((f) => ({ question: f.question, answer: f.answer })),
+    faqs: p.faqs.map((f) => ({ question: f.question, answer: f.answer, questionMs: f.questionMs ?? "", answerMs: f.answerMs ?? "" })),
     videos: p.videos.map((v) => ({ url: v.url, title: v.title ?? "" })),
     variants: p.variants.map((v) => ({
       id: v.id,

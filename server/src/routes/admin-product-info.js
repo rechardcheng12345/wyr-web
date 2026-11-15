@@ -57,7 +57,12 @@ const FAQ_COLUMNS = [
   { key: "productName", header: "Product name (for reference)", width: 40, locked: true },
   { key: "question", header: "Question", width: 50, wrap: true },
   { key: "answer", header: "Answer", width: 70, wrap: true },
+  // optional so sheets downloaded before these columns existed still upload (their BM text is then kept)
+  { key: "questionMs", header: "Question (Bahasa Malaysia)", width: 50, wrap: true, optional: true },
+  { key: "answerMs", header: "Answer (Bahasa Malaysia)", width: 70, wrap: true, optional: true },
 ];
+
+const faqHeader = (key) => FAQ_COLUMNS.find((c) => c.key === key)?.header;
 
 const toNumber = (d) => (d == null ? null : d.toNumber());
 
@@ -106,6 +111,7 @@ async function buildWorkbook() {
     "2. Leave a cell empty if you don't know it yet. Emptying a cell that had a value clears it on the website.",
     "3. Inside a cell, press Alt+Enter (Mac: Option+Enter) to start a new line, e.g. one specification per line.",
     "4. FAQ: one question per row. Copy the Product ID from the Products sheet. To delete a question, delete its row.",
+    "   Write the English question and answer, and the Bahasa Malaysia version in the BM columns of the same row (optional, but fill in both BM question and answer).",
     "5. Don't add or remove products or variants here (use Products › Add product). Don't change Product ID or SKU.",
     "6. Save, then in the admin go to Products › Upload info sheet. You will see the changes before anything is saved.",
     "",
@@ -151,7 +157,9 @@ async function buildWorkbook() {
     wb,
     "FAQ",
     FAQ_COLUMNS,
-    products.flatMap((p) => p.faqs.map((f) => ({ productId: p.id, productName: p.name, question: f.question, answer: f.answer }))),
+    products.flatMap((p) =>
+      p.faqs.map((f) => ({ productId: p.id, productName: p.name, question: f.question, answer: f.answer, questionMs: f.questionMs ?? "", answerMs: f.answerMs ?? "" })),
+    ),
   );
   return wb;
 }
@@ -288,14 +296,24 @@ async function planImport(buffer) {
 
   // FAQ sheet is the full list: for every product on the Products or FAQ sheet, its questions become exactly these rows.
   const faqRows = new Map();
-  for (const { rowNo, get } of readSheet(wb, "FAQ", FAQ_COLUMNS, errors)) {
+  for (const { rowNo, get, has } of readSheet(wb, "FAQ", FAQ_COLUMNS, errors)) {
     const id = rowId(get("Product ID"));
     if (!id || !byId.has(id)) {
       errors.push({ sheet: "FAQ", row: rowNo, message: `Product ID "${get("Product ID")}" not found` });
       continue;
     }
+    const row = { rowNo, question: get("Question"), answer: get("Answer") };
+    if (has(faqHeader("questionMs")) || has(faqHeader("answerMs"))) {
+      row.questionMs = get(faqHeader("questionMs"));
+      row.answerMs = get(faqHeader("answerMs"));
+    } else {
+      // older sheet without BM columns: keep the BM text of the question with the same English wording
+      const old = byId.get(id).faqs.find((f) => f.question === row.question.replace(/\r\n?/g, "\n").trim());
+      row.questionMs = old?.questionMs ?? "";
+      row.answerMs = old?.answerMs ?? "";
+    }
     if (!faqRows.has(id)) faqRows.set(id, []);
-    faqRows.get(id).push({ rowNo, question: get("Question"), answer: get("Answer") });
+    faqRows.get(id).push(row);
   }
   const faqs = [];
   for (const id of new Set([...seenProducts, ...faqRows.keys()])) {
@@ -304,10 +322,10 @@ async function planImport(buffer) {
     const list = parseFaqs(rows, fields, "faq");
     for (const [key, message] of Object.entries(fields)) {
       const [, i, col] = key.split(".");
-      errors.push({ sheet: "FAQ", row: rows[Number(i)]?.rowNo, message: col ? `${col === "question" ? "Question" : "Answer"}: ${message}` : message });
+      errors.push({ sheet: "FAQ", row: rows[Number(i)]?.rowNo, message: col ? `${faqHeader(col)}: ${message}` : message });
     }
     const p = byId.get(id);
-    const current = p.faqs.map((f) => ({ question: f.question, answer: f.answer }));
+    const current = p.faqs.map((f) => ({ question: f.question, answer: f.answer, questionMs: f.questionMs ?? null, answerMs: f.answerMs ?? null }));
     if (!same(list, current)) faqs.push({ id, label: label(p), list, changed: [`${current.length} → ${list.length} question${list.length === 1 ? "" : "s"}`] });
   }
 

@@ -575,5 +575,1084 @@
     },
     "tool_use_id": "toolu_014yjMC3e2hs9Apw5jSbbwWA",
     "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\server\\src",
+    "duration_ms": 344,
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "91e213b5-07dc-4d46-b8cc-d54b39f5ca7f",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "command": "cd \"D:/Github/WYR Web/server/src\" \u0026\u0026 grep -n \"company\\|doc_\\|bank\\|ship\\|whatsapp\" -i constants.js | head -40; grep -n \"businessJsonLd\" -A30 seo.js | head -45; ls routes | grep -i -E \"feed|merchant\"; grep -rn \"feed\" app.js",
+      "description": "Check company settings and business JSON-LD"
+    },
+    "tool_name": "Bash",
+    "tool_response": {
+      "interrupted": false,
+      "isImage": false,
+      "noOutputExpected": false,
+      "stderr": "",
+      "stdout": "8:/** Flat shipping in RM: Peninsular Malaysia, and East Malaysia (Sabah, Sarawak, Labuan). */\n9:export const SHIPPING_FLAT_WM_RM = 6.9;\n10:export const SHIPPING_FLAT_EM_RM = 6.9;\n15:/** From this many pieces the product page also offers a bulk / business quote over WhatsApp. */\n18:/** WhatsApp number for \"Bulk / business quote\" links: digits with country code, no + or spaces. */\n19:export const WHATSAPP_NUMBER = \"60125978873\";\n29:export const FREE_SHIPPING_THRESHOLD_RM = 50;\n38:/** Company details and wording on quotations, invoices and delivery orders (editable on the admin Static page). */\n39:export const COMPANY_NAME = \"WYR Technology\";\n40:export const COMPANY_ADDRESS = \"5-17 Setapak Green Condominium\\nJalan Semarak Api off Jalan Gombak\\n53000, Setapak,\";\n41:export const COMPANY_PHONE = \"0125978873\";\n42:export const COMPANY_EMAIL = \"alancheng8873@gmail.com\";\n43:export const BANK_INFO = \"Maybank 512866195920\";\n8:import { BUSINESS_NAME, businessJsonLd, shippingDetailsJsonLd, variantOffer, variantUrl, websiteJsonLd } from \"./merchant.js\";\n9-import { detailInclude, serializeDetail } from \"./routes/products.js\";\n10-\n11-const SITE_NAME = BUSINESS_NAME;\n12-const DEFAULT_TITLE = \"WYR Technology · NFC \u0026 RFID hardware\";\n13-const DEFAULT_DESCRIPTION = \"WYR Technology: NFC tags, RFID cards, readers and tap-to-review standees. Ready stock in Kuala Lumpur.\";\n14-const DEFAULT_IMAGE = \"/images/logo.jpeg\";\n15-\n16-// Public pages worth indexing (path -\u003e title, description).\n17-const STATIC_PAGES = {\n18-  \"/\": { title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION },\n19-  \"/products\": {\n20-    title: \"Shop NFC tags, RFID cards \u0026 readers · WYR Technology\",\n21-    description: \"Browse NFC stickers, NTAG213/215/216 tags, RFID and DESFire cards, readers and tap-to-review standees. Ready stock in Malaysia, ships from Kuala Lumpur.\",\n22-  },\n23-  \"/about\": {\n24-    title: \"About us · WYR Technology\",\n25-    description: \"WYR Technology makes NFC and RFID easy to buy in Malaysia: genuine chips, ready stock in Kuala Lumpur and help choosing the right tag.\",\n26-  },\n27-  \"/contact\": {\n28-    title: \"Contact us · WYR Technology\",\n29-    description: \"Questions about NFC tags, RFID cards or bulk orders? Contact WYR Technology by WhatsApp or email.\",\n30-  },\n31-  \"/eink-converter\": {\n32-    title: \"E-ink card image converter · WYR Technology\",\n33-    description: \"Convert any photo into a 200 × 300 black, white, red and yellow picture that the e-ink NFC card accepts, ready to write with the NETME app on iPhone.\",\n34-  },\n35-};\n36-\n37-// Real pages that shouldn't appear in search results (carts, accounts, order status).\n38-const PRIVATE_PAGES = [/^\\/cart$/, /^\\/checkout(\\/return)?$/, /^\\/orders\\/[^/]+$/, /^\\/track$/, /^\\/account(\\/(login|register|orders))?$/];\n--\n121:    if (p === \"/\") meta.jsonLd.push(businessJsonLd(origin), websiteJsonLd(origin));\n122:    if (p === \"/about\" || p === \"/contact\") meta.jsonLd.push(businessJsonLd(origin));\n123-    // Category listings are their own pages; searches and page numbers fold into /products.\n124-    const category = typeof req.query.category === \"string\" ? req.query.category.trim() : \"\";\n125-    if (p === \"/products\" \u0026\u0026 category) {\n126-      const cat = await prisma.category.findUnique({ where: { slug: category }, select: { name: true, slug: true } });\n127-      if (cat?.name) {\n128-        meta.title = `${cat.name} · WYR Technology`;\n129-        meta.description = `Shop ${cat.name} at WYR Technology. Ready stock in Malaysia, ships from Kuala Lumpur.`;\n130-        meta.canonical = `${origin}/products?category=${encodeURIComponent(cat.slug)}`;\n131-      }\n132-    }\n133-    return meta;\n9:import { merchantFeed } from \"./merchant-feed.js\";\n100:      app.get(\"/merchant-feed.xml\", merchantFeed);"
+    },
+    "tool_use_id": "toolu_01XqY9Ab5dVLcMtHo64Y6ekz",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\server\\src",
+    "duration_ms": 1811,
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "91e213b5-07dc-4d46-b8cc-d54b39f5ca7f",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "command": "cd \"D:/Github/WYR Web/server/src\" \u0026\u0026 cat merchant.js | head -120; grep -n \"return\\|refund\\|shipping\\|handling\\|transit\" -i merchant-feed.js | head -20; curl -s -m 15 https://wyrgadget.com/ -o /dev/null -w \"%{http_code}\\n\"; curl -s -m 15 https://wyrgadget.com/returns -o /dev/null -w \"%{http_code}\\n\"",
+      "description": "Read merchant JSON-LD and check live site"
+    },
+    "tool_name": "Bash",
+    "tool_response": {
+      "interrupted": false,
+      "isImage": false,
+      "noOutputExpected": false,
+      "stderr": "",
+      "stdout": "// What Google (Search structured data and the Merchant Center feed) is told about offers,\n// shipping and the business. Kept in one place so the product page JSON-LD and\n// /merchant-feed.xml always agree.\nimport { getSetting } from \"./settings.js\";\nimport { shippingSummary } from \"./shipping.js\";\n\nexport const BUSINESS_NAME = \"WYR Technology\";\n\n// East Malaysia postcodes (Labuan 87, Sabah 88-91, Sarawak 93-98); everything else ships at the West rate.\nconst EAST_POSTCODES = [\n  { postalCodeBegin: \"87000\", postalCodeEnd: \"87999\" },\n  { postalCodeBegin: \"88000\", postalCodeEnd: \"91999\" },\n  { postalCodeBegin: \"93000\", postalCodeEnd: \"98999\" },\n];\n\n/**\n * One sellable offer per variant. Variants that need a minimum quantity (low-price items)\n * are offered as a pack of that many, since a single piece can't be bought at that price.\n */\nexport function variantOffer(variant) {\n  if (!variant.tiers.length) return null;\n  const packQty = Math.max(1, variant.minQty ?? 1);\n  const unitPrice = variant.tiers[0].unitPrice;\n  return {\n    unitPrice,\n    packQty,\n    packPrice: Math.round(unitPrice * packQty * 100) / 100,\n    inStock: variant.stock != null \u0026\u0026 variant.stock \u003e= packQty,\n  };\n}\n\n/** Variant page URL: the product page with that variant preselected. */\nexport function variantUrl(productUrl, variant) {\n  return `${productUrl}?variant=${variant.id}`;\n}\n\nfunction rate(cents) {\n  return { \"@type\": \"MonetaryAmount\", value: (cents / 100).toFixed(2), currency: \"MYR\" };\n}\n\n/** schema.org OfferShippingDetails for Malaysia: West rate by default, East rate for East Malaysian postcodes. */\nexport function shippingDetailsJsonLd(priceCents) {\n  const { westCents, eastCents, freeThresholdCents } = shippingSummary();\n  const free = freeThresholdCents != null \u0026\u0026 priceCents \u003e= freeThresholdCents;\n  return [\n    {\n      \"@type\": \"OfferShippingDetails\",\n      shippingRate: rate(free ? 0 : westCents),\n      shippingDestination: { \"@type\": \"DefinedRegion\", addressCountry: \"MY\" },\n    },\n    {\n      \"@type\": \"OfferShippingDetails\",\n      shippingRate: rate(free ? 0 : eastCents),\n      shippingDestination: { \"@type\": \"DefinedRegion\", addressCountry: \"MY\", postalCodeRange: EAST_POSTCODES },\n    },\n  ];\n}\n\n/** Store details for search: Malaysia-only online shop based in Kuala Lumpur (no street address published). */\nexport function businessJsonLd(origin) {\n  const whatsapp = getSetting(\"whatsappNumber\").replace(/\\D/g, \"\");\n  const shopee = getSetting(\"shopeeUrl\");\n  return {\n    \"@context\": \"https://schema.org\",\n    \"@type\": \"OnlineStore\",\n    name: BUSINESS_NAME,\n    url: `${origin}/`,\n    logo: `${origin}/images/wyr-logo-mark.png`,\n    description: \"NFC tags, RFID cards, readers and tap-to-review standees. Ready stock in Kuala Lumpur, shipped across Malaysia.\",\n    address: { \"@type\": \"PostalAddress\", addressLocality: \"Kuala Lumpur\", addressCountry: \"MY\" },\n    areaServed: { \"@type\": \"Country\", name: \"Malaysia\" },\n    currenciesAccepted: \"MYR\",\n    ...(whatsapp \u0026\u0026 {\n      contactPoint: { \"@type\": \"ContactPoint\", contactType: \"customer service\", telephone: `+${whatsapp}`, areaServed: \"MY\" },\n    }),\n    ...(shopee \u0026\u0026 { sameAs: [shopee] }),\n  };\n}\n\nexport function websiteJsonLd(origin) {\n  return { \"@context\": \"https://schema.org\", \"@type\": \"WebSite\", name: BUSINESS_NAME, alternateName: \"WYR Gadget\", url: `${origin}/` };\n}\n17:  return t.length \u003c= max ? t : `${t.slice(0, max - 1).replace(/\\s+\\S*$/, \"\")}…`;\n22:  if (!offer) return null;\n31:  if (!images.length) return null;\n49:    ...(variant.weightG ? [[\"g:shipping_weight\", `${variant.weightG} g`]] : []),\n51:  return `    \u003citem\u003e\\n${fields.map(([k, v]) =\u003e `      \u003c${k}\u003e${escapeXml(v)}\u003c/${k}\u003e`).join(\"\\n\")}\\n    \u003c/item\u003e`;\n200\r\n404"
+    },
+    "tool_use_id": "toolu_01JPRH339xxa45gZpCEnHsF2",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\server\\src",
+    "duration_ms": 1118,
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "b2b58939-7ad8-4e63-acce-319e1fbf9899",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "command": "cd \"D:/Github/WYR Web/server/src\" \u0026\u0026 python - \u003c\u003c'EOF'\nimport re\ndef edit(p, old, new, count=1):\n    s=open(p,encoding=\"utf8\").read()\n    assert s.count(old)\u003e=1, (p, old[:60])\n    s=s.replace(old,new,count)\n    open(p,\"w\",encoding=\"utf8\",newline=\"\").write(s)\n\nedit(\"constants.js\", 'export const INVOICE_FOOTER = \"This is a computer-generated invoice. No signature is required.\";',\n'''export const INVOICE_FOOTER = \"This is a computer-generated invoice. No signature is required.\";\n\n/** Store policies shown on the website (Shipping, Returns \u0026 refunds, Contact) and told to Google. */\nexport const PUBLIC_ADDRESS = \"Setapak, 53000 Kuala Lumpur, Malaysia\";\nexport const BUSINESS_HOURS = \"Monday to Friday, 9am to 6pm\";\n/** Orders paid before this hour (Malaysia time) on a working day ship the same day. */\nexport const DISPATCH_CUTOFF_HOUR = 15;\nexport const DELIVERY_WEST_DAYS = [2, 4];\nexport const DELIVERY_EAST_DAYS = [3, 7];\nexport const COURIERS = \"\";\n/** Days after delivery to report a defective, damaged or wrong item. */\nexport const RETURN_DAYS = 7;\n/** Working days to refund once a return is approved. */\nexport const REFUND_DAYS = 7;''')\n\ns=open(\"settings.js\",encoding=\"utf8\").read()\ns=s.replace(\"  BANK_INFO,\\n\",\"  BANK_INFO,\\n  BUSINESS_HOURS,\\n  COURIERS,\\n  DELIVERY_EAST_DAYS,\\n  DELIVERY_WEST_DAYS,\\n  DISPATCH_CUTOFF_HOUR,\\n\",1)\ns=s.replace(\"  MIN_ORDER_SUBTOTAL_RM,\\n\",\"  MIN_ORDER_SUBTOTAL_RM,\\n  PUBLIC_ADDRESS,\\n  REFUND_DAYS,\\n  RETURN_DAYS,\\n\",1)\ns=s.replace('''    help: \"Printed after the company name. Leave empty to hide.\",''','''    help: \"Printed after the company name on documents, and shown on the website footer, Contact and policy pages. Leave empty to hide.\",''',1)\ns=s.replace('''    help: \"As printed on documents, e.g. 012-597 8873.\",''','''    help: \"As printed on documents, e.g. 012-597 8873. Also shown on the website (Contact, footer, policies).\",''',1)\ns=s.replace('''    help: \"As printed on documents.\",''','''    help: \"As printed on documents. Also shown on the website (Contact, footer, policies).\",''',1)\nnew_settings='''  {\n    key: \"public_address\",\n    group: \"Store policies (website)\",\n    label: \"Address shown on the website\",\n    help: \"On the Contact, footer and policy pages. The full street address earns more trust (Google checks it); the area alone is fine too.\",\n    type: \"textarea\",\n    defaultValue: PUBLIC_ADDRESS,\n    parse: text(300, { required: true }),\n  },\n  {\n    key: \"business_hours\",\n    group: \"Store policies (website)\",\n    label: \"Business hours\",\n    help: \"When customers can reach you, shown on the Contact and policy pages. Leave empty to hide.\",\n    type: \"text\",\n    defaultValue: BUSINESS_HOURS,\n    parse: text(150),\n  },\n  {\n    key: \"dispatch_cutoff_hour\",\n    group: \"Store policies (website)\",\n    label: \"Same-day dispatch cut-off (hour, 0-23)\",\n    help: \"Orders paid before this hour on a working day (Monday to Friday) ship the same day; later ones the next working day. 15 = 3pm.\",\n    type: \"int\",\n    defaultValue: DISPATCH_CUTOFF_HOUR,\n    parse: intBetween(0, 23),\n  },\n  {\n    key: \"delivery_west_days\",\n    group: \"Store policies (website)\",\n    label: \"Delivery time, Peninsular Malaysia (working days)\",\n    help: \"Courier time after dispatch, as a range: e.g. 2-4.\",\n    type: \"text\",\n    defaultValue: DELIVERY_WEST_DAYS,\n    parse: dayRange,\n  },\n  {\n    key: \"delivery_east_days\",\n    group: \"Store policies (website)\",\n    label: \"Delivery time, East Malaysia (working days)\",\n    help: \"Courier time after dispatch to Sabah, Sarawak and Labuan, as a range: e.g. 3-7.\",\n    type: \"text\",\n    defaultValue: DELIVERY_EAST_DAYS,\n    parse: dayRange,\n  },\n  {\n    key: \"couriers\",\n    group: \"Store policies (website)\",\n    label: \"Couriers\",\n    help: \"Named on the Shipping page, e.g. J\u0026T Express, Pos Laju. Leave empty to hide.\",\n    type: \"text\",\n    defaultValue: COURIERS,\n    parse: text(150),\n  },\n  {\n    key: \"return_days\",\n    group: \"Store policies (website)\",\n    label: \"Report a problem within (days of delivery)\",\n    help: \"Defective, damaged or wrong items reported within this many days are replaced or refunded.\",\n    type: \"int\",\n    defaultValue: RETURN_DAYS,\n    parse: intBetween(1, 60),\n  },\n  {\n    key: \"refund_days\",\n    group: \"Store policies (website)\",\n    label: \"Refund within (working days)\",\n    help: \"How soon an approved refund is paid back.\",\n    type: \"int\",\n    defaultValue: REFUND_DAYS,\n    parse: intBetween(1, 60),\n  },\n];\n\nconst BY_KEY'''\ns=s.replace(\"];\\n\\nconst BY_KEY\", \",\\n\"+new_settings[0:0]+new_settings, 1) if False else s.replace(\"  },\\n];\\n\\nconst BY_KEY\", \"  },\\n\"+new_settings,1)\ns=s.replace('''const CHANNELS = [''','''/** \"2-4\" -\u003e [2, 4]: a working-day range (a single number means min = max). */\nfunction dayRange(raw) {\n  const m = (Array.isArray(raw) ? raw.join(\"-\") : String(raw ?? \"\")).trim().match(/^(\\\\d{1,2})\\\\s*(?:[-\\u2013]\\\\s*(\\\\d{1,2}))?$/);\n  const min = m ? Number(m[1]) : NaN;\n  const max = m ? Number(m[2] ?? m[1]) : NaN;\n  if (!m || min \u003c 0 || max \u003c min || max \u003e 60) throw new Error(\"A range of working days, e.g. 2-4\");\n  return [min, max];\n}\n\nconst CHANNELS = [''',1)\nopen(\"settings.js\",\"w\",encoding=\"utf8\",newline=\"\").write(s)\nEOF\ngrep -n \"dayRange\\|Store policies\" settings.js | head; node -e \"import('./settings.js').then(m=\u003e{const d=m.describeSettings().filter(s=\u003es.group.startsWith('Store'));console.log(d.map(s=\u003es.key+'='+JSON.stringify(s.value)).join('\\n'))})\" 2\u003e\u00261 | tail -10",
+      "description": "Add store policy constants and settings"
+    },
+    "tool_name": "Bash",
+    "tool_response": {
+      "bashEditDiff": {
+        "changedFiles": [
+          "D:\\Github\\WYR Web\\server\\src\\constants.js",
+          "D:\\Github\\WYR Web\\server\\src\\settings.js"
+        ],
+        "files": [
+          {
+            "filePath": "D:\\Github\\WYR Web\\server\\src\\constants.js",
+            "hunks": [
+              {
+                "lines": [
+                  " export const QUOTATION_TERMS =",
+                  "   \"All prices quoted are valid for 30 days from the date stated on the quotation.\\nIf you have any questions concerning this quotation, please contact us by email or by phone.\";",
+                  " export const INVOICE_FOOTER = \"This is a computer-generated invoice. No signature is required.\";",
+                  "+",
+                  "+/** Store policies shown on the website (Shipping, Returns \u0026 refunds, Contact) and told to Google. */",
+                  "+export const PUBLIC_ADDRESS = \"Setapak, 53000 Kuala Lumpur, Malaysia\";",
+                  "+export const BUSINESS_HOURS = \"Monday to Friday, 9am to 6pm\";",
+                  "+/** Orders paid before this hour (Malaysia time) on a working day ship the same day. */",
+                  "+export const DISPATCH_CUTOFF_HOUR = 15;",
+                  "+export const DELIVERY_WEST_DAYS = [2, 4];",
+                  "+export const DELIVERY_EAST_DAYS = [3, 7];",
+                  "+export const COURIERS = \"\";",
+                  "+/** Days after delivery to report a defective, damaged or wrong item. */",
+                  "+export const RETURN_DAYS = 7;",
+                  "+/** Working days to refund once a return is approved. */",
+                  "+export const REFUND_DAYS = 7;"
+                ],
+                "newLines": 16,
+                "newStart": 46,
+                "oldLines": 3,
+                "oldStart": 46
+              }
+            ]
+          },
+          {
+            "filePath": "D:\\Github\\WYR Web\\server\\src\\settings.js",
+            "hunks": [
+              {
+                "lines": [
+                  " import {",
+                  "   BANK_INFO,",
+                  "+  BUSINESS_HOURS,",
+                  "+  COURIERS,",
+                  "+  DELIVERY_EAST_DAYS,",
+                  "+  DELIVERY_WEST_DAYS,",
+                  "+  DISPATCH_CUTOFF_HOUR,",
+                  "   BULK_QUOTE_MIN_QTY,",
+                  "   COMPANY_ADDRESS,",
+                  "   COMPANY_EMAIL,"
+                ],
+                "newLines": 10,
+                "newStart": 1,
+                "oldLines": 5,
+                "oldStart": 1
+              },
+              {
+                "lines": [
+                  "   LOW_PRICE_MIN_QTY,",
+                  "   LOW_PRICE_THRESHOLD_RM,",
+                  "   MIN_ORDER_SUBTOTAL_RM,",
+                  "+  PUBLIC_ADDRESS,",
+                  "+  REFUND_DAYS,",
+                  "+  RETURN_DAYS,",
+                  "   STOCK_SAFETY_BUFFER,",
+                  "   WELCOME_VOUCHER_CODE,",
+                  "   ORDER_HOLD_MINUTES,"
+                ],
+                "newLines": 9,
+                "newStart": 18,
+                "oldLines": 6,
+                "oldStart": 13
+              },
+              {
+                "lines": [
+                  "   };",
+                  " }",
+                  " ",
+                  "+/** \"2-4\" -\u003e [2, 4]: a working-day range (a single number means min = max). */",
+                  "+function dayRange(raw) {",
+                  "+  const m = (Array.isArray(raw) ? raw.join(\"-\") : String(raw ?? \"\")).trim().match(/^(\\d{1,2})\\s*(?:[-–]\\s*(\\d{1,2}))?$/);",
+                  "+  const min = m ? Number(m[1]) : NaN;",
+                  "+  const max = m ? Number(m[2] ?? m[1]) : NaN;",
+                  "+  if (!m || min \u003c 0 || max \u003c min || max \u003e 60) throw new Error(\"A range of working days, e.g. 2-4\");",
+                  "+  return [min, max];",
+                  "+}",
+                  "+",
+                  " const CHANNELS = [",
+                  "   { value: \"0\", label: \"FPX online banking only\" },",
+                  "   { value: \"1\", label: \"Credit / debit card only\" },"
+                ],
+                "newLines": 15,
+                "newStart": 92,
+                "oldLines": 6,
+                "oldStart": 84
+              },
+              {
+                "lines": [
+                  "     key: \"company_reg_no\",",
+                  "     group: \"Documents (quotation, invoice, DO)\",",
+                  "     label: \"Registration no. (SSM)\",",
+                  "-    help: \"Printed after the company name. Leave empty to hide.\",",
+                  "+    help: \"Printed after the company name on documents, and shown on the website footer, Contact and policy pages. Leave empty to hide.\",",
+                  "     type: \"text\",",
+                  "     defaultValue: \"\",",
+                  "     parse: text(60),"
+                ],
+                "newLines": 7,
+                "newStart": 240,
+                "oldLines": 7,
+                "oldStart": 223
+              },
+              {
+                "lines": [
+                  "     key: \"company_phone\",",
+                  "     group: \"Documents (quotation, invoice, DO)\",",
+                  "     label: \"Phone\",",
+                  "-    help: \"As printed on documents, e.g. 012-597 8873.\",",
+                  "+    help: \"As printed on documents, e.g. 012-597 8873. Also shown on the website (Contact, footer, policies).\",",
+                  "     type: \"text\",",
+                  "     defaultValue: COMPANY_PHONE,",
+                  "     parse: text(40),"
+                ],
+                "newLines": 7,
+                "newStart": 258,
+                "oldLines": 7,
+                "oldStart": 241
+              },
+              {
+                "lines": [
+                  "     key: \"company_email\",",
+                  "     group: \"Documents (quotation, invoice, DO)\",",
+                  "     label: \"Email\",",
+                  "-    help: \"As printed on documents.\",",
+                  "+    help: \"As printed on documents. Also shown on the website (Contact, footer, policies).\",",
+                  "     type: \"text\",",
+                  "     defaultValue: COMPANY_EMAIL,",
+                  "     parse: text(150),"
+                ],
+                "newLines": 7,
+                "newStart": 267,
+                "oldLines": 7,
+                "oldStart": 250
+              },
+              {
+                "lines": [
+                  "     defaultValue: INVOICE_FOOTER,",
+                  "     parse: text(500),",
+                  "   },",
+                  "+  {",
+                  "+    key: \"public_address\",",
+                  "+    group: \"Store policies (website)\",",
+                  "+    label: \"Address shown on the website\",",
+                  "+    help: \"On the Contact, footer and policy pages. The full street address earns more trust (Google checks it); the area alone is fine too.\",",
+                  "+    type: \"textarea\",",
+                  "+    defaultValue: PUBLIC_ADDRESS,",
+                  "+    parse: text(300, { required: true }),",
+                  "+  },",
+                  "+  {",
+                  "+    key: \"business_hours\",",
+                  "+    group: \"Store policies (website)\",",
+                  "+    label: \"Business hours\",",
+                  "+    help: \"When customers can reach you, shown on the Contact and policy pages. Leave empty to hide.\",",
+                  "+    type: \"text\",",
+                  "+    defaultValue: BUSINESS_HOURS,",
+                  "+    parse: text(150),",
+                  "+  },",
+                  "+  {",
+                  "+    key: \"dispatch_cutoff_hour\",",
+                  "+    group: \"Store policies (website)\",",
+                  "+    label: \"Same-day dispatch cut-off (hour, 0-23)\",",
+                  "+    help: \"Orders paid before this hour on a working day (Monday to Friday) ship the same day; later ones the next working day. 15 = 3pm.\",",
+                  "+    type: \"int\",",
+                  "+    defaultValue: DISPATCH_CUTOFF_HOUR,",
+                  "+    parse: intBetween(0, 23),",
+                  "+  },",
+                  "+  {",
+                  "+    key: \"delivery_west_days\",",
+                  "+    group: \"Store policies (website)\",",
+                  "+    label: \"Delivery time, Peninsular Malaysia (working days)\",",
+                  "+    help: \"Courier time after dispatch, as a range: e.g. 2-4.\",",
+                  "+    type: \"text\",",
+                  "+    defaultValue: DELIVERY_WEST_DAYS,",
+                  "+    parse: dayRange,",
+                  "+  },",
+                  "+  {",
+                  "+    key: \"delivery_east_days\",",
+                  "+    group: \"Store policies (website)\",",
+                  "+    label: \"Delivery time, East Malaysia (working days)\",",
+                  "+    help: \"Courier time after dispatch to Sabah, Sarawak and Labuan, as a range: e.g. 3-7.\",",
+                  "+    type: \"text\",",
+                  "+    defaultValue: DELIVERY_EAST_DAYS,",
+                  "+    parse: dayRange,",
+                  "+  },",
+                  "+  {",
+                  "+    key: \"couriers\",",
+                  "+    group: \"Store policies (website)\",",
+                  "+    label: \"Couriers\",",
+                  "+    help: \"Named on the Shipping page, e.g. J\u0026T Express, Pos Laju. Leave empty to hide.\",",
+                  "+    type: \"text\",",
+                  "+    defaultValue: COURIERS,",
+                  "+    parse: text(150),",
+                  "+  },",
+                  "+  {",
+                  "+    key: \"return_days\",",
+                  "+    group: \"Store policies (website)\",",
+                  "+    label: \"Report a problem within (days of delivery)\",",
+                  "+    help: \"Defective, damaged or wrong items reported within this many days are replaced or refunded.\",",
+                  "+    type: \"int\",",
+                  "+    defaultValue: RETURN_DAYS,",
+                  "+    parse: intBetween(1, 60),",
+                  "+  },",
+                  "+  {",
+                  "+    key: \"refund_days\",",
+                  "+    group: \"Store policies (website)\",",
+                  "+    label: \"Refund within (working days)\",",
+                  "+    help: \"How soon an approved refund is paid back.\",",
+                  "+    type: \"int\",",
+                  "+    defaultValue: REFUND_DAYS,",
+                  "+    parse: intBetween(1, 60),",
+                  "+  },",
+                  " ];",
+                  " ",
+                  " const BY_KEY = new Map(SETTINGS.map((s) =\u003e [s.key, s]));"
+                ],
+                "newLines": 78,
+                "newStart": 317,
+                "oldLines": 6,
+                "oldStart": 300
+              }
+            ]
+          }
+        ],
+        "moreFiles": 0
+      },
+      "interrupted": false,
+      "isImage": false,
+      "noOutputExpected": false,
+      "stderr": "",
+      "stdout": "\u003cstdin\u003e:108: SyntaxWarning: invalid escape sequence '\\d'\r\n96:function dayRange(raw) {\n322:    group: \"Store policies (website)\",\n331:    group: \"Store policies (website)\",\n340:    group: \"Store policies (website)\",\n349:    group: \"Store policies (website)\",\n354:    parse: dayRange,\n358:    group: \"Store policies (website)\",\n363:    parse: dayRange,\n367:    group: \"Store policies (website)\",\n376:    group: \"Store policies (website)\",\npublic_address=\"Setapak, 53000 Kuala Lumpur, Malaysia\"\nbusiness_hours=\"Monday to Friday, 9am to 6pm\"\ndispatch_cutoff_hour=15\ndelivery_west_days=[2,4]\ndelivery_east_days=[3,7]\ncouriers=\"\"\nreturn_days=7\nrefund_days=7"
+    },
+    "tool_use_id": "toolu_01K9hnx9JYSuvLHLzZTQQwEH",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\server\\src",
+    "duration_ms": 566,
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "b2b58939-7ad8-4e63-acce-319e1fbf9899",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "command": "cd \"D:/Github/WYR Web/server/src\" \u0026\u0026 sed -n 95,103p settings.js; node --input-type=module -e \"\nconst {SETTINGS}=await import('./settings.js'); const p=SETTINGS.find(s=\u003es.key==='delivery_west_days').parse;\nfor (const v of ['2-4','3','2 – 5',[2,4],'5-2','x','']) { try { console.log(JSON.stringify(v),'-\u003e',p(v)); } catch(e){ console.log(JSON.stringify(v),'!',e.message);} }\"",
+      "description": "Verify day-range parser"
+    },
+    "tool_name": "Bash",
+    "tool_response": {
+      "interrupted": false,
+      "isImage": false,
+      "noOutputExpected": false,
+      "stderr": "",
+      "stdout": "/** \"2-4\" -\u003e [2, 4]: a working-day range (a single number means min = max). */\nfunction dayRange(raw) {\n  const m = (Array.isArray(raw) ? raw.join(\"-\") : String(raw ?? \"\")).trim().match(/^(\\d{1,2})\\s*(?:[-–]\\s*(\\d{1,2}))?$/);\n  const min = m ? Number(m[1]) : NaN;\n  const max = m ? Number(m[2] ?? m[1]) : NaN;\n  if (!m || min \u003c 0 || max \u003c min || max \u003e 60) throw new Error(\"A range of working days, e.g. 2-4\");\n  return [min, max];\n}\n\n\"2-4\" -\u003e [ 2, 4 ]\n\"3\" -\u003e [ 3, 3 ]\n\"2 – 5\" -\u003e [ 2, 5 ]\n[2,4] -\u003e [ 2, 4 ]\n\"5-2\" ! A range of working days, e.g. 2-4\n\"x\" ! A range of working days, e.g. 2-4\n\"\" ! A range of working days, e.g. 2-4"
+    },
+    "tool_use_id": "toolu_0118Y5QRfjkZQgJSYVAnSMVR",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\server\\src",
+    "duration_ms": 1724,
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "b2b58939-7ad8-4e63-acce-319e1fbf9899",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "command": "cd \"D:/Github/WYR Web/server/src\" \u0026\u0026 python - \u003c\u003c'EOF'\np=\"settings.js\"; s=open(p,encoding=\"utf8\").read()\ns=s.replace('''/** \"2-4\" -\u003e [2, 4]: a working-day range (a single number means min = max). */\nfunction dayRange(raw) {\n  const m = (Array.isArray(raw) ? raw.join(\"-\") : String(raw ?? \"\")).trim()''','''/** A working-day range, saved as \"2-4\" (\"3\" means 3-3). Read it with getDayRange(). */\nfunction dayRange(raw) {\n  const m = String(raw ?? \"\").trim()''')\ns=s.replace('''  return [min, max];\n}''','''  return `${min}-${max}`;\n}''',1)\ns=s.replace('''export function describeSettings() {''','''/** A dayRange setting as [min, max]. */\nexport function getDayRange(key) {\n  return getSetting(key).split(\"-\").map(Number);\n}\n\nexport function describeSettings() {''',1)\nopen(p,\"w\",encoding=\"utf8\",newline=\"\").write(s)\np=\"constants.js\"; s=open(p,encoding=\"utf8\").read()\ns=s.replace('export const DELIVERY_WEST_DAYS = [2, 4];\\nexport const DELIVERY_EAST_DAYS = [3, 7];','/** Courier time after dispatch, in working days (\"min-max\"). */\\nexport const DELIVERY_WEST_DAYS = \"2-4\";\\nexport const DELIVERY_EAST_DAYS = \"3-7\";')\nopen(p,\"w\",encoding=\"utf8\",newline=\"\").write(s)\nEOF\nnode --input-type=module -e \"const m=await import('./settings.js'); console.log(m.getDayRange('delivery_east_days'), m.SETTINGS.find(s=\u003es.key==='delivery_west_days').parse(' 2 – 5 '))\"",
+      "description": "Store delivery ranges as text"
+    },
+    "tool_name": "Bash",
+    "tool_response": {
+      "bashEditDiff": {
+        "changedFiles": [
+          "D:\\Github\\WYR Web\\server\\src\\constants.js",
+          "D:\\Github\\WYR Web\\server\\src\\settings.js"
+        ],
+        "files": [
+          {
+            "filePath": "D:\\Github\\WYR Web\\server\\src\\constants.js",
+            "hunks": [
+              {
+                "lines": [
+                  " export const BUSINESS_HOURS = \"Monday to Friday, 9am to 6pm\";",
+                  " /** Orders paid before this hour (Malaysia time) on a working day ship the same day. */",
+                  " export const DISPATCH_CUTOFF_HOUR = 15;",
+                  "-export const DELIVERY_WEST_DAYS = [2, 4];",
+                  "-export const DELIVERY_EAST_DAYS = [3, 7];",
+                  "+/** Courier time after dispatch, in working days (\"min-max\"). */",
+                  "+export const DELIVERY_WEST_DAYS = \"2-4\";",
+                  "+export const DELIVERY_EAST_DAYS = \"3-7\";",
+                  " export const COURIERS = \"\";",
+                  " /** Days after delivery to report a defective, damaged or wrong item. */",
+                  " export const RETURN_DAYS = 7;"
+                ],
+                "newLines": 9,
+                "newStart": 52,
+                "oldLines": 8,
+                "oldStart": 52
+              }
+            ]
+          },
+          {
+            "filePath": "D:\\Github\\WYR Web\\server\\src\\settings.js",
+            "hunks": [
+              {
+                "lines": [
+                  "   };",
+                  " }",
+                  " ",
+                  "-/** \"2-4\" -\u003e [2, 4]: a working-day range (a single number means min = max). */",
+                  "+/** A working-day range, saved as \"2-4\" (\"3\" means 3-3). Read it with getDayRange(). */",
+                  " function dayRange(raw) {",
+                  "-  const m = (Array.isArray(raw) ? raw.join(\"-\") : String(raw ?? \"\")).trim().match(/^(\\d{1,2})\\s*(?:[-–]\\s*(\\d{1,2}))?$/);",
+                  "+  const m = String(raw ?? \"\").trim().match(/^(\\d{1,2})\\s*(?:[-–]\\s*(\\d{1,2}))?$/);",
+                  "   const min = m ? Number(m[1]) : NaN;",
+                  "   const max = m ? Number(m[2] ?? m[1]) : NaN;",
+                  "   if (!m || min \u003c 0 || max \u003c min || max \u003e 60) throw new Error(\"A range of working days, e.g. 2-4\");",
+                  "-  return [min, max];",
+                  "+  return `${min}-${max}`;",
+                  " }",
+                  " ",
+                  " const CHANNELS = ["
+                ],
+                "newLines": 13,
+                "newStart": 92,
+                "oldLines": 13,
+                "oldStart": 92
+              },
+              {
+                "lines": [
+                  "   return saved.has(key) ? saved.get(key).value : def.defaultValue;",
+                  " }",
+                  " ",
+                  "+/** A dayRange setting as [min, max]. */",
+                  "+export function getDayRange(key) {",
+                  "+  return getSetting(key).split(\"-\").map(Number);",
+                  "+}",
+                  "+",
+                  " export function describeSettings() {",
+                  "   return SETTINGS.map(({ parse: _p, ...def }) =\u003e ({",
+                  "     ...def,"
+                ],
+                "newLines": 11,
+                "newStart": 414,
+                "oldLines": 6,
+                "oldStart": 414
+              }
+            ]
+          }
+        ],
+        "moreFiles": 0
+      },
+      "interrupted": false,
+      "isImage": false,
+      "noOutputExpected": false,
+      "stderr": "",
+      "stdout": "[ 3, 7 ] 2-5"
+    },
+    "tool_use_id": "toolu_01LLQZUjybkKgBt97QBk4cLB",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\server\\src",
+    "duration_ms": 2698,
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "b2b58939-7ad8-4e63-acce-319e1fbf9899",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "command": "cd \"D:/Github/WYR Web/server/src\" \u0026\u0026 python - \u003c\u003c'EOF'\np=\"merchant.js\"; s=open(p,encoding=\"utf8\").read()\ns=s.replace('import { getSetting } from \"./settings.js\";','import { getDayRange, getSetting } from \"./settings.js\";',1)\ns=s.replace('''function rate(cents) {''','''/**\n * Who the seller is and the store's shipping/returns terms, shown on the Contact and policy\n * pages (via /api/site) and used in the structured data below, so the two never disagree.\n */\nexport function storeInfo() {\n  return {\n    business: {\n      name: getSetting(\"company_name\"),\n      regNo: getSetting(\"company_reg_no\") || null,\n      address: getSetting(\"public_address\"),\n      phone: getSetting(\"company_phone\") || null,\n      email: getSetting(\"company_email\") || null,\n      hours: getSetting(\"business_hours\") || null,\n    },\n    policies: {\n      dispatchCutoffHour: getSetting(\"dispatch_cutoff_hour\"),\n      deliveryWestDays: getDayRange(\"delivery_west_days\"),\n      deliveryEastDays: getDayRange(\"delivery_east_days\"),\n      couriers: getSetting(\"couriers\") || null,\n      returnDays: getSetting(\"return_days\"),\n      refundDays: getSetting(\"refund_days\"),\n    },\n  };\n}\n\nconst WORKING_DAYS = [\"Monday\", \"Tuesday\", \"Wednesday\", \"Thursday\", \"Friday\"].map((d) =\u003e `https://schema.org/${d}`);\nconst days = ([minValue, maxValue]) =\u003e ({ \"@type\": \"QuantitativeValue\", minValue, maxValue, unitCode: \"DAY\" });\n\n/** Same day before the cut-off, else next working day; then the courier's range. */\nfunction deliveryTimeJsonLd(range) {\n  const hour = String(getSetting(\"dispatch_cutoff_hour\")).padStart(2, \"0\");\n  return {\n    \"@type\": \"ShippingDeliveryTime\",\n    handlingTime: days([0, 1]),\n    transitTime: days(range),\n    cutoffTime: `${hour}:00:00+08:00`,\n    businessDays: { \"@type\": \"OpeningHoursSpecification\", dayOfWeek: WORKING_DAYS },\n  };\n}\n\nfunction rate(cents) {''',1)\ns=s.replace('''      shippingRate: rate(free ? 0 : westCents),\n      shippingDestination: { \"@type\": \"DefinedRegion\", addressCountry: \"MY\" },''','''      shippingRate: rate(free ? 0 : westCents),\n      shippingDestination: { \"@type\": \"DefinedRegion\", addressCountry: \"MY\" },\n      deliveryTime: deliveryTimeJsonLd(getDayRange(\"delivery_west_days\")),''',1)\ns=s.replace('''      shippingDestination: { \"@type\": \"DefinedRegion\", addressCountry: \"MY\", postalCodeRange: EAST_POSTCODES },''','''      shippingDestination: { \"@type\": \"DefinedRegion\", addressCountry: \"MY\", postalCodeRange: EAST_POSTCODES },\n      deliveryTime: deliveryTimeJsonLd(getDayRange(\"delivery_east_days\")),''',1)\ns=s.replace('''/** Store details for search: Malaysia-only online shop based in Kuala Lumpur (no street address published). */\nexport function businessJsonLd(origin) {\n  const whatsapp = getSetting(\"whatsappNumber\").replace(/\\\\D/g, \"\");\n  const shopee = getSetting(\"shopeeUrl\");''','''/** Store details for search: Malaysia-only online shop based in Kuala Lumpur, with the address and contacts the site shows. */\nexport function businessJsonLd(origin) {\n  const whatsapp = getSetting(\"whatsappNumber\").replace(/\\\\D/g, \"\");\n  const shopee = getSetting(\"shopeeUrl\");\n  const { business } = storeInfo();''',1)\ns=s.replace('''    address: { \"@type\": \"PostalAddress\", addressLocality: \"Kuala Lumpur\", addressCountry: \"MY\" },''','''    ...(business.regNo \u0026\u0026 { legalName: business.name, identifier: business.regNo }),\n    address: { \"@type\": \"PostalAddress\", streetAddress: business.address.replace(/\\\\s*\\\\n\\\\s*/g, \", \"), addressLocality: \"Kuala Lumpur\", addressCountry: \"MY\" },\n    ...(business.email \u0026\u0026 { email: business.email }),''',1)\nopen(p,\"w\",encoding=\"utf8\",newline=\"\").write(s)\n\np=\"app.js\"; s=open(p,encoding=\"utf8\").read()\nassert \"welcomeVoucher: await welcomeVoucher(),\" in s\ns=s.replace(\"      welcomeVoucher: await welcomeVoucher(),\\n\",\"      welcomeVoucher: await welcomeVoucher(),\\n      ...storeInfo(),\\n\",1)\nopen(p,\"w\",encoding=\"utf8\",newline=\"\").write(s)\nEOF\ngrep -n \"^import\" app.js | head -12",
+      "description": "Add store info, delivery times and contacts to structured data"
+    },
+    "tool_name": "Bash",
+    "tool_response": {
+      "bashEditDiff": {
+        "changedFiles": [
+          "D:\\Github\\WYR Web\\server\\src\\app.js",
+          "D:\\Github\\WYR Web\\server\\src\\merchant.js"
+        ],
+        "files": [
+          {
+            "filePath": "D:\\Github\\WYR Web\\server\\src\\app.js",
+            "hunks": [
+              {
+                "lines": [
+                  "       minOrderSubtotalRm: getSetting(\"min_order_subtotal\"),",
+                  "       lowPriceMinQty: getSetting(\"low_price_min_qty\"),",
+                  "       welcomeVoucher: await welcomeVoucher(),",
+                  "+      ...storeInfo(),",
+                  "     });",
+                  "   });",
+                  "   app.use(\"/api/auth\", authRouter);"
+                ],
+                "newLines": 7,
+                "newStart": 58,
+                "oldLines": 6,
+                "oldStart": 58
+              }
+            ]
+          },
+          {
+            "filePath": "D:\\Github\\WYR Web\\server\\src\\merchant.js",
+            "hunks": [
+              {
+                "lines": [
+                  " // What Google (Search structured data and the Merchant Center feed) is told about offers,",
+                  " // shipping and the business. Kept in one place so the product page JSON-LD and",
+                  " // /merchant-feed.xml always agree.",
+                  "-import { getSetting } from \"./settings.js\";",
+                  "+import { getDayRange, getSetting } from \"./settings.js\";",
+                  " import { shippingSummary } from \"./shipping.js\";",
+                  " ",
+                  " export const BUSINESS_NAME = \"WYR Technology\";"
+                ],
+                "newLines": 7,
+                "newStart": 1,
+                "oldLines": 7,
+                "oldStart": 1
+              },
+              {
+                "lines": [
+                  "   return `${productUrl}?variant=${variant.id}`;",
+                  " }",
+                  " ",
+                  "+/**",
+                  "+ * Who the seller is and the store's shipping/returns terms, shown on the Contact and policy",
+                  "+ * pages (via /api/site) and used in the structured data below, so the two never disagree.",
+                  "+ */",
+                  "+export function storeInfo() {",
+                  "+  return {",
+                  "+    business: {",
+                  "+      name: getSetting(\"company_name\"),",
+                  "+      regNo: getSetting(\"company_reg_no\") || null,",
+                  "+      address: getSetting(\"public_address\"),",
+                  "+      phone: getSetting(\"company_phone\") || null,",
+                  "+      email: getSetting(\"company_email\") || null,",
+                  "+      hours: getSetting(\"business_hours\") || null,",
+                  "+    },",
+                  "+    policies: {",
+                  "+      dispatchCutoffHour: getSetting(\"dispatch_cutoff_hour\"),",
+                  "+      deliveryWestDays: getDayRange(\"delivery_west_days\"),",
+                  "+      deliveryEastDays: getDayRange(\"delivery_east_days\"),",
+                  "+      couriers: getSetting(\"couriers\") || null,",
+                  "+      returnDays: getSetting(\"return_days\"),",
+                  "+      refundDays: getSetting(\"refund_days\"),",
+                  "+    },",
+                  "+  };",
+                  "+}",
+                  "+",
+                  "+const WORKING_DAYS = [\"Monday\", \"Tuesday\", \"Wednesday\", \"Thursday\", \"Friday\"].map((d) =\u003e `https://schema.org/${d}`);",
+                  "+const days = ([minValue, maxValue]) =\u003e ({ \"@type\": \"QuantitativeValue\", minValue, maxValue, unitCode: \"DAY\" });",
+                  "+",
+                  "+/** Same day before the cut-off, else next working day; then the courier's range. */",
+                  "+function deliveryTimeJsonLd(range) {",
+                  "+  const hour = String(getSetting(\"dispatch_cutoff_hour\")).padStart(2, \"0\");",
+                  "+  return {",
+                  "+    \"@type\": \"ShippingDeliveryTime\",",
+                  "+    handlingTime: days([0, 1]),",
+                  "+    transitTime: days(range),",
+                  "+    cutoffTime: `${hour}:00:00+08:00`,",
+                  "+    businessDays: { \"@type\": \"OpeningHoursSpecification\", dayOfWeek: WORKING_DAYS },",
+                  "+  };",
+                  "+}",
+                  "+",
+                  " function rate(cents) {",
+                  "   return { \"@type\": \"MonetaryAmount\", value: (cents / 100).toFixed(2), currency: \"MYR\" };",
+                  " }"
+                ],
+                "newLines": 46,
+                "newStart": 34,
+                "oldLines": 6,
+                "oldStart": 34
+              },
+              {
+                "lines": [
+                  "       \"@type\": \"OfferShippingDetails\",",
+                  "       shippingRate: rate(free ? 0 : westCents),",
+                  "       shippingDestination: { \"@type\": \"DefinedRegion\", addressCountry: \"MY\" },",
+                  "+      deliveryTime: deliveryTimeJsonLd(getDayRange(\"delivery_west_days\")),",
+                  "     },",
+                  "     {",
+                  "       \"@type\": \"OfferShippingDetails\",",
+                  "       shippingRate: rate(free ? 0 : eastCents),",
+                  "       shippingDestination: { \"@type\": \"DefinedRegion\", addressCountry: \"MY\", postalCodeRange: EAST_POSTCODES },",
+                  "+      deliveryTime: deliveryTimeJsonLd(getDayRange(\"delivery_east_days\")),",
+                  "     },",
+                  "   ];",
+                  " }",
+                  " ",
+                  "-/** Store details for search: Malaysia-only online shop based in Kuala Lumpur (no street address published). */",
+                  "+/** Store details for search: Malaysia-only online shop based in Kuala Lumpur, with the address and contacts the site shows. */",
+                  " export function businessJsonLd(origin) {",
+                  "   const whatsapp = getSetting(\"whatsappNumber\").replace(/\\D/g, \"\");",
+                  "   const shopee = getSetting(\"shopeeUrl\");",
+                  "+  const { business } = storeInfo();",
+                  "   return {",
+                  "     \"@context\": \"https://schema.org\",",
+                  "     \"@type\": \"OnlineStore\","
+                ],
+                "newLines": 22,
+                "newStart": 87,
+                "oldLines": 19,
+                "oldStart": 47
+              },
+              {
+                "lines": [
+                  "     url: `${origin}/`,",
+                  "     logo: `${origin}/images/wyr-logo-mark.png`,",
+                  "     description: \"NFC tags, RFID cards, readers and tap-to-review standees. Ready stock in Kuala Lumpur, shipped across Malaysia.\",",
+                  "-    address: { \"@type\": \"PostalAddress\", addressLocality: \"Kuala Lumpur\", addressCountry: \"MY\" },",
+                  "+    ...(business.regNo \u0026\u0026 { legalName: business.name, identifier: business.regNo }),",
+                  "+    address: { \"@type\": \"PostalAddress\", streetAddress: business.address.replace(/\\s*",
+                  "+\\s*/g, \", \"), addressLocality: \"Kuala Lumpur\", addressCountry: \"MY\" },",
+                  "+    ...(business.email \u0026\u0026 { email: business.email }),",
+                  "     areaServed: { \"@type\": \"Country\", name: \"Malaysia\" },",
+                  "     currenciesAccepted: \"MYR\",",
+                  "     ...(whatsapp \u0026\u0026 {"
+                ],
+                "newLines": 10,
+                "newStart": 110,
+                "oldLines": 7,
+                "oldStart": 67
+              }
+            ]
+          }
+        ],
+        "moreFiles": 0
+      },
+      "interrupted": false,
+      "isImage": false,
+      "noOutputExpected": false,
+      "stderr": "",
+      "stdout": "\u003cstdin\u003e:52: SyntaxWarning: invalid escape sequence '\\D'\r\n\u003cstdin\u003e:55: SyntaxWarning: invalid escape sequence '\\D'\r\n\u003cstdin\u003e:59: SyntaxWarning: invalid escape sequence '\\s'\r\n1:import fs from \"node:fs\";\n2:import path from \"node:path\";\n3:import cors from \"cors\";\n4:import express, { } from \"express\";\n5:import { CORS_ORIGINS } from \"./constants.js\";\n6:import { SERVER_ROOT } from \"./env.js\";\n7:import { CheckoutError } from \"./orders.js\";\n8:import { bulkQuote } from \"./pricing.js\";\n9:import { merchantFeed } from \"./merchant-feed.js\";\n10:import { createSeo, redirectWww } from \"./seo.js\";\n11:import { getSetting } from \"./settings.js\";\n12:import { shippingSummary } from \"./shipping.js\";"
+    },
+    "tool_use_id": "toolu_01HnZxV9H7E5GQ8f4waFS832",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\server\\src",
+    "duration_ms": 1297,
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "b2b58939-7ad8-4e63-acce-319e1fbf9899",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "command": "cd \"D:/Github/WYR Web/server/src\" \u0026\u0026 grep -n 'replace(/' merchant.js; sed -i 's#^import { getSetting } from \"./settings.js\";#import { storeInfo } from \"./merchant.js\";\\nimport { getSetting } from \"./settings.js\";#' app.js \u0026\u0026 grep -n \"storeInfo\" app.js",
+      "description": "Verify regexes and import storeInfo"
+    },
+    "tool_name": "Bash",
+    "tool_response": {
+      "bashEditDiff": {
+        "changedFiles": [
+          "D:\\Github\\WYR Web\\server\\src\\app.js"
+        ],
+        "files": [
+          {
+            "filePath": "D:\\Github\\WYR Web\\server\\src\\app.js",
+            "hunks": [
+              {
+                "lines": [
+                  " import { bulkQuote } from \"./pricing.js\";",
+                  " import { merchantFeed } from \"./merchant-feed.js\";",
+                  " import { createSeo, redirectWww } from \"./seo.js\";",
+                  "+import { storeInfo } from \"./merchant.js\";",
+                  " import { getSetting } from \"./settings.js\";",
+                  " import { shippingSummary } from \"./shipping.js\";",
+                  " import { welcomeVoucher } from \"./vouchers.js\";"
+                ],
+                "newLines": 7,
+                "newStart": 8,
+                "oldLines": 6,
+                "oldStart": 8
+              }
+            ]
+          }
+        ],
+        "moreFiles": 0
+      },
+      "interrupted": false,
+      "isImage": false,
+      "noOutputExpected": false,
+      "stderr": "",
+      "stdout": "103:  const whatsapp = getSetting(\"whatsappNumber\").replace(/\\D/g, \"\");\n114:    address: { \"@type\": \"PostalAddress\", streetAddress: business.address.replace(/\\s*\n11:import { storeInfo } from \"./merchant.js\";\n62:      ...storeInfo(),"
+    },
+    "tool_use_id": "toolu_01PycjXYbgd8Sz5RL59dBFK1",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\server\\src",
+    "duration_ms": 37,
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "b2b58939-7ad8-4e63-acce-319e1fbf9899",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "file_path": "D:\\Github\\WYR Web\\server\\src\\merchant.js",
+      "limit": 30,
+      "offset": 98
+    },
+    "tool_name": "Read",
+    "tool_response": {
+      "file": {
+        "content": "  ];\n}\n\n/** Store details for search: Malaysia-only online shop based in Kuala Lumpur, with the address and contacts the site shows. */\nexport function businessJsonLd(origin) {\n  const whatsapp = getSetting(\"whatsappNumber\").replace(/\\D/g, \"\");\n  const shopee = getSetting(\"shopeeUrl\");\n  const { business } = storeInfo();\n  return {\n    \"@context\": \"https://schema.org\",\n    \"@type\": \"OnlineStore\",\n    name: BUSINESS_NAME,\n    url: `${origin}/`,\n    logo: `${origin}/images/wyr-logo-mark.png`,\n    description: \"NFC tags, RFID cards, readers and tap-to-review standees. Ready stock in Kuala Lumpur, shipped across Malaysia.\",\n    ...(business.regNo \u0026\u0026 { legalName: business.name, identifier: business.regNo }),\n    address: { \"@type\": \"PostalAddress\", streetAddress: business.address.replace(/\\s*\n\\s*/g, \", \"), addressLocality: \"Kuala Lumpur\", addressCountry: \"MY\" },\n    ...(business.email \u0026\u0026 { email: business.email }),\n    areaServed: { \"@type\": \"Country\", name: \"Malaysia\" },\n    currenciesAccepted: \"MYR\",\n    ...(whatsapp \u0026\u0026 {\n      contactPoint: { \"@type\": \"ContactPoint\", contactType: \"customer service\", telephone: `+${whatsapp}`, areaServed: \"MY\" },\n    }),\n    ...(shopee \u0026\u0026 { sameAs: [shopee] }),\n  };\n}\n\nexport function websiteJsonLd(origin) {\n  return { \"@context\": \"https://schema.org\", \"@type\": \"WebSite\", name: BUSINESS_NAME, alternateName: \"WYR Gadget\", url: `${origin}/` };",
+        "filePath": "D:\\Github\\WYR Web\\server\\src\\merchant.js",
+        "numLines": 30,
+        "startLine": 98,
+        "totalLines": 129
+      },
+      "type": "text"
+    },
+    "tool_use_id": "toolu_015JUDfJsLeLAeDG4XexuvRW",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\server\\src",
+    "duration_ms": 180,
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "b2b58939-7ad8-4e63-acce-319e1fbf9899",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "file_path": "D:\\Github\\WYR Web\\server\\src\\merchant.js",
+      "new_string": "    address: { \"@type\": \"PostalAddress\", addressLocality: \"Kuala Lumpur\", addressCountry: \"MY\" },",
+      "old_string": "    address: { \"@type\": \"PostalAddress\", streetAddress: business.address.replace(/\\s*\n\\s*/g, \", \"), addressLocality: \"Kuala Lumpur\", addressCountry: \"MY\" },",
+      "replace_all": false
+    },
+    "tool_name": "Edit",
+    "tool_response": {
+      "contentNotInModelContext": true,
+      "filePath": "D:\\Github\\WYR Web\\server\\src\\merchant.js",
+      "newString": "    address: { \"@type\": \"PostalAddress\", addressLocality: \"Kuala Lumpur\", addressCountry: \"MY\" },",
+      "oldString": "    address: { \"@type\": \"PostalAddress\", streetAddress: business.address.replace(/\\s*\n\\s*/g, \", \"), addressLocality: \"Kuala Lumpur\", addressCountry: \"MY\" },",
+      "originalFile": "// What Google (Search structured data and the Merchant Center feed) is told about offers,\n// shipping and the business. Kept in one place so the product page JSON-LD and\n// /merchant-feed.xml always agree.\nimport { getDayRange, getSetting } from \"./settings.js\";\nimport { shippingSummary } from \"./shipping.js\";\n\nexport const BUSINESS_NAME = \"WYR Technology\";\n\n// East Malaysia postcodes (Labuan 87, Sabah 88-91, Sarawak 93-98); everything else ships at the West rate.\nconst EAST_POSTCODES = [\n  { postalCodeBegin: \"87000\", postalCodeEnd: \"87999\" },\n  { postalCodeBegin: \"88000\", postalCodeEnd: \"91999\" },\n  { postalCodeBegin: \"93000\", postalCodeEnd: \"98999\" },\n];\n\n/**\n * One sellable offer per variant. Variants that need a minimum quantity (low-price items)\n * are offered as a pack of that many, since a single piece can't be bought at that price.\n */\nexport function variantOffer(variant) {\n  if (!variant.tiers.length) return null;\n  const packQty = Math.max(1, variant.minQty ?? 1);\n  const unitPrice = variant.tiers[0].unitPrice;\n  return {\n    unitPrice,\n    packQty,\n    packPrice: Math.round(unitPrice * packQty * 100) / 100,\n    inStock: variant.stock != null \u0026\u0026 variant.stock \u003e= packQty,\n  };\n}\n\n/** Variant page URL: the product page with that variant preselected. */\nexport function variantUrl(productUrl, variant) {\n  return `${productUrl}?variant=${variant.id}`;\n}\n\n/**\n * Who the seller is and the store's shipping/returns terms, shown on the Contact and policy\n * pages (via /api/site) and used in the structured data below, so the two never disagree.\n */\nexport function storeInfo() {\n  return {\n    business: {\n      name: getSetting(\"company_name\"),\n      regNo: getSetting(\"company_reg_no\") || null,\n      address: getSetting(\"public_address\"),\n      phone: getSetting(\"company_phone\") || null,\n      email: getSetting(\"company_email\") || null,\n      hours: getSetting(\"business_hours\") || null,\n    },\n    policies: {\n      dispatchCutoffHour: getSetting(\"dispatch_cutoff_hour\"),\n      deliveryWestDays: getDayRange(\"delivery_west_days\"),\n      deliveryEastDays: getDayRange(\"delivery_east_days\"),\n      couriers: getSetting(\"couriers\") || null,\n      returnDays: getSetting(\"return_days\"),\n      refundDays: getSetting(\"refund_days\"),\n    },\n  };\n}\n\nconst WORKING_DAYS = [\"Monday\", \"Tuesday\", \"Wednesday\", \"Thursday\", \"Friday\"].map((d) =\u003e `https://schema.org/${d}`);\nconst days = ([minValue, maxValue]) =\u003e ({ \"@type\": \"QuantitativeValue\", minValue, maxValue, unitCode: \"DAY\" });\n\n/** Same day before the cut-off, else next working day; then the courier's range. */\nfunction deliveryTimeJsonLd(range) {\n  const hour = String(getSetting(\"dispatch_cutoff_hour\")).padStart(2, \"0\");\n  return {\n    \"@type\": \"ShippingDeliveryTime\",\n    handlingTime: days([0, 1]),\n    transitTime: days(range),\n    cutoffTime: `${hour}:00:00+08:00`,\n    businessDays: { \"@type\": \"OpeningHoursSpecification\", dayOfWeek: WORKING_DAYS },\n  };\n}\n\nfunction rate(cents) {\n  return { \"@type\": \"MonetaryAmount\", value: (cents / 100).toFixed(2), currency: \"MYR\" };\n}\n\n/** schema.org OfferShippingDetails for Malaysia: West rate by default, East rate for East Malaysian postcodes. */\nexport function shippingDetailsJsonLd(priceCents) {\n  const { westCents, eastCents, freeThresholdCents } = shippingSummary();\n  const free = freeThresholdCents != null \u0026\u0026 priceCents \u003e= freeThresholdCents;\n  return [\n    {\n      \"@type\": \"OfferShippingDetails\",\n      shippingRate: rate(free ? 0 : westCents),\n      shippingDestination: { \"@type\": \"DefinedRegion\", addressCountry: \"MY\" },\n      deliveryTime: deliveryTimeJsonLd(getDayRange(\"delivery_west_days\")),\n    },\n    {\n      \"@type\": \"OfferShippingDetails\",\n      shippingRate: rate(free ? 0 : eastCents),\n      shippingDestination: { \"@type\": \"DefinedRegion\", addressCountry: \"MY\", postalCodeRange: EAST_POSTCODES },\n      deliveryTime: deliveryTimeJsonLd(getDayRange(\"delivery_east_days\")),\n    },\n  ];\n}\n\n/** Store details for search: Malaysia-only online shop based in Kuala Lumpur, with the address and contacts the site shows. */\nexport function businessJsonLd(origin) {\n  const whatsapp = getSetting(\"whatsappNumber\").replace(/\\D/g, \"\");\n  const shopee = getSetting(\"shopeeUrl\");\n  const { business } = storeInfo();\n  return {\n    \"@context\": \"https://schema.org\",\n    \"@type\": \"OnlineStore\",\n    name: BUSINESS_NAME,\n    url: `${origin}/`,\n    logo: `${origin}/images/wyr-logo-mark.png`,\n    description: \"NFC tags, RFID cards, readers and tap-to-review standees. Ready stock in Kuala Lumpur, shipped across Malaysia.\",\n    ...(business.regNo \u0026\u0026 { legalName: business.name, identifier: business.regNo }),\n    address: { \"@type\": \"PostalAddress\", streetAddress: business.address.replace(/\\s*\n\\s*/g, \", \"), addressLocality: \"Kuala Lumpur\", addressCountry: \"MY\" },\n    ...(business.email \u0026\u0026 { email: business.email }),\n    areaServed: { \"@type\": \"Country\", name: \"Malaysia\" },\n    currenciesAccepted: \"MYR\",\n    ...(whatsapp \u0026\u0026 {\n      contactPoint: { \"@type\": \"ContactPoint\", contactType: \"customer service\", telephone: `+${whatsapp}`, areaServed: \"MY\" },\n    }),\n    ...(shopee \u0026\u0026 { sameAs: [shopee] }),\n  };\n}\n\nexport function websiteJsonLd(origin) {\n  return { \"@context\": \"https://schema.org\", \"@type\": \"WebSite\", name: BUSINESS_NAME, alternateName: \"WYR Gadget\", url: `${origin}/` };\n}\n",
+      "replaceAll": false,
+      "structuredPatch": [
+        {
+          "lines": [
+            "     logo: `${origin}/images/wyr-logo-mark.png`,",
+            "     description: \"NFC tags, RFID cards, readers and tap-to-review standees. Ready stock in Kuala Lumpur, shipped across Malaysia.\",",
+            "     ...(business.regNo \u0026\u0026 { legalName: business.name, identifier: business.regNo }),",
+            "-    address: { \"@type\": \"PostalAddress\", streetAddress: business.address.replace(/\\s*",
+            "-\\s*/g, \", \"), addressLocality: \"Kuala Lumpur\", addressCountry: \"MY\" },",
+            "+    address: { \"@type\": \"PostalAddress\", addressLocality: \"Kuala Lumpur\", addressCountry: \"MY\" },",
+            "     ...(business.email \u0026\u0026 { email: business.email }),",
+            "     areaServed: { \"@type\": \"Country\", name: \"Malaysia\" },",
+            "     currenciesAccepted: \"MYR\","
+          ],
+          "newLines": 7,
+          "newStart": 111,
+          "oldLines": 8,
+          "oldStart": 111
+        }
+      ],
+      "userModified": false
+    },
+    "tool_use_id": "toolu_01FWhitwXnCsYkhQWtKjnzac",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\server\\src",
+    "duration_ms": 32,
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "b2b58939-7ad8-4e63-acce-319e1fbf9899",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "file_path": "D:\\Github\\WYR Web\\server\\src\\merchant.js",
+      "new_string": "/** Store details for search: Malaysia-only online shop based in Kuala Lumpur, with the contacts the site shows. */",
+      "old_string": "/** Store details for search: Malaysia-only online shop based in Kuala Lumpur, with the address and contacts the site shows. */",
+      "replace_all": false
+    },
+    "tool_name": "Edit",
+    "tool_response": {
+      "contentNotInModelContext": true,
+      "filePath": "D:\\Github\\WYR Web\\server\\src\\merchant.js",
+      "newString": "/** Store details for search: Malaysia-only online shop based in Kuala Lumpur, with the contacts the site shows. */",
+      "oldString": "/** Store details for search: Malaysia-only online shop based in Kuala Lumpur, with the address and contacts the site shows. */",
+      "originalFile": "// What Google (Search structured data and the Merchant Center feed) is told about offers,\n// shipping and the business. Kept in one place so the product page JSON-LD and\n// /merchant-feed.xml always agree.\nimport { getDayRange, getSetting } from \"./settings.js\";\nimport { shippingSummary } from \"./shipping.js\";\n\nexport const BUSINESS_NAME = \"WYR Technology\";\n\n// East Malaysia postcodes (Labuan 87, Sabah 88-91, Sarawak 93-98); everything else ships at the West rate.\nconst EAST_POSTCODES = [\n  { postalCodeBegin: \"87000\", postalCodeEnd: \"87999\" },\n  { postalCodeBegin: \"88000\", postalCodeEnd: \"91999\" },\n  { postalCodeBegin: \"93000\", postalCodeEnd: \"98999\" },\n];\n\n/**\n * One sellable offer per variant. Variants that need a minimum quantity (low-price items)\n * are offered as a pack of that many, since a single piece can't be bought at that price.\n */\nexport function variantOffer(variant) {\n  if (!variant.tiers.length) return null;\n  const packQty = Math.max(1, variant.minQty ?? 1);\n  const unitPrice = variant.tiers[0].unitPrice;\n  return {\n    unitPrice,\n    packQty,\n    packPrice: Math.round(unitPrice * packQty * 100) / 100,\n    inStock: variant.stock != null \u0026\u0026 variant.stock \u003e= packQty,\n  };\n}\n\n/** Variant page URL: the product page with that variant preselected. */\nexport function variantUrl(productUrl, variant) {\n  return `${productUrl}?variant=${variant.id}`;\n}\n\n/**\n * Who the seller is and the store's shipping/returns terms, shown on the Contact and policy\n * pages (via /api/site) and used in the structured data below, so the two never disagree.\n */\nexport function storeInfo() {\n  return {\n    business: {\n      name: getSetting(\"company_name\"),\n      regNo: getSetting(\"company_reg_no\") || null,\n      address: getSetting(\"public_address\"),\n      phone: getSetting(\"company_phone\") || null,\n      email: getSetting(\"company_email\") || null,\n      hours: getSetting(\"business_hours\") || null,\n    },\n    policies: {\n      dispatchCutoffHour: getSetting(\"dispatch_cutoff_hour\"),\n      deliveryWestDays: getDayRange(\"delivery_west_days\"),\n      deliveryEastDays: getDayRange(\"delivery_east_days\"),\n      couriers: getSetting(\"couriers\") || null,\n      returnDays: getSetting(\"return_days\"),\n      refundDays: getSetting(\"refund_days\"),\n    },\n  };\n}\n\nconst WORKING_DAYS = [\"Monday\", \"Tuesday\", \"Wednesday\", \"Thursday\", \"Friday\"].map((d) =\u003e `https://schema.org/${d}`);\nconst days = ([minValue, maxValue]) =\u003e ({ \"@type\": \"QuantitativeValue\", minValue, maxValue, unitCode: \"DAY\" });\n\n/** Same day before the cut-off, else next working day; then the courier's range. */\nfunction deliveryTimeJsonLd(range) {\n  const hour = String(getSetting(\"dispatch_cutoff_hour\")).padStart(2, \"0\");\n  return {\n    \"@type\": \"ShippingDeliveryTime\",\n    handlingTime: days([0, 1]),\n    transitTime: days(range),\n    cutoffTime: `${hour}:00:00+08:00`,\n    businessDays: { \"@type\": \"OpeningHoursSpecification\", dayOfWeek: WORKING_DAYS },\n  };\n}\n\nfunction rate(cents) {\n  return { \"@type\": \"MonetaryAmount\", value: (cents / 100).toFixed(2), currency: \"MYR\" };\n}\n\n/** schema.org OfferShippingDetails for Malaysia: West rate by default, East rate for East Malaysian postcodes. */\nexport function shippingDetailsJsonLd(priceCents) {\n  const { westCents, eastCents, freeThresholdCents } = shippingSummary();\n  const free = freeThresholdCents != null \u0026\u0026 priceCents \u003e= freeThresholdCents;\n  return [\n    {\n      \"@type\": \"OfferShippingDetails\",\n      shippingRate: rate(free ? 0 : westCents),\n      shippingDestination: { \"@type\": \"DefinedRegion\", addressCountry: \"MY\" },\n      deliveryTime: deliveryTimeJsonLd(getDayRange(\"delivery_west_days\")),\n    },\n    {\n      \"@type\": \"OfferShippingDetails\",\n      shippingRate: rate(free ? 0 : eastCents),\n      shippingDestination: { \"@type\": \"DefinedRegion\", addressCountry: \"MY\", postalCodeRange: EAST_POSTCODES },\n      deliveryTime: deliveryTimeJsonLd(getDayRange(\"delivery_east_days\")),\n    },\n  ];\n}\n\n/** Store details for search: Malaysia-only online shop based in Kuala Lumpur, with the address and contacts the site shows. */\nexport function businessJsonLd(origin) {\n  const whatsapp = getSetting(\"whatsappNumber\").replace(/\\D/g, \"\");\n  const shopee = getSetting(\"shopeeUrl\");\n  const { business } = storeInfo();\n  return {\n    \"@context\": \"https://schema.org\",\n    \"@type\": \"OnlineStore\",\n    name: BUSINESS_NAME,\n    url: `${origin}/`,\n    logo: `${origin}/images/wyr-logo-mark.png`,\n    description: \"NFC tags, RFID cards, readers and tap-to-review standees. Ready stock in Kuala Lumpur, shipped across Malaysia.\",\n    ...(business.regNo \u0026\u0026 { legalName: business.name, identifier: business.regNo }),\n    address: { \"@type\": \"PostalAddress\", addressLocality: \"Kuala Lumpur\", addressCountry: \"MY\" },\n    ...(business.email \u0026\u0026 { email: business.email }),\n    areaServed: { \"@type\": \"Country\", name: \"Malaysia\" },\n    currenciesAccepted: \"MYR\",\n    ...(whatsapp \u0026\u0026 {\n      contactPoint: { \"@type\": \"ContactPoint\", contactType: \"customer service\", telephone: `+${whatsapp}`, areaServed: \"MY\" },\n    }),\n    ...(shopee \u0026\u0026 { sameAs: [shopee] }),\n  };\n}\n\nexport function websiteJsonLd(origin) {\n  return { \"@context\": \"https://schema.org\", \"@type\": \"WebSite\", name: BUSINESS_NAME, alternateName: \"WYR Gadget\", url: `${origin}/` };\n}\n",
+      "replaceAll": false,
+      "structuredPatch": [
+        {
+          "lines": [
+            "   ];",
+            " }",
+            " ",
+            "-/** Store details for search: Malaysia-only online shop based in Kuala Lumpur, with the address and contacts the site shows. */",
+            "+/** Store details for search: Malaysia-only online shop based in Kuala Lumpur, with the contacts the site shows. */",
+            " export function businessJsonLd(origin) {",
+            "   const whatsapp = getSetting(\"whatsappNumber\").replace(/\\D/g, \"\");",
+            "   const shopee = getSetting(\"shopeeUrl\");"
+          ],
+          "newLines": 7,
+          "newStart": 98,
+          "oldLines": 7,
+          "oldStart": 98
+        }
+      ],
+      "userModified": false
+    },
+    "tool_use_id": "toolu_01QeiC9CdRu29Sz81TFWSLHB",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\server\\src",
+    "duration_ms": 88,
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "b2b58939-7ad8-4e63-acce-319e1fbf9899",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "file_path": "D:\\Github\\WYR Web\\server\\src\\seo.js",
+      "new_string": "  \"/shipping\": {\n    title: \"Shipping policy · WYR Technology\",\n    description: \"Shipping fees, dispatch times and delivery times for WYR Technology orders across Peninsular and East Malaysia.\",\n  },\n  \"/returns\": {\n    title: \"Returns \u0026 refunds · WYR Technology\",\n    description: \"How to return a defective, damaged or wrong item from WYR Technology, and how refunds are paid.\",\n  },\n  \"/privacy\": {\n    title: \"Privacy policy · WYR Technology\",\n    description: \"What personal data WYR Technology collects, how it is used and your rights under Malaysia's PDPA.\",\n  },\n  \"/terms\": {\n    title: \"Terms \u0026 conditions · WYR Technology\",\n    description: \"The terms that apply when you buy from WYR Technology: orders, prices, payment, delivery and returns.\",\n  },\n  \"/eink-converter\": {",
+      "old_string": "  \"/eink-converter\": {",
+      "replace_all": false
+    },
+    "tool_name": "Edit",
+    "tool_response": {
+      "contentNotInModelContext": true,
+      "filePath": "D:\\Github\\WYR Web\\server\\src\\seo.js",
+      "newString": "  \"/shipping\": {\n    title: \"Shipping policy · WYR Technology\",\n    description: \"Shipping fees, dispatch times and delivery times for WYR Technology orders across Peninsular and East Malaysia.\",\n  },\n  \"/returns\": {\n    title: \"Returns \u0026 refunds · WYR Technology\",\n    description: \"How to return a defective, damaged or wrong item from WYR Technology, and how refunds are paid.\",\n  },\n  \"/privacy\": {\n    title: \"Privacy policy · WYR Technology\",\n    description: \"What personal data WYR Technology collects, how it is used and your rights under Malaysia's PDPA.\",\n  },\n  \"/terms\": {\n    title: \"Terms \u0026 conditions · WYR Technology\",\n    description: \"The terms that apply when you buy from WYR Technology: orders, prices, payment, delivery and returns.\",\n  },\n  \"/eink-converter\": {",
+      "oldString": "  \"/eink-converter\": {",
+      "originalFile": "// Search-engine support for the production SPA: robots.txt, sitemap.xml, a www -\u003e apex\n// redirect, and per-URL \u003chead\u003e tags (title, description, canonical, Open Graph, Product\n// JSON-LD) injected into client/dist/index.html so crawlers that don't run JavaScript\n// still see the right page. Unknown URLs and products get a real 404 status.\nimport fs from \"node:fs\";\nimport path from \"node:path\";\nimport { prisma } from \"./db.js\";\nimport { BUSINESS_NAME, businessJsonLd, shippingDetailsJsonLd, variantOffer, variantUrl, websiteJsonLd } from \"./merchant.js\";\nimport { detailInclude, serializeDetail } from \"./routes/products.js\";\n\nconst SITE_NAME = BUSINESS_NAME;\nconst DEFAULT_TITLE = \"WYR Technology · NFC \u0026 RFID hardware\";\nconst DEFAULT_DESCRIPTION = \"WYR Technology: NFC tags, RFID cards, readers and tap-to-review standees. Ready stock in Kuala Lumpur.\";\nconst DEFAULT_IMAGE = \"/images/logo.jpeg\";\n\n// Public pages worth indexing (path -\u003e title, description).\nconst STATIC_PAGES = {\n  \"/\": { title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION },\n  \"/products\": {\n    title: \"Shop NFC tags, RFID cards \u0026 readers · WYR Technology\",\n    description: \"Browse NFC stickers, NTAG213/215/216 tags, RFID and DESFire cards, readers and tap-to-review standees. Ready stock in Malaysia, ships from Kuala Lumpur.\",\n  },\n  \"/about\": {\n    title: \"About us · WYR Technology\",\n    description: \"WYR Technology makes NFC and RFID easy to buy in Malaysia: genuine chips, ready stock in Kuala Lumpur and help choosing the right tag.\",\n  },\n  \"/contact\": {\n    title: \"Contact us · WYR Technology\",\n    description: \"Questions about NFC tags, RFID cards or bulk orders? Contact WYR Technology by WhatsApp or email.\",\n  },\n  \"/eink-converter\": {\n    title: \"E-ink card image converter · WYR Technology\",\n    description: \"Convert any photo into a 200 × 300 black, white, red and yellow picture that the e-ink NFC card accepts, ready to write with the NETME app on iPhone.\",\n  },\n};\n\n// Real pages that shouldn't appear in search results (carts, accounts, order status).\nconst PRIVATE_PAGES = [/^\\/cart$/, /^\\/checkout(\\/return)?$/, /^\\/orders\\/[^/]+$/, /^\\/track$/, /^\\/account(\\/(login|register|orders))?$/];\n\nconst ROBOTS_DISALLOW = [\"/system\", \"/api/\", \"/cart\", \"/checkout\", \"/account\", \"/orders/\", \"/track\"];\n\n// Canonical origin: PUBLIC_BASE_URL in production (it is required for payments anyway).\nfunction siteOrigin(req) {\n  const env = process.env.PUBLIC_BASE_URL?.trim().replace(/\\/+$/, \"\");\n  return env || `${req.protocol}://${req.get(\"host\")}`;\n}\n\nconst escapeHtml = (s) =\u003e\n  String(s).replace(/[\u0026\u003c\u003e\"']/g, (c) =\u003e ({ \"\u0026\": \"\u0026amp;\", \"\u003c\": \"\u0026lt;\", \"\u003e\": \"\u0026gt;\", '\"': \"\u0026quot;\", \"'\": \"\u0026#39;\" })[c]);\n\nconst absolute = (origin, url) =\u003e (/^https?:\\/\\//i.test(url) ? url : `${origin}${url.startsWith(\"/\") ? \"\" : \"/\"}${url}`);\n\nfunction truncate(text, max = 160) {\n  const t = String(text ?? \"\").replace(/\\s+/g, \" \").trim();\n  return t.length \u003c= max ? t : `${t.slice(0, max - 3).replace(/\\s+\\S*$/, \"\")}…`;\n}\n\n// Mirrors metaDescription() in client/src/pages/ProductDetailPage.jsx.\nfunction productDescription(product, name) {\n  const price = product.minPrice != null ? ` from RM${product.minPrice.toFixed(2)}` : \"\";\n  const text = String(product.description ?? \"\").replace(/\\s+/g, \" \").trim();\n  if (!text) return `${name}${price}. Ready stock in Malaysia, ships from Kuala Lumpur.`;\n  return truncate(`${name}${price}. ${text}`);\n}\n\nfunction productJsonLd(product, raw, origin, url) {\n  const seller = { \"@type\": \"Organization\", name: SITE_NAME };\n  // One Offer per variant (Google merchant listings don't accept AggregateOffer). The price is\n  // per piece, as the page shows it; variants with a minimum quantity say so in eligibleQuantity.\n  const offers = product.variants.flatMap((v) =\u003e {\n    const o = variantOffer(v);\n    if (!o) return [];\n    return [\n      {\n        \"@type\": \"Offer\",\n        url: variantUrl(url, v),\n        sku: v.sku,\n        ...(v.name \u0026\u0026 { name: v.name }),\n        priceCurrency: \"MYR\",\n        price: o.unitPrice.toFixed(2),\n        ...(o.packQty \u003e 1 \u0026\u0026 { eligibleQuantity: { \"@type\": \"QuantitativeValue\", minValue: o.packQty, unitCode: \"C62\" } }),\n        availability: `https://schema.org/${o.inStock ? \"InStock\" : \"OutOfStock\"}`,\n        itemCondition: \"https://schema.org/NewCondition\",\n        shippingDetails: shippingDetailsJsonLd(Math.round(o.packPrice * 100)),\n        seller,\n      },\n    ];\n  });\n  return {\n    \"@context\": \"https://schema.org\",\n    \"@type\": \"Product\",\n    name: product.displayName ?? product.name,\n    description: truncate(product.description || product.name, 5000),\n    image: product.images.map((i) =\u003e absolute(origin, i.url)).slice(0, 10),\n    sku: product.parentSku ?? product.variants[0]?.sku,\n    ...(raw.brand \u0026\u0026 { brand: { \"@type\": \"Brand\", name: raw.brand } }),\n    ...(raw.model \u0026\u0026 { model: raw.model }),\n    ...(product.category?.name \u0026\u0026 { category: product.category.name }),\n    url,\n    ...(offers.length \u0026\u0026 { offers }),\n  };\n}\n\nfunction breadcrumbJsonLd(product, origin, url) {\n  const items = [{ name: \"Products\", item: `${origin}/products` }];\n  if (product.category?.slug) items.push({ name: product.category.name, item: `${origin}/products?category=${encodeURIComponent(product.category.slug)}` });\n  items.push({ name: product.displayName ?? product.name, item: url });\n  return {\n    \"@context\": \"https://schema.org\",\n    \"@type\": \"BreadcrumbList\",\n    itemListElement: items.map((it, i) =\u003e ({ \"@type\": \"ListItem\", position: i + 1, ...it })),\n  };\n}\n\n// Decides what the \u003chead\u003e of a given URL should say, and its HTTP status.\nasync function pageMeta(req, origin) {\n  const p = req.path.length \u003e 1 ? req.path.replace(/\\/+$/, \"\") : \"/\";\n\n  if (p === \"/products\" || STATIC_PAGES[p]) {\n    const meta = { status: 200, ...STATIC_PAGES[p], canonical: `${origin}${p === \"/\" ? \"/\" : p}`, type: \"website\", jsonLd: [] };\n    if (p === \"/\") meta.jsonLd.push(businessJsonLd(origin), websiteJsonLd(origin));\n    if (p === \"/about\" || p === \"/contact\") meta.jsonLd.push(businessJsonLd(origin));\n    // Category listings are their own pages; searches and page numbers fold into /products.\n    const category = typeof req.query.category === \"string\" ? req.query.category.trim() : \"\";\n    if (p === \"/products\" \u0026\u0026 category) {\n      const cat = await prisma.category.findUnique({ where: { slug: category }, select: { name: true, slug: true } });\n      if (cat?.name) {\n        meta.title = `${cat.name} · WYR Technology`;\n        meta.description = `Shop ${cat.name} at WYR Technology. Ready stock in Malaysia, ships from Kuala Lumpur.`;\n        meta.canonical = `${origin}/products?category=${encodeURIComponent(cat.slug)}`;\n      }\n    }\n    return meta;\n  }\n\n  const productMatch = p.match(/^\\/products\\/([^/]+)$/);\n  if (productMatch) {\n    const slug = decodeURIComponent(productMatch[1]);\n    const raw = await prisma.product.findFirst({ where: { slug, isActive: true }, include: detailInclude });\n    if (!raw) return notFound();\n    const product = serializeDetail(raw);\n    const name = product.displayName ?? product.name;\n    const url = `${origin}/products/${encodeURIComponent(raw.slug)}`;\n    return {\n      status: 200,\n      title: `${name} · WYR Technology`,\n      description: productDescription(product, name),\n      canonical: url,\n      type: \"product\",\n      image: product.images[0]?.url,\n      jsonLd: [productJsonLd(product, raw, origin, url), breadcrumbJsonLd(product, origin, url)],\n    };\n  }\n\n  if (p === \"/system\" || p.startsWith(\"/system/\")) return { status: 200, title: DEFAULT_TITLE, noindex: true, jsonLd: [] };\n  if (PRIVATE_PAGES.some((re) =\u003e re.test(p))) return { status: 200, title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION, noindex: true, jsonLd: [] };\n  return notFound();\n}\n\nfunction notFound() {\n  return { status: 404, title: `Page not found · ${SITE_NAME}`, description: DEFAULT_DESCRIPTION, noindex: true, jsonLd: [] };\n}\n\nfunction headTags(meta, origin) {\n  const tags = [];\n  if (meta.noindex) tags.push('\u003cmeta name=\"robots\" content=\"noindex, nofollow\" /\u003e');\n  if (meta.canonical) {\n    const image = absolute(origin, meta.image || DEFAULT_IMAGE);\n    tags.push(\n      `\u003clink rel=\"canonical\" href=\"${escapeHtml(meta.canonical)}\" /\u003e`,\n      `\u003cmeta property=\"og:site_name\" content=\"${SITE_NAME}\" /\u003e`,\n      `\u003cmeta property=\"og:type\" content=\"${meta.type === \"product\" ? \"product\" : \"website\"}\" /\u003e`,\n      `\u003cmeta property=\"og:title\" content=\"${escapeHtml(meta.title)}\" /\u003e`,\n      `\u003cmeta property=\"og:description\" content=\"${escapeHtml(meta.description)}\" /\u003e`,\n      `\u003cmeta property=\"og:url\" content=\"${escapeHtml(meta.canonical)}\" /\u003e`,\n      `\u003cmeta property=\"og:image\" content=\"${escapeHtml(image)}\" /\u003e`,\n      '\u003cmeta property=\"og:locale\" content=\"en_MY\" /\u003e',\n      '\u003cmeta name=\"twitter:card\" content=\"summary_large_image\" /\u003e',\n    );\n  }\n  for (const data of meta.jsonLd) {\n    // Escape \"\u003c\" so product text can never close the script tag.\n    tags.push(`\u003cscript type=\"application/ld+json\"\u003e${JSON.stringify(data).replace(/\u003c/g, \"\\\\u003c\")}\u003c/script\u003e`);\n  }\n  return tags.join(\"\\n    \");\n}\n\n// 301 www.\u003chost\u003e to \u003chost\u003e when PUBLIC_BASE_URL names the bare domain, so there is one copy of each page.\nexport function redirectWww(req, res, next) {\n  const env = process.env.PUBLIC_BASE_URL?.trim();\n  const host = req.get(\"host\") ?? \"\";\n  if (env \u0026\u0026 (req.method === \"GET\" || req.method === \"HEAD\") \u0026\u0026 host.toLowerCase().startsWith(\"www.\")) {\n    try {\n      const canonical = new URL(env);\n      if (canonical.host.toLowerCase() === host.slice(4).toLowerCase()) {\n        res.redirect(301, `${canonical.origin}${req.originalUrl}`);\n        return;\n      }\n    } catch {\n      // Bad PUBLIC_BASE_URL: serve the page rather than break the site.\n    }\n  }\n  next();\n}\n\nexport function createSeo(clientDist) {\n  const indexPath = path.join(clientDist, \"index.html\");\n  let template = null;\n  const loadTemplate = () =\u003e (template ??= fs.readFileSync(indexPath, \"utf8\"));\n\n  function robots(req, res) {\n    const origin = siteOrigin(req);\n    const lines = [\"User-agent: *\", \"Allow: /\", ...ROBOTS_DISALLOW.map((d) =\u003e `Disallow: ${d}`), \"\", `Sitemap: ${origin}/sitemap.xml`, \"\"];\n    res.type(\"text/plain\").set(\"Cache-Control\", \"public, max-age=3600\").send(lines.join(\"\\n\"));\n  }\n\n  async function sitemap(req, res, next) {\n    try {\n      const origin = siteOrigin(req);\n      const [products, categories] = await Promise.all([\n        prisma.product.findMany({ where: { isActive: true, slug: { not: null } }, select: { slug: true }, orderBy: { id: \"asc\" } }),\n        prisma.category.findMany({ where: { slug: { not: null }, products: { some: { isActive: true } } }, select: { slug: true }, orderBy: { id: \"asc\" } }),\n      ]);\n      const urls = [\n        ...Object.keys(STATIC_PAGES).map((p) =\u003e `${origin}${p}`),\n        ...categories.map((c) =\u003e `${origin}/products?category=${encodeURIComponent(c.slug)}`),\n        ...products.map((p) =\u003e `${origin}/products/${encodeURIComponent(p.slug)}`),\n      ];\n      const body = [\n        '\u003c?xml version=\"1.0\" encoding=\"UTF-8\"?\u003e',\n        '\u003curlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"\u003e',\n        ...urls.map((u) =\u003e `  \u003curl\u003e\u003cloc\u003e${escapeHtml(u)}\u003c/loc\u003e\u003c/url\u003e`),\n        \"\u003c/urlset\u003e\",\n        \"\",\n      ].join(\"\\n\");\n      res.type(\"application/xml\").set(\"Cache-Control\", \"public, max-age=3600\").send(body);\n    } catch (err) {\n      next(err);\n    }\n  }\n\n  // SPA fallback: index.html with this URL's head tags and the right status code.\n  async function renderPage(req, res, next) {\n    if (req.method !== \"GET\" \u0026\u0026 req.method !== \"HEAD\") return next();\n    try {\n      const origin = siteOrigin(req);\n      let meta;\n      try {\n        meta = await pageMeta(req, origin);\n      } catch (err) {\n        // A database hiccup shouldn't take the shop down: fall back to the generic head.\n        console.error(\"[seo] page meta failed:\", err);\n        meta = { status: 200, title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION, jsonLd: [] };\n      }\n      let html = loadTemplate()\n        .replace(/\u003ctitle\u003e[\\s\\S]*?\u003c\\/title\u003e/, `\u003ctitle\u003e${escapeHtml(meta.title ?? DEFAULT_TITLE)}\u003c/title\u003e`)\n        .replace(/\u003cmeta name=\"description\"[^\u003e]*\u003e/, `\u003cmeta name=\"description\" content=\"${escapeHtml(meta.description ?? DEFAULT_DESCRIPTION)}\" /\u003e`);\n      const tags = headTags(meta, origin);\n      if (tags) html = html.replace(/\\s*\u003c\\/head\u003e/, `\\n    ${tags}\\n  \u003c/head\u003e`);\n      res.status(meta.status).type(\"html\").set(\"Cache-Control\", \"no-cache\");\n      if (meta.noindex) res.set(\"X-Robots-Tag\", \"noindex, nofollow\");\n      res.send(html);\n    } catch (err) {\n      next(err);\n    }\n  }\n\n  return { robots, sitemap, renderPage };\n}\n",
+      "replaceAll": false,
+      "structuredPatch": [
+        {
+          "lines": [
+            "     title: \"Contact us · WYR Technology\",",
+            "     description: \"Questions about NFC tags, RFID cards or bulk orders? Contact WYR Technology by WhatsApp or email.\",",
+            "   },",
+            "+  \"/shipping\": {",
+            "+    title: \"Shipping policy · WYR Technology\",",
+            "+    description: \"Shipping fees, dispatch times and delivery times for WYR Technology orders across Peninsular and East Malaysia.\",",
+            "+  },",
+            "+  \"/returns\": {",
+            "+    title: \"Returns \u0026 refunds · WYR Technology\",",
+            "+    description: \"How to return a defective, damaged or wrong item from WYR Technology, and how refunds are paid.\",",
+            "+  },",
+            "+  \"/privacy\": {",
+            "+    title: \"Privacy policy · WYR Technology\",",
+            "+    description: \"What personal data WYR Technology collects, how it is used and your rights under Malaysia's PDPA.\",",
+            "+  },",
+            "+  \"/terms\": {",
+            "+    title: \"Terms \u0026 conditions · WYR Technology\",",
+            "+    description: \"The terms that apply when you buy from WYR Technology: orders, prices, payment, delivery and returns.\",",
+            "+  },",
+            "   \"/eink-converter\": {",
+            "     title: \"E-ink card image converter · WYR Technology\",",
+            "     description: \"Convert any photo into a 200 × 300 black, white, red and yellow picture that the e-ink NFC card accepts, ready to write with the NETME app on iPhone.\","
+          ],
+          "newLines": 22,
+          "newStart": 28,
+          "oldLines": 6,
+          "oldStart": 28
+        }
+      ],
+      "userModified": false
+    },
+    "tool_use_id": "toolu_01Vuu4eDPyL6dzNo7EKLRUtt",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\server\\src",
+    "duration_ms": 40,
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "b2b58939-7ad8-4e63-acce-319e1fbf9899",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "content": "import { Clock, Mail, MapPin, MessageCircle, Phone } from \"lucide-react\";\nimport { Link } from \"react-router-dom\";\nimport { formatPrice } from \"@/lib/format\";\nimport { usePageMeta, useSiteInfo, whatsappLink } from \"@/lib/site\";\n\n// Shipping, Returns \u0026 refunds, Privacy and Terms. The numbers in them (fees, dispatch cut-off,\n// delivery and return days) and the business details come from the admin settings via /api/site,\n// the same values server/src/merchant.js gives Google, so the pages and Google never disagree.\n\nconst UPDATED = \"11 November 2026\";\n\n/** 15 -\u003e \"3pm\", 0 -\u003e \"midnight\", 12 -\u003e \"12 noon\". */\nexport function hourText(h) {\n  if (h === 0) return \"midnight\";\n  if (h === 12) return \"12 noon\";\n  return h \u003c 12 ? `${h}am` : `${h - 12}pm`;\n}\n\nexport const dayRangeText = ([min, max]) =\u003e (min === max ? `${min} working day${min === 1 ? \"\" : \"s\"}` : `${min} to ${max} working days`);\n\n/** \"WYR Technology (202403123456)\" when a registration number is set. */\nexport function legalName(business) {\n  if (!business) return \"WYR Technology\";\n  return business.regNo ? `${business.name} (${business.regNo})` : business.name;\n}\n\nconst telHref = (phone) =\u003e `tel:${phone.replace(/[^\\d+]/g, \"\").replace(/^0/, \"+60\")}`;\n\n/** Registered name, address, phone, email and hours, as set in the admin. */\nexport function BusinessDetails({ className = \"\" }) {\n  const site = useSiteInfo();\n  const b = site.business;\n  if (!b) return null;\n  const chat = whatsappLink(site.whatsappNumber, \"Hi WYR Technology, I have a question.\");\n  const row = \"flex gap-3\";\n  const icon = \"text-muted-foreground mt-0.5 size-4 shrink-0\";\n  return (\n    \u003cdiv className={`space-y-3 text-sm ${className}`} data-testid=\"business-details\"\u003e\n      \u003cp className=\"font-semibold\"\u003e{legalName(b)}\u003c/p\u003e\n      \u003cp className={row}\u003e\n        \u003cMapPin className={icon} /\u003e\n        \u003cspan className=\"whitespace-pre-line\"\u003e{b.address}\u003c/span\u003e\n      \u003c/p\u003e\n      {b.phone \u0026\u0026 (\n        \u003cp className={row}\u003e\n          \u003cPhone className={icon} /\u003e\n          \u003ca href={telHref(b.phone)} className=\"hover:underline\"\u003e\n            {b.phone}\n          \u003c/a\u003e\n        \u003c/p\u003e\n      )}\n      {chat \u0026\u0026 (\n        \u003cp className={row}\u003e\n          \u003cMessageCircle className={icon} /\u003e\n          \u003ca href={chat} target=\"_blank\" rel=\"noreferrer\" className=\"hover:underline\"\u003e\n            WhatsApp +{site.whatsappNumber}\n          \u003c/a\u003e\n        \u003c/p\u003e\n      )}\n      {b.email \u0026\u0026 (\n        \u003cp className={row}\u003e\n          \u003cMail className={icon} /\u003e\n          \u003ca href={`mailto:${b.email}`} className=\"break-all hover:underline\"\u003e\n            {b.email}\n          \u003c/a\u003e\n        \u003c/p\u003e\n      )}\n      {b.hours \u0026\u0026 (\n        \u003cp className={row}\u003e\n          \u003cClock className={icon} /\u003e\n          \u003cspan\u003e{b.hours}\u003c/span\u003e\n        \u003c/p\u003e\n      )}\n    \u003c/div\u003e\n  );\n}\n\nfunction PolicyPage({ eyebrow, title, intro, metaTitle, metaDescription, children }) {\n  usePageMeta(metaTitle, metaDescription);\n  return (\n    \u003c\u003e\n      \u003ctitle\u003e{metaTitle}\u003c/title\u003e\n      \u003csection className=\"bg-brand-navy relative overflow-hidden text-white\"\u003e\n        \u003cdiv className=\"bg-brand-orange/30 absolute -top-20 right-0 size-72 rounded-full blur-3xl\" /\u003e\n        \u003cdiv className=\"relative mx-auto max-w-6xl px-4 py-14 md:py-16\"\u003e\n          \u003cp className=\"text-brand-orange text-xs font-semibold tracking-[0.14em] uppercase\"\u003e{eyebrow}\u003c/p\u003e\n          \u003ch1 className=\"mt-3 max-w-2xl text-4xl font-extrabold tracking-tight text-balance sm:text-5xl\"\u003e{title}\u003c/h1\u003e\n          \u003cp className=\"mt-5 max-w-2xl text-lg text-slate-300\"\u003e{intro}\u003c/p\u003e\n        \u003c/div\u003e\n      \u003c/section\u003e\n      \u003cdiv className=\"mx-auto grid max-w-6xl gap-10 px-4 pt-12 lg:grid-cols-[minmax(0,1fr)_18rem]\"\u003e\n        \u003carticle className=\"min-w-0 space-y-10\"\u003e\n          {children}\n          \u003cp className=\"text-muted-foreground border-t pt-6 text-xs\"\u003eLast updated {UPDATED}.\u003c/p\u003e\n        \u003c/article\u003e\n        \u003caside className=\"h-fit lg:sticky lg:top-24\"\u003e\n          \u003cdiv className=\"bg-card rounded-2xl border p-6\"\u003e\n            \u003ch2 className=\"font-semibold\"\u003eQuestions?\u003c/h2\u003e\n            \u003cp className=\"text-muted-foreground mt-1 mb-4 text-sm\"\u003eContact us, we usually reply within the same working day.\u003c/p\u003e\n            \u003cBusinessDetails /\u003e\n          \u003c/div\u003e\n          \u003cnav className=\"mt-4 flex flex-col gap-1 px-2 text-sm\" aria-label=\"Policies\"\u003e\n            {POLICY_LINKS.map((l) =\u003e (\n              \u003cLink key={l.to} to={l.to} className=\"text-muted-foreground hover:text-foreground py-1\"\u003e\n                {l.label}\n              \u003c/Link\u003e\n            ))}\n          \u003c/nav\u003e\n        \u003c/aside\u003e\n      \u003c/div\u003e\n    \u003c/\u003e\n  );\n}\n\nexport const POLICY_LINKS = [\n  { to: \"/shipping\", label: \"Shipping policy\" },\n  { to: \"/returns\", label: \"Returns \u0026 refunds\" },\n  { to: \"/privacy\", label: \"Privacy policy\" },\n  { to: \"/terms\", label: \"Terms \u0026 conditions\" },\n];\n\nfunction Section({ title, children }) {\n  return (\n    \u003csection\u003e\n      \u003ch2 className=\"text-xl font-bold tracking-tight sm:text-2xl\"\u003e{title}\u003c/h2\u003e\n      \u003cdiv className=\"text-muted-foreground mt-4 space-y-3 leading-relaxed [\u0026_a]:text-primary [\u0026_a]:underline-offset-2 [\u0026_a:hover]:underline [\u0026_li]:pl-1 [\u0026_strong]:text-foreground [\u0026_ul]:list-disc [\u0026_ul]:space-y-2 [\u0026_ul]:pl-5\"\u003e\n        {children}\n      \u003c/div\u003e\n    \u003c/section\u003e\n  );\n}\n\nfunction feeText(shipping) {\n  if (!shipping) return null;\n  if (shipping.westRm === shipping.eastRm) return \u003c\u003ea flat {formatPrice(shipping.westRm)} per order anywhere in Malaysia\u003c/\u003e;\n  return (\n    \u003c\u003e\n      {formatPrice(shipping.westRm)} per order to Peninsular Malaysia and {formatPrice(shipping.eastRm)} per order to Sabah, Sarawak and Labuan\n    \u003c/\u003e\n  );\n}\n\nexport function ShippingPolicyPage() {\n  const site = useSiteInfo();\n  const p = site.policies;\n  const shipping = site.shipping;\n  return (\n    \u003cPolicyPage\n      eyebrow=\"Shipping\"\n      title=\"Shipping policy\"\n      intro=\"We ship from Kuala Lumpur to every state in Malaysia. Here's what it costs and how long it takes.\"\n      metaTitle=\"Shipping policy · WYR Technology\"\n      metaDescription=\"Shipping fees, dispatch times and delivery times for WYR Technology orders across Peninsular and East Malaysia.\"\n    \u003e\n      \u003cSection title=\"Where we ship\"\u003e\n        \u003cp\u003e\n          We deliver anywhere in Malaysia: Peninsular Malaysia, Sabah, Sarawak and W.P. Labuan. We don't ship outside Malaysia at the moment. If you need an overseas delivery,{\" \"}\n          \u003cLink to=\"/contact\"\u003econtact us\u003c/Link\u003e first.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Shipping fees\"\u003e\n        {shipping ? (\n          \u003cp\u003e\n            Shipping is {feeText(shipping)}.\n            {shipping.freeThresholdRm != null \u0026\u0026 (\n              \u003c\u003e\n                {\" \"}\n                Orders with a subtotal of \u003cstrong\u003e{formatPrice(shipping.freeThresholdRm)}\u003c/strong\u003e or more ship \u003cstrong\u003efree\u003c/strong\u003e.\n              \u003c/\u003e\n            )}{\" \"}\n            The exact fee is shown at checkout before you pay.\n          \u003c/p\u003e\n        ) : (\n          \u003cp\u003eThe shipping fee is shown at checkout before you pay.\u003c/p\u003e\n        )}\n      \u003c/Section\u003e\n      {p \u0026\u0026 (\n        \u003cSection title=\"When we ship\"\u003e\n          \u003cul\u003e\n            \u003cli\u003e\n              Orders paid before \u003cstrong\u003e{hourText(p.dispatchCutoffHour)}\u003c/strong\u003e on a working day are packed and handed to the courier \u003cstrong\u003ethe same day\u003c/strong\u003e.\n            \u003c/li\u003e\n            \u003cli\u003eOrders paid after that, or on weekends and public holidays, ship the next working day.\u003c/li\u003e\n            \u003cli\u003eWorking days are Monday to Friday, except Malaysian public holidays.\u003c/li\u003e\n            \u003cli\u003eCustom-printed or custom-encoded orders ship on the date we agree with you in the quotation.\u003c/li\u003e\n          \u003c/ul\u003e\n        \u003c/Section\u003e\n      )}\n      {p \u0026\u0026 (\n        \u003cSection title=\"Delivery times\"\u003e\n          \u003cp\u003eAfter your parcel leaves us, the courier usually delivers it in:\u003c/p\u003e\n          \u003cul\u003e\n            \u003cli\u003e\n              \u003cstrong\u003ePeninsular Malaysia:\u003c/strong\u003e {dayRangeText(p.deliveryWestDays)}\n            \u003c/li\u003e\n            \u003cli\u003e\n              \u003cstrong\u003eSabah, Sarawak and Labuan:\u003c/strong\u003e {dayRangeText(p.deliveryEastDays)}\n            \u003c/li\u003e\n          \u003c/ul\u003e\n          {p.couriers \u0026\u0026 \u003cp\u003eWe ship with {p.couriers}.\u003c/p\u003e}\n          \u003cp\u003eRemote areas, festive seasons and bad weather can add a few days. These times are the courier's estimates, not guarantees.\u003c/p\u003e\n        \u003c/Section\u003e\n      )}\n      \u003cSection title=\"Tracking your order\"\u003e\n        \u003cp\u003e\n          Once your order ships we add the courier and tracking number to it. You can see them under \u003cLink to=\"/account/orders\"\u003eMy account\u003c/Link\u003e, or on{\" \"}\n          \u003cLink to=\"/track\"\u003eTrack order\u003c/Link\u003e with your order number and email.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Lost or damaged parcels\"\u003e\n        \u003cp\u003e\n          If your parcel arrives damaged, or hasn't arrived well after the delivery time above, contact us{p \u0026\u0026 \u003c\u003e within {p.returnDays} days\u003c/\u003e}. We'll sort it out with\n          the courier and send a replacement or refund you. See \u003cLink to=\"/returns\"\u003eReturns \u0026amp; refunds\u003c/Link\u003e.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n    \u003c/PolicyPage\u003e\n  );\n}\n\nexport function ReturnsPolicyPage() {\n  const site = useSiteInfo();\n  const p = site.policies;\n  const days = p ? `${p.returnDays} days` : \"the days stated below\";\n  return (\n    \u003cPolicyPage\n      eyebrow=\"Returns \u0026 refunds\"\n      title=\"Returns \u0026 refunds\"\n      intro=\"If something arrives faulty, damaged or not what you ordered, we'll replace it or refund you, and we pay the return shipping.\"\n      metaTitle=\"Returns \u0026 refunds · WYR Technology\"\n      metaDescription=\"How to return a defective, damaged or wrong item from WYR Technology, and how refunds are paid.\"\n    \u003e\n      \u003cSection title=\"What you can return\"\u003e\n        \u003cp\u003e\n          Tell us within \u003cstrong\u003e{days} of delivery\u003c/strong\u003e if an item:\n        \u003c/p\u003e\n        \u003cul\u003e\n          \u003cli\u003eis defective or doesn't work as described (for example, a tag that can't be read or written, or a reader that isn't detected),\u003c/li\u003e\n          \u003cli\u003earrived damaged, or\u003c/li\u003e\n          \u003cli\u003eisn't what you ordered (wrong item, wrong chip type or missing pieces).\u003c/li\u003e\n        \u003c/ul\u003e\n        \u003cp\u003eWe'll replace it, or refund it in full including the shipping you paid for it, whichever you prefer. A replacement depends on stock.\u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"What we can't accept\"\u003e\n        \u003cul\u003e\n          \u003cli\u003eChange-of-mind returns, or items bought by mistake, when the item is working and as described.\u003c/li\u003e\n          \u003cli\u003eItems damaged after delivery through misuse, for example tags bent, cut, heated or exposed to liquids beyond their rating.\u003c/li\u003e\n          \u003cli\u003e\n            Tags you have locked (made read-only) yourself. Locking is permanent, so please test your data before locking. A tag that was faulty before you locked it is still\n            covered.\n          \u003c/li\u003e\n          \u003cli\u003eCustom-printed or custom-encoded items made to your order, unless they are faulty or not made as we agreed.\u003c/li\u003e\n        \u003c/ul\u003e\n        \u003cp\u003eNot sure which chip or reader you need? Ask us before you order and we'll help you choose.\u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"How to return an item\"\u003e\n        \u003cul\u003e\n          \u003cli\u003e\n            Contact us by WhatsApp or email within {days} of delivery with your \u003cstrong\u003eorder number\u003c/strong\u003e and a \u003cstrong\u003ephoto or short video\u003c/strong\u003e showing the problem.\n          \u003c/li\u003e\n          \u003cli\u003eWe reply within one working day. Often we can fix a setup problem over chat. If not, we'll give you the return address and instructions.\u003c/li\u003e\n          \u003cli\u003e\n            \u003cstrong\u003eWe pay the return shipping\u003c/strong\u003e for approved returns. We either arrange the pickup or refund your postage when the item arrives.\n          \u003c/li\u003e\n          \u003cli\u003ePlease send the item back with all its parts within 14 days of our approval.\u003c/li\u003e\n        \u003c/ul\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Refunds\"\u003e\n        \u003cul\u003e\n          \u003cli\u003e\n            We refund to your original payment method (the bank account you paid from with FPX) within{\" \"}\n            \u003cstrong\u003e{p ? `${p.refundDays} working days` : \"a few working days\"}\u003c/strong\u003e of approving your return. For damaged or missing items we may refund you without asking for the item\n            back.\n          \u003c/li\u003e\n          \u003cli\u003eYour bank may take a few more days to show the money in your account.\u003c/li\u003e\n          \u003cli\u003eWe'll message you when the refund has been sent.\u003c/li\u003e\n        \u003c/ul\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Cancelling an order\"\u003e\n        \u003cp\u003e\n          You can cancel any time before your order ships: contact us and we'll refund it in full. Unpaid orders cancel themselves after a short time. Once an order has shipped, the\n          return rules above apply.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Orders from Shopee or Lazada\"\u003e\n        \u003cp\u003eOrders placed on our Shopee or Lazada stores follow that marketplace's own return and refund process. Please request the return in their app.\u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Your rights\"\u003e\n        \u003cp\u003eThis policy doesn't affect your rights under Malaysia's Consumer Protection Act 1999.\u003c/p\u003e\n      \u003c/Section\u003e\n    \u003c/PolicyPage\u003e\n  );\n}\n\nexport function PrivacyPolicyPage() {\n  const site = useSiteInfo();\n  const b = site.business;\n  return (\n    \u003cPolicyPage\n      eyebrow=\"Privacy\"\n      title=\"Privacy policy\"\n      intro=\"What personal data we collect when you shop with us, why, and what you can ask us to do with it.\"\n      metaTitle=\"Privacy policy · WYR Technology\"\n      metaDescription=\"What personal data WYR Technology collects, how it is used and your rights under Malaysia's PDPA.\"\n    \u003e\n      \u003cSection title=\"Who we are\"\u003e\n        \u003cp\u003e\n          This website is run by \u003cstrong\u003e{legalName(b)}\u003c/strong\u003e, {b ? b.address.replace(/\\s*\\n\\s*/g, \", \") : \"Kuala Lumpur, Malaysia\"}. We handle your personal data in line with\n          Malaysia's Personal Data Protection Act 2010 (PDPA).\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"What we collect\"\u003e\n        \u003cul\u003e\n          \u003cli\u003e\n            \u003cstrong\u003eWhen you order:\u003c/strong\u003e your name, phone number, email address, delivery address, company name (if you give one) and what you bought.\n          \u003c/li\u003e\n          \u003cli\u003e\n            \u003cstrong\u003eWhen you create an account:\u003c/strong\u003e the same details, plus your password, which we store only in scrambled (hashed) form.\n          \u003c/li\u003e\n          \u003cli\u003e\n            \u003cstrong\u003eWhen you contact us:\u003c/strong\u003e what you tell us by WhatsApp, email or phone.\n          \u003c/li\u003e\n          \u003cli\u003e\n            \u003cstrong\u003ePayments:\u003c/strong\u003e you pay on ToyyibPay's secure page. We see whether your payment succeeded and its reference, but never your online banking login or card details.\n          \u003c/li\u003e\n        \u003c/ul\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"How we use it\"\u003e\n        \u003cul\u003e\n          \u003cli\u003eto process, pack and deliver your order, and to send you its status and tracking details,\u003c/li\u003e\n          \u003cli\u003eto reply to your questions and handle returns and refunds,\u003c/li\u003e\n          \u003cli\u003eto issue invoices and keep the business and tax records the law requires,\u003c/li\u003e\n          \u003cli\u003eto keep the website and your account secure.\u003c/li\u003e\n        \u003c/ul\u003e\n        \u003cp\u003eWe don't sell or rent your personal data. We only send you promotions if you've asked to receive them, and you can stop them any time.\u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Who we share it with\"\u003e\n        \u003cp\u003eOnly with the companies that help us serve you, and only what they need:\u003c/p\u003e\n        \u003cul\u003e\n          \u003cli\u003ecourier companies, to deliver your parcel (name, phone and address),\u003c/li\u003e\n          \u003cli\u003eToyyibPay, to take your payment,\u003c/li\u003e\n          \u003cli\u003ethe services we use to host this website and manage orders and stock.\u003c/li\u003e\n        \u003c/ul\u003e\n        \u003cp\u003eWe may also share data when the law requires it, for example with government authorities.\u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Cookies and browser storage\"\u003e\n        \u003cp\u003e\n          We use a small number of cookies and browser storage to keep you logged in and to remember your cart. We don't use advertising or tracking cookies.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"How long we keep it\"\u003e\n        \u003cp\u003e\n          We keep order records for as long as Malaysian accounting and tax law requires (currently 7 years), and account details until you ask us to close your account.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Your rights\"\u003e\n        \u003cp\u003e\n          Under the PDPA you can ask to see the personal data we hold about you, correct it, or withdraw your consent to us using it (which may mean we can't fulfil an order). Contact us\n          {b?.email \u0026\u0026 (\n            \u003c\u003e\n              {\" \"}\n              at \u003ca href={`mailto:${b.email}`}\u003e{b.email}\u003c/a\u003e\n            \u003c/\u003e\n          )}{\" \"}\n          and we'll respond within 21 days.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Changes\"\u003e\n        \u003cp\u003eIf we change this policy we'll update the date below. Significant changes will also be shown on the website.\u003c/p\u003e\n      \u003c/Section\u003e\n    \u003c/PolicyPage\u003e\n  );\n}\n\nexport function TermsPage() {\n  const site = useSiteInfo();\n  const b = site.business;\n  return (\n    \u003cPolicyPage\n      eyebrow=\"Terms\"\n      title=\"Terms \u0026 conditions\"\n      intro=\"The terms that apply when you buy from this website. Please read them with our shipping and returns policies.\"\n      metaTitle=\"Terms \u0026 conditions · WYR Technology\"\n      metaDescription=\"The terms that apply when you buy from WYR Technology: orders, prices, payment, delivery and returns.\"\n    \u003e\n      \u003cSection title=\"About us\"\u003e\n        \u003cp\u003e\n          This website (wyrgadget.com) is operated by \u003cstrong\u003e{legalName(b)}\u003c/strong\u003e, {b ? b.address.replace(/\\s*\\n\\s*/g, \", \") : \"Kuala Lumpur, Malaysia\"}. By placing an order you agree to\n          these terms.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Products and prices\"\u003e\n        \u003cul\u003e\n          \u003cli\u003e\n            Prices are in Ringgit Malaysia (RM). The price you pay is the one shown in your cart at checkout. Shipping is added at checkout and shown before you pay.\n          \u003c/li\u003e\n          \u003cli\u003eSome low-priced items have a minimum quantity, and larger quantities may get a lower price per piece. Both are shown on the product page.\u003c/li\u003e\n          \u003cli\u003e\n            We describe our products as accurately as we can. Photos show the product, but colours and print can vary slightly. NFC products need an NFC-capable phone or reader: check the\n            compatibility on the product page, or ask us.\n          \u003c/li\u003e\n          \u003cli\u003eIf a price or description is clearly wrong because of an error, we'll contact you before shipping and you can cancel for a full refund.\u003c/li\u003e\n        \u003c/ul\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Orders and payment\"\u003e\n        \u003cul\u003e\n          \u003cli\u003eYou pay securely through ToyyibPay. Your order is confirmed once the payment is confirmed, and we'll show you the order number.\u003c/li\u003e\n          \u003cli\u003eWe hold the items for a short time while you pay. Unpaid orders are cancelled automatically.\u003c/li\u003e\n          \u003cli\u003e\n            If an item turns out to be out of stock after you've paid, we'll tell you and refund you in full, or ship it later if you'd rather wait.\n          \u003c/li\u003e\n          \u003cli\u003eFor bulk, custom-printed or custom-encoded orders, the price and delivery date in our written quotation apply.\u003c/li\u003e\n        \u003c/ul\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Delivery, returns and refunds\"\u003e\n        \u003cp\u003e\n          Delivery is covered by our \u003cLink to=\"/shipping\"\u003eShipping policy\u003c/Link\u003e, and returns, refunds and cancellations by our \u003cLink to=\"/returns\"\u003eReturns \u0026amp; refunds\u003c/Link\u003e policy.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Your account\"\u003e\n        \u003cp\u003eKeep your password private. You're responsible for orders placed from your account. Tell us straight away if you think someone else has used it.\u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Liability\"\u003e\n        \u003cp\u003e\n          As far as the law allows, our liability for any order is limited to the amount you paid for it, and we aren't liable for indirect losses. Nothing in these terms limits your rights\n          under the Consumer Protection Act 1999 or any other law that can't be excluded.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Privacy\"\u003e\n        \u003cp\u003e\n          How we handle your personal data is explained in our \u003cLink to=\"/privacy\"\u003ePrivacy policy\u003c/Link\u003e.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Law\"\u003e\n        \u003cp\u003eThese terms are governed by the laws of Malaysia. If we change them, the version on this page when you placed your order applies to that order.\u003c/p\u003e\n      \u003c/Section\u003e\n    \u003c/PolicyPage\u003e\n  );\n}\n",
+      "file_path": "D:\\Github\\WYR Web\\client\\src\\pages\\PolicyPages.jsx"
+    },
+    "tool_name": "Write",
+    "tool_response": {
+      "content": "import { Clock, Mail, MapPin, MessageCircle, Phone } from \"lucide-react\";\nimport { Link } from \"react-router-dom\";\nimport { formatPrice } from \"@/lib/format\";\nimport { usePageMeta, useSiteInfo, whatsappLink } from \"@/lib/site\";\n\n// Shipping, Returns \u0026 refunds, Privacy and Terms. The numbers in them (fees, dispatch cut-off,\n// delivery and return days) and the business details come from the admin settings via /api/site,\n// the same values server/src/merchant.js gives Google, so the pages and Google never disagree.\n\nconst UPDATED = \"11 November 2026\";\n\n/** 15 -\u003e \"3pm\", 0 -\u003e \"midnight\", 12 -\u003e \"12 noon\". */\nexport function hourText(h) {\n  if (h === 0) return \"midnight\";\n  if (h === 12) return \"12 noon\";\n  return h \u003c 12 ? `${h}am` : `${h - 12}pm`;\n}\n\nexport const dayRangeText = ([min, max]) =\u003e (min === max ? `${min} working day${min === 1 ? \"\" : \"s\"}` : `${min} to ${max} working days`);\n\n/** \"WYR Technology (202403123456)\" when a registration number is set. */\nexport function legalName(business) {\n  if (!business) return \"WYR Technology\";\n  return business.regNo ? `${business.name} (${business.regNo})` : business.name;\n}\n\nconst telHref = (phone) =\u003e `tel:${phone.replace(/[^\\d+]/g, \"\").replace(/^0/, \"+60\")}`;\n\n/** Registered name, address, phone, email and hours, as set in the admin. */\nexport function BusinessDetails({ className = \"\" }) {\n  const site = useSiteInfo();\n  const b = site.business;\n  if (!b) return null;\n  const chat = whatsappLink(site.whatsappNumber, \"Hi WYR Technology, I have a question.\");\n  const row = \"flex gap-3\";\n  const icon = \"text-muted-foreground mt-0.5 size-4 shrink-0\";\n  return (\n    \u003cdiv className={`space-y-3 text-sm ${className}`} data-testid=\"business-details\"\u003e\n      \u003cp className=\"font-semibold\"\u003e{legalName(b)}\u003c/p\u003e\n      \u003cp className={row}\u003e\n        \u003cMapPin className={icon} /\u003e\n        \u003cspan className=\"whitespace-pre-line\"\u003e{b.address}\u003c/span\u003e\n      \u003c/p\u003e\n      {b.phone \u0026\u0026 (\n        \u003cp className={row}\u003e\n          \u003cPhone className={icon} /\u003e\n          \u003ca href={telHref(b.phone)} className=\"hover:underline\"\u003e\n            {b.phone}\n          \u003c/a\u003e\n        \u003c/p\u003e\n      )}\n      {chat \u0026\u0026 (\n        \u003cp className={row}\u003e\n          \u003cMessageCircle className={icon} /\u003e\n          \u003ca href={chat} target=\"_blank\" rel=\"noreferrer\" className=\"hover:underline\"\u003e\n            WhatsApp +{site.whatsappNumber}\n          \u003c/a\u003e\n        \u003c/p\u003e\n      )}\n      {b.email \u0026\u0026 (\n        \u003cp className={row}\u003e\n          \u003cMail className={icon} /\u003e\n          \u003ca href={`mailto:${b.email}`} className=\"break-all hover:underline\"\u003e\n            {b.email}\n          \u003c/a\u003e\n        \u003c/p\u003e\n      )}\n      {b.hours \u0026\u0026 (\n        \u003cp className={row}\u003e\n          \u003cClock className={icon} /\u003e\n          \u003cspan\u003e{b.hours}\u003c/span\u003e\n        \u003c/p\u003e\n      )}\n    \u003c/div\u003e\n  );\n}\n\nfunction PolicyPage({ eyebrow, title, intro, metaTitle, metaDescription, children }) {\n  usePageMeta(metaTitle, metaDescription);\n  return (\n    \u003c\u003e\n      \u003ctitle\u003e{metaTitle}\u003c/title\u003e\n      \u003csection className=\"bg-brand-navy relative overflow-hidden text-white\"\u003e\n        \u003cdiv className=\"bg-brand-orange/30 absolute -top-20 right-0 size-72 rounded-full blur-3xl\" /\u003e\n        \u003cdiv className=\"relative mx-auto max-w-6xl px-4 py-14 md:py-16\"\u003e\n          \u003cp className=\"text-brand-orange text-xs font-semibold tracking-[0.14em] uppercase\"\u003e{eyebrow}\u003c/p\u003e\n          \u003ch1 className=\"mt-3 max-w-2xl text-4xl font-extrabold tracking-tight text-balance sm:text-5xl\"\u003e{title}\u003c/h1\u003e\n          \u003cp className=\"mt-5 max-w-2xl text-lg text-slate-300\"\u003e{intro}\u003c/p\u003e\n        \u003c/div\u003e\n      \u003c/section\u003e\n      \u003cdiv className=\"mx-auto grid max-w-6xl gap-10 px-4 pt-12 lg:grid-cols-[minmax(0,1fr)_18rem]\"\u003e\n        \u003carticle className=\"min-w-0 space-y-10\"\u003e\n          {children}\n          \u003cp className=\"text-muted-foreground border-t pt-6 text-xs\"\u003eLast updated {UPDATED}.\u003c/p\u003e\n        \u003c/article\u003e\n        \u003caside className=\"h-fit lg:sticky lg:top-24\"\u003e\n          \u003cdiv className=\"bg-card rounded-2xl border p-6\"\u003e\n            \u003ch2 className=\"font-semibold\"\u003eQuestions?\u003c/h2\u003e\n            \u003cp className=\"text-muted-foreground mt-1 mb-4 text-sm\"\u003eContact us, we usually reply within the same working day.\u003c/p\u003e\n            \u003cBusinessDetails /\u003e\n          \u003c/div\u003e\n          \u003cnav className=\"mt-4 flex flex-col gap-1 px-2 text-sm\" aria-label=\"Policies\"\u003e\n            {POLICY_LINKS.map((l) =\u003e (\n              \u003cLink key={l.to} to={l.to} className=\"text-muted-foreground hover:text-foreground py-1\"\u003e\n                {l.label}\n              \u003c/Link\u003e\n            ))}\n          \u003c/nav\u003e\n        \u003c/aside\u003e\n      \u003c/div\u003e\n    \u003c/\u003e\n  );\n}\n\nexport const POLICY_LINKS = [\n  { to: \"/shipping\", label: \"Shipping policy\" },\n  { to: \"/returns\", label: \"Returns \u0026 refunds\" },\n  { to: \"/privacy\", label: \"Privacy policy\" },\n  { to: \"/terms\", label: \"Terms \u0026 conditions\" },\n];\n\nfunction Section({ title, children }) {\n  return (\n    \u003csection\u003e\n      \u003ch2 className=\"text-xl font-bold tracking-tight sm:text-2xl\"\u003e{title}\u003c/h2\u003e\n      \u003cdiv className=\"text-muted-foreground mt-4 space-y-3 leading-relaxed [\u0026_a]:text-primary [\u0026_a]:underline-offset-2 [\u0026_a:hover]:underline [\u0026_li]:pl-1 [\u0026_strong]:text-foreground [\u0026_ul]:list-disc [\u0026_ul]:space-y-2 [\u0026_ul]:pl-5\"\u003e\n        {children}\n      \u003c/div\u003e\n    \u003c/section\u003e\n  );\n}\n\nfunction feeText(shipping) {\n  if (!shipping) return null;\n  if (shipping.westRm === shipping.eastRm) return \u003c\u003ea flat {formatPrice(shipping.westRm)} per order anywhere in Malaysia\u003c/\u003e;\n  return (\n    \u003c\u003e\n      {formatPrice(shipping.westRm)} per order to Peninsular Malaysia and {formatPrice(shipping.eastRm)} per order to Sabah, Sarawak and Labuan\n    \u003c/\u003e\n  );\n}\n\nexport function ShippingPolicyPage() {\n  const site = useSiteInfo();\n  const p = site.policies;\n  const shipping = site.shipping;\n  return (\n    \u003cPolicyPage\n      eyebrow=\"Shipping\"\n      title=\"Shipping policy\"\n      intro=\"We ship from Kuala Lumpur to every state in Malaysia. Here's what it costs and how long it takes.\"\n      metaTitle=\"Shipping policy · WYR Technology\"\n      metaDescription=\"Shipping fees, dispatch times and delivery times for WYR Technology orders across Peninsular and East Malaysia.\"\n    \u003e\n      \u003cSection title=\"Where we ship\"\u003e\n        \u003cp\u003e\n          We deliver anywhere in Malaysia: Peninsular Malaysia, Sabah, Sarawak and W.P. Labuan. We don't ship outside Malaysia at the moment. If you need an overseas delivery,{\" \"}\n          \u003cLink to=\"/contact\"\u003econtact us\u003c/Link\u003e first.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Shipping fees\"\u003e\n        {shipping ? (\n          \u003cp\u003e\n            Shipping is {feeText(shipping)}.\n            {shipping.freeThresholdRm != null \u0026\u0026 (\n              \u003c\u003e\n                {\" \"}\n                Orders with a subtotal of \u003cstrong\u003e{formatPrice(shipping.freeThresholdRm)}\u003c/strong\u003e or more ship \u003cstrong\u003efree\u003c/strong\u003e.\n              \u003c/\u003e\n            )}{\" \"}\n            The exact fee is shown at checkout before you pay.\n          \u003c/p\u003e\n        ) : (\n          \u003cp\u003eThe shipping fee is shown at checkout before you pay.\u003c/p\u003e\n        )}\n      \u003c/Section\u003e\n      {p \u0026\u0026 (\n        \u003cSection title=\"When we ship\"\u003e\n          \u003cul\u003e\n            \u003cli\u003e\n              Orders paid before \u003cstrong\u003e{hourText(p.dispatchCutoffHour)}\u003c/strong\u003e on a working day are packed and handed to the courier \u003cstrong\u003ethe same day\u003c/strong\u003e.\n            \u003c/li\u003e\n            \u003cli\u003eOrders paid after that, or on weekends and public holidays, ship the next working day.\u003c/li\u003e\n            \u003cli\u003eWorking days are Monday to Friday, except Malaysian public holidays.\u003c/li\u003e\n            \u003cli\u003eCustom-printed or custom-encoded orders ship on the date we agree with you in the quotation.\u003c/li\u003e\n          \u003c/ul\u003e\n        \u003c/Section\u003e\n      )}\n      {p \u0026\u0026 (\n        \u003cSection title=\"Delivery times\"\u003e\n          \u003cp\u003eAfter your parcel leaves us, the courier usually delivers it in:\u003c/p\u003e\n          \u003cul\u003e\n            \u003cli\u003e\n              \u003cstrong\u003ePeninsular Malaysia:\u003c/strong\u003e {dayRangeText(p.deliveryWestDays)}\n            \u003c/li\u003e\n            \u003cli\u003e\n              \u003cstrong\u003eSabah, Sarawak and Labuan:\u003c/strong\u003e {dayRangeText(p.deliveryEastDays)}\n            \u003c/li\u003e\n          \u003c/ul\u003e\n          {p.couriers \u0026\u0026 \u003cp\u003eWe ship with {p.couriers}.\u003c/p\u003e}\n          \u003cp\u003eRemote areas, festive seasons and bad weather can add a few days. These times are the courier's estimates, not guarantees.\u003c/p\u003e\n        \u003c/Section\u003e\n      )}\n      \u003cSection title=\"Tracking your order\"\u003e\n        \u003cp\u003e\n          Once your order ships we add the courier and tracking number to it. You can see them under \u003cLink to=\"/account/orders\"\u003eMy account\u003c/Link\u003e, or on{\" \"}\n          \u003cLink to=\"/track\"\u003eTrack order\u003c/Link\u003e with your order number and email.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Lost or damaged parcels\"\u003e\n        \u003cp\u003e\n          If your parcel arrives damaged, or hasn't arrived well after the delivery time above, contact us{p \u0026\u0026 \u003c\u003e within {p.returnDays} days\u003c/\u003e}. We'll sort it out with\n          the courier and send a replacement or refund you. See \u003cLink to=\"/returns\"\u003eReturns \u0026amp; refunds\u003c/Link\u003e.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n    \u003c/PolicyPage\u003e\n  );\n}\n\nexport function ReturnsPolicyPage() {\n  const site = useSiteInfo();\n  const p = site.policies;\n  const days = p ? `${p.returnDays} days` : \"the days stated below\";\n  return (\n    \u003cPolicyPage\n      eyebrow=\"Returns \u0026 refunds\"\n      title=\"Returns \u0026 refunds\"\n      intro=\"If something arrives faulty, damaged or not what you ordered, we'll replace it or refund you, and we pay the return shipping.\"\n      metaTitle=\"Returns \u0026 refunds · WYR Technology\"\n      metaDescription=\"How to return a defective, damaged or wrong item from WYR Technology, and how refunds are paid.\"\n    \u003e\n      \u003cSection title=\"What you can return\"\u003e\n        \u003cp\u003e\n          Tell us within \u003cstrong\u003e{days} of delivery\u003c/strong\u003e if an item:\n        \u003c/p\u003e\n        \u003cul\u003e\n          \u003cli\u003eis defective or doesn't work as described (for example, a tag that can't be read or written, or a reader that isn't detected),\u003c/li\u003e\n          \u003cli\u003earrived damaged, or\u003c/li\u003e\n          \u003cli\u003eisn't what you ordered (wrong item, wrong chip type or missing pieces).\u003c/li\u003e\n        \u003c/ul\u003e\n        \u003cp\u003eWe'll replace it, or refund it in full including the shipping you paid for it, whichever you prefer. A replacement depends on stock.\u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"What we can't accept\"\u003e\n        \u003cul\u003e\n          \u003cli\u003eChange-of-mind returns, or items bought by mistake, when the item is working and as described.\u003c/li\u003e\n          \u003cli\u003eItems damaged after delivery through misuse, for example tags bent, cut, heated or exposed to liquids beyond their rating.\u003c/li\u003e\n          \u003cli\u003e\n            Tags you have locked (made read-only) yourself. Locking is permanent, so please test your data before locking. A tag that was faulty before you locked it is still\n            covered.\n          \u003c/li\u003e\n          \u003cli\u003eCustom-printed or custom-encoded items made to your order, unless they are faulty or not made as we agreed.\u003c/li\u003e\n        \u003c/ul\u003e\n        \u003cp\u003eNot sure which chip or reader you need? Ask us before you order and we'll help you choose.\u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"How to return an item\"\u003e\n        \u003cul\u003e\n          \u003cli\u003e\n            Contact us by WhatsApp or email within {days} of delivery with your \u003cstrong\u003eorder number\u003c/strong\u003e and a \u003cstrong\u003ephoto or short video\u003c/strong\u003e showing the problem.\n          \u003c/li\u003e\n          \u003cli\u003eWe reply within one working day. Often we can fix a setup problem over chat. If not, we'll give you the return address and instructions.\u003c/li\u003e\n          \u003cli\u003e\n            \u003cstrong\u003eWe pay the return shipping\u003c/strong\u003e for approved returns. We either arrange the pickup or refund your postage when the item arrives.\n          \u003c/li\u003e\n          \u003cli\u003ePlease send the item back with all its parts within 14 days of our approval.\u003c/li\u003e\n        \u003c/ul\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Refunds\"\u003e\n        \u003cul\u003e\n          \u003cli\u003e\n            We refund to your original payment method (the bank account you paid from with FPX) within{\" \"}\n            \u003cstrong\u003e{p ? `${p.refundDays} working days` : \"a few working days\"}\u003c/strong\u003e of approving your return. For damaged or missing items we may refund you without asking for the item\n            back.\n          \u003c/li\u003e\n          \u003cli\u003eYour bank may take a few more days to show the money in your account.\u003c/li\u003e\n          \u003cli\u003eWe'll message you when the refund has been sent.\u003c/li\u003e\n        \u003c/ul\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Cancelling an order\"\u003e\n        \u003cp\u003e\n          You can cancel any time before your order ships: contact us and we'll refund it in full. Unpaid orders cancel themselves after a short time. Once an order has shipped, the\n          return rules above apply.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Orders from Shopee or Lazada\"\u003e\n        \u003cp\u003eOrders placed on our Shopee or Lazada stores follow that marketplace's own return and refund process. Please request the return in their app.\u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Your rights\"\u003e\n        \u003cp\u003eThis policy doesn't affect your rights under Malaysia's Consumer Protection Act 1999.\u003c/p\u003e\n      \u003c/Section\u003e\n    \u003c/PolicyPage\u003e\n  );\n}\n\nexport function PrivacyPolicyPage() {\n  const site = useSiteInfo();\n  const b = site.business;\n  return (\n    \u003cPolicyPage\n      eyebrow=\"Privacy\"\n      title=\"Privacy policy\"\n      intro=\"What personal data we collect when you shop with us, why, and what you can ask us to do with it.\"\n      metaTitle=\"Privacy policy · WYR Technology\"\n      metaDescription=\"What personal data WYR Technology collects, how it is used and your rights under Malaysia's PDPA.\"\n    \u003e\n      \u003cSection title=\"Who we are\"\u003e\n        \u003cp\u003e\n          This website is run by \u003cstrong\u003e{legalName(b)}\u003c/strong\u003e, {b ? b.address.replace(/\\s*\\n\\s*/g, \", \") : \"Kuala Lumpur, Malaysia\"}. We handle your personal data in line with\n          Malaysia's Personal Data Protection Act 2010 (PDPA).\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"What we collect\"\u003e\n        \u003cul\u003e\n          \u003cli\u003e\n            \u003cstrong\u003eWhen you order:\u003c/strong\u003e your name, phone number, email address, delivery address, company name (if you give one) and what you bought.\n          \u003c/li\u003e\n          \u003cli\u003e\n            \u003cstrong\u003eWhen you create an account:\u003c/strong\u003e the same details, plus your password, which we store only in scrambled (hashed) form.\n          \u003c/li\u003e\n          \u003cli\u003e\n            \u003cstrong\u003eWhen you contact us:\u003c/strong\u003e what you tell us by WhatsApp, email or phone.\n          \u003c/li\u003e\n          \u003cli\u003e\n            \u003cstrong\u003ePayments:\u003c/strong\u003e you pay on ToyyibPay's secure page. We see whether your payment succeeded and its reference, but never your online banking login or card details.\n          \u003c/li\u003e\n        \u003c/ul\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"How we use it\"\u003e\n        \u003cul\u003e\n          \u003cli\u003eto process, pack and deliver your order, and to send you its status and tracking details,\u003c/li\u003e\n          \u003cli\u003eto reply to your questions and handle returns and refunds,\u003c/li\u003e\n          \u003cli\u003eto issue invoices and keep the business and tax records the law requires,\u003c/li\u003e\n          \u003cli\u003eto keep the website and your account secure.\u003c/li\u003e\n        \u003c/ul\u003e\n        \u003cp\u003eWe don't sell or rent your personal data. We only send you promotions if you've asked to receive them, and you can stop them any time.\u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Who we share it with\"\u003e\n        \u003cp\u003eOnly with the companies that help us serve you, and only what they need:\u003c/p\u003e\n        \u003cul\u003e\n          \u003cli\u003ecourier companies, to deliver your parcel (name, phone and address),\u003c/li\u003e\n          \u003cli\u003eToyyibPay, to take your payment,\u003c/li\u003e\n          \u003cli\u003ethe services we use to host this website and manage orders and stock.\u003c/li\u003e\n        \u003c/ul\u003e\n        \u003cp\u003eWe may also share data when the law requires it, for example with government authorities.\u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Cookies and browser storage\"\u003e\n        \u003cp\u003e\n          We use a small number of cookies and browser storage to keep you logged in and to remember your cart. We don't use advertising or tracking cookies.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"How long we keep it\"\u003e\n        \u003cp\u003e\n          We keep order records for as long as Malaysian accounting and tax law requires (currently 7 years), and account details until you ask us to close your account.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Your rights\"\u003e\n        \u003cp\u003e\n          Under the PDPA you can ask to see the personal data we hold about you, correct it, or withdraw your consent to us using it (which may mean we can't fulfil an order). Contact us\n          {b?.email \u0026\u0026 (\n            \u003c\u003e\n              {\" \"}\n              at \u003ca href={`mailto:${b.email}`}\u003e{b.email}\u003c/a\u003e\n            \u003c/\u003e\n          )}{\" \"}\n          and we'll respond within 21 days.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Changes\"\u003e\n        \u003cp\u003eIf we change this policy we'll update the date below. Significant changes will also be shown on the website.\u003c/p\u003e\n      \u003c/Section\u003e\n    \u003c/PolicyPage\u003e\n  );\n}\n\nexport function TermsPage() {\n  const site = useSiteInfo();\n  const b = site.business;\n  return (\n    \u003cPolicyPage\n      eyebrow=\"Terms\"\n      title=\"Terms \u0026 conditions\"\n      intro=\"The terms that apply when you buy from this website. Please read them with our shipping and returns policies.\"\n      metaTitle=\"Terms \u0026 conditions · WYR Technology\"\n      metaDescription=\"The terms that apply when you buy from WYR Technology: orders, prices, payment, delivery and returns.\"\n    \u003e\n      \u003cSection title=\"About us\"\u003e\n        \u003cp\u003e\n          This website (wyrgadget.com) is operated by \u003cstrong\u003e{legalName(b)}\u003c/strong\u003e, {b ? b.address.replace(/\\s*\\n\\s*/g, \", \") : \"Kuala Lumpur, Malaysia\"}. By placing an order you agree to\n          these terms.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Products and prices\"\u003e\n        \u003cul\u003e\n          \u003cli\u003e\n            Prices are in Ringgit Malaysia (RM). The price you pay is the one shown in your cart at checkout. Shipping is added at checkout and shown before you pay.\n          \u003c/li\u003e\n          \u003cli\u003eSome low-priced items have a minimum quantity, and larger quantities may get a lower price per piece. Both are shown on the product page.\u003c/li\u003e\n          \u003cli\u003e\n            We describe our products as accurately as we can. Photos show the product, but colours and print can vary slightly. NFC products need an NFC-capable phone or reader: check the\n            compatibility on the product page, or ask us.\n          \u003c/li\u003e\n          \u003cli\u003eIf a price or description is clearly wrong because of an error, we'll contact you before shipping and you can cancel for a full refund.\u003c/li\u003e\n        \u003c/ul\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Orders and payment\"\u003e\n        \u003cul\u003e\n          \u003cli\u003eYou pay securely through ToyyibPay. Your order is confirmed once the payment is confirmed, and we'll show you the order number.\u003c/li\u003e\n          \u003cli\u003eWe hold the items for a short time while you pay. Unpaid orders are cancelled automatically.\u003c/li\u003e\n          \u003cli\u003e\n            If an item turns out to be out of stock after you've paid, we'll tell you and refund you in full, or ship it later if you'd rather wait.\n          \u003c/li\u003e\n          \u003cli\u003eFor bulk, custom-printed or custom-encoded orders, the price and delivery date in our written quotation apply.\u003c/li\u003e\n        \u003c/ul\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Delivery, returns and refunds\"\u003e\n        \u003cp\u003e\n          Delivery is covered by our \u003cLink to=\"/shipping\"\u003eShipping policy\u003c/Link\u003e, and returns, refunds and cancellations by our \u003cLink to=\"/returns\"\u003eReturns \u0026amp; refunds\u003c/Link\u003e policy.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Your account\"\u003e\n        \u003cp\u003eKeep your password private. You're responsible for orders placed from your account. Tell us straight away if you think someone else has used it.\u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Liability\"\u003e\n        \u003cp\u003e\n          As far as the law allows, our liability for any order is limited to the amount you paid for it, and we aren't liable for indirect losses. Nothing in these terms limits your rights\n          under the Consumer Protection Act 1999 or any other law that can't be excluded.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Privacy\"\u003e\n        \u003cp\u003e\n          How we handle your personal data is explained in our \u003cLink to=\"/privacy\"\u003ePrivacy policy\u003c/Link\u003e.\n        \u003c/p\u003e\n      \u003c/Section\u003e\n      \u003cSection title=\"Law\"\u003e\n        \u003cp\u003eThese terms are governed by the laws of Malaysia. If we change them, the version on this page when you placed your order applies to that order.\u003c/p\u003e\n      \u003c/Section\u003e\n    \u003c/PolicyPage\u003e\n  );\n}\n",
+      "filePath": "D:\\Github\\WYR Web\\client\\src\\pages\\PolicyPages.jsx",
+      "originalFile": null,
+      "structuredPatch": [],
+      "type": "create",
+      "userModified": false
+    },
+    "tool_use_id": "toolu_017hwfoFD5EVpwuRCHtnKzMp",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\server\\src",
+    "duration_ms": 264,
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "d4bf83d3-2962-4e41-b509-891a5f5f1aab",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "command": "cd \"D:/Github/WYR Web/server/src\" \u0026\u0026 sed -n 55,140p merchant-feed.js; grep -rn \"isActive\" routes/admin-products.js | head -5",
+      "description": "Read merchant feed product selection"
+    },
+    "tool_name": "Bash",
+    "tool_response": {
+      "interrupted": false,
+      "isImage": false,
+      "noOutputExpected": false,
+      "stderr": "",
+      "stdout": "  try {\n    const env = process.env.PUBLIC_BASE_URL?.trim().replace(/\\/+$/, \"\");\n    const origin = env || `${req.protocol}://${req.get(\"host\")}`;\n    const products = await prisma.product.findMany({\n      where: { isActive: true, slug: { not: null } },\n      include: detailInclude,\n      orderBy: { id: \"asc\" },\n    });\n    const items = [];\n    for (const raw of products) {\n      const product = serializeDetail(raw);\n      for (const v of product.variants) {\n        const weightG = raw.variants.find((rv) =\u003e rv.id === v.id)?.weightG ?? null;\n        const xml = itemXml(origin, raw, product, { ...v, weightG });\n        if (xml) items.push(xml);\n      }\n    }\n    const body = [\n      '\u003c?xml version=\"1.0\" encoding=\"UTF-8\"?\u003e',\n      '\u003crss version=\"2.0\" xmlns:g=\"http://base.google.com/ns/1.0\"\u003e',\n      \"  \u003cchannel\u003e\",\n      \"    \u003ctitle\u003eWYR Technology\u003c/title\u003e\",\n      `    \u003clink\u003e${escapeXml(origin)}/\u003c/link\u003e`,\n      \"    \u003cdescription\u003eNFC tags, RFID cards and readers, shipped across Malaysia.\u003c/description\u003e\",\n      ...items,\n      \"  \u003c/channel\u003e\",\n      \"\u003c/rss\u003e\",\n      \"\",\n    ].join(\"\\n\");\n    res.type(\"application/xml\").set(\"Cache-Control\", \"public, max-age=3600\").send(body);\n  } catch (err) {\n    next(err);\n  }\n}\n139:      isActive: body?.isActive !== false,\n240:    isActive: p.isActive !== false,\n262:    isActive: p.isActive !== false,"
+    },
+    "tool_use_id": "toolu_01PJJgqZDiAgarVURrxawJLo",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\server\\src",
+    "duration_ms": 406,
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "40c1583e-2b85-4888-ade2-33b37b79fb31",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "command": "cd \"D:/Github/WYR Web/server/src\" \u0026\u0026 grep -n \"^/\\*\\*\\|^export\\|^const\\|^function\" merchant.js | head -30; git diff --stat seo.js merchant.js",
+      "description": "Find anchor points in merchant.js"
+    },
+    "tool_name": "Bash",
+    "tool_response": {
+      "interrupted": false,
+      "isImage": false,
+      "noOutputExpected": false,
+      "stderr": "",
+      "stdout": "7:export const BUSINESS_NAME = \"WYR Technology\";\n10:const EAST_POSTCODES = [\n16:/**\n20:export function variantOffer(variant) {\n32:/** Variant page URL: the product page with that variant preselected. */\n33:export function variantUrl(productUrl, variant) {\n37:/**\n41:export function storeInfo() {\n62:const WORKING_DAYS = [\"Monday\", \"Tuesday\", \"Wednesday\", \"Thursday\", \"Friday\"].map((d) =\u003e `https://schema.org/${d}`);\n63:const days = ([minValue, maxValue]) =\u003e ({ \"@type\": \"QuantitativeValue\", minValue, maxValue, unitCode: \"DAY\" });\n65:/** Same day before the cut-off, else next working day; then the courier's range. */\n66:function deliveryTimeJsonLd(range) {\n77:function rate(cents) {\n81:/** schema.org OfferShippingDetails for Malaysia: West rate by default, East rate for East Malaysian postcodes. */\n82:export function shippingDetailsJsonLd(priceCents) {\n101:/** Store details for search: Malaysia-only online shop based in Kuala Lumpur, with the contacts the site shows. */\n102:export function businessJsonLd(origin) {\n125:export function websiteJsonLd(origin) {\nwarning: in the working copy of 'server/src/seo.js', LF will be replaced by CRLF the next time Git touches it\n server/src/seo.js | 3 ++-\n 1 file changed, 2 insertions(+), 1 deletion(-)"
+    },
+    "tool_use_id": "toolu_01HYkLfDKMHKLqBF9RY1egmv",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\server\\src",
+    "duration_ms": 30,
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "40c1583e-2b85-4888-ade2-33b37b79fb31",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "file_path": "D:\\Github\\WYR Web\\server\\src\\merchant.js",
+      "new_string": "// Marketplace boilerplate in descriptions imported from Shopee: Google treats store banners,\n// links and emoji as promotional text, so the feed and structured data leave them out.\nconst BANNERS = [\n  /welcome to wyr technology[.!]?/gi,\n  /follow (?:our|us)\\b[^.!\\n]*[.!]?/gi,\n  /ready stock\\s*(?:\u0026|and|\\|)\\s*ship(?:ping)?\\s+from\\s+kl\\b[.!]?/gi,\n  /(?:all products are )?ready stock(?: is)?(?: available)?(?: in kl)?(?: and available for immediate shipment)?[.!]?/gi,\n  /same[- ]day shipping[^.!\\n]*[.!]?/gi,\n  /ship(?:ping)? from kl\\b[.!]?/gi,\n  /fast processing and delivery[.!]?/gi,\n  /why buy from us\\??/gi,\n];\nconst PICTOGRAPHS = /[\\p{Extended_Pictographic}\\u{1F1E6}-\\u{1F1FF}️‍]/gu;\n\n/** A product description with Shopee links, hashtags, emoji and store banners removed. */\nexport function googleDescription(text) {\n  return String(text ?? \"\")\n    .replace(/\\r\\n?/g, \"\\n\")\n    .split(\"\\n\")\n    .map((line) =\u003e {\n      let l = line\n        .replace(/https?:\\/\\/\\S+/gi, \"\")\n        .replace(/(?:^|\\s)#[\\p{L}\\p{N}_.]+/gu, \" \")\n        .replace(PICTOGRAPHS, \"\")\n        .replace(/【([^】\\n]*)】/g, \"$1: \");\n      for (const re of BANNERS) l = l.replace(re, \"\");\n      return l.replace(/\\s+/g, \" \").replace(/^[\\s:|,.\u0026-]+/, \"\").replace(/\\s*:\\s*:/g, \":\").trim();\n    })\n    // Drop lines left empty, or left as just the heading of what was removed (e.g. \"Ready Stock \u0026 Shipping:\").\n    .filter((l) =\u003e /[\\p{L}\\p{N}]/u.test(l) \u0026\u0026 !/^ready stock\\b[^.]{0,30}:?$/i.test(l))\n    .join(\"\\n\");\n}\n\n/** Variant page URL: the product page with that variant preselected. */",
+      "old_string": "/** Variant page URL: the product page with that variant preselected. */",
+      "replace_all": false
+    },
+    "tool_name": "Edit",
+    "tool_response": {
+      "contentNotInModelContext": true,
+      "filePath": "D:\\Github\\WYR Web\\server\\src\\merchant.js",
+      "newString": "// Marketplace boilerplate in descriptions imported from Shopee: Google treats store banners,\n// links and emoji as promotional text, so the feed and structured data leave them out.\nconst BANNERS = [\n  /welcome to wyr technology[.!]?/gi,\n  /follow (?:our|us)\\b[^.!\\n]*[.!]?/gi,\n  /ready stock\\s*(?:\u0026|and|\\|)\\s*ship(?:ping)?\\s+from\\s+kl\\b[.!]?/gi,\n  /(?:all products are )?ready stock(?: is)?(?: available)?(?: in kl)?(?: and available for immediate shipment)?[.!]?/gi,\n  /same[- ]day shipping[^.!\\n]*[.!]?/gi,\n  /ship(?:ping)? from kl\\b[.!]?/gi,\n  /fast processing and delivery[.!]?/gi,\n  /why buy from us\\??/gi,\n];\nconst PICTOGRAPHS = /[\\p{Extended_Pictographic}\\u{1F1E6}-\\u{1F1FF}️‍]/gu;\n\n/** A product description with Shopee links, hashtags, emoji and store banners removed. */\nexport function googleDescription(text) {\n  return String(text ?? \"\")\n    .replace(/\\r\\n?/g, \"\\n\")\n    .split(\"\\n\")\n    .map((line) =\u003e {\n      let l = line\n        .replace(/https?:\\/\\/\\S+/gi, \"\")\n        .replace(/(?:^|\\s)#[\\p{L}\\p{N}_.]+/gu, \" \")\n        .replace(PICTOGRAPHS, \"\")\n        .replace(/【([^】\\n]*)】/g, \"$1: \");\n      for (const re of BANNERS) l = l.replace(re, \"\");\n      return l.replace(/\\s+/g, \" \").replace(/^[\\s:|,.\u0026-]+/, \"\").replace(/\\s*:\\s*:/g, \":\").trim();\n    })\n    // Drop lines left empty, or left as just the heading of what was removed (e.g. \"Ready Stock \u0026 Shipping:\").\n    .filter((l) =\u003e /[\\p{L}\\p{N}]/u.test(l) \u0026\u0026 !/^ready stock\\b[^.]{0,30}:?$/i.test(l))\n    .join(\"\\n\");\n}\n\n/** Variant page URL: the product page with that variant preselected. */",
+      "oldString": "/** Variant page URL: the product page with that variant preselected. */",
+      "originalFile": "// What Google (Search structured data and the Merchant Center feed) is told about offers,\n// shipping and the business. Kept in one place so the product page JSON-LD and\n// /merchant-feed.xml always agree.\nimport { getDayRange, getSetting } from \"./settings.js\";\nimport { shippingSummary } from \"./shipping.js\";\n\nexport const BUSINESS_NAME = \"WYR Technology\";\n\n// East Malaysia postcodes (Labuan 87, Sabah 88-91, Sarawak 93-98); everything else ships at the West rate.\nconst EAST_POSTCODES = [\n  { postalCodeBegin: \"87000\", postalCodeEnd: \"87999\" },\n  { postalCodeBegin: \"88000\", postalCodeEnd: \"91999\" },\n  { postalCodeBegin: \"93000\", postalCodeEnd: \"98999\" },\n];\n\n/**\n * One sellable offer per variant. Variants that need a minimum quantity (low-price items)\n * are offered as a pack of that many, since a single piece can't be bought at that price.\n */\nexport function variantOffer(variant) {\n  if (!variant.tiers.length) return null;\n  const packQty = Math.max(1, variant.minQty ?? 1);\n  const unitPrice = variant.tiers[0].unitPrice;\n  return {\n    unitPrice,\n    packQty,\n    packPrice: Math.round(unitPrice * packQty * 100) / 100,\n    inStock: variant.stock != null \u0026\u0026 variant.stock \u003e= packQty,\n  };\n}\n\n/** Variant page URL: the product page with that variant preselected. */\nexport function variantUrl(productUrl, variant) {\n  return `${productUrl}?variant=${variant.id}`;\n}\n\n/**\n * Who the seller is and the store's shipping/returns terms, shown on the Contact and policy\n * pages (via /api/site) and used in the structured data below, so the two never disagree.\n */\nexport function storeInfo() {\n  return {\n    business: {\n      name: getSetting(\"company_name\"),\n      regNo: getSetting(\"company_reg_no\") || null,\n      address: getSetting(\"public_address\"),\n      phone: getSetting(\"company_phone\") || null,\n      email: getSetting(\"company_email\") || null,\n      hours: getSetting(\"business_hours\") || null,\n    },\n    policies: {\n      dispatchCutoffHour: getSetting(\"dispatch_cutoff_hour\"),\n      deliveryWestDays: getDayRange(\"delivery_west_days\"),\n      deliveryEastDays: getDayRange(\"delivery_east_days\"),\n      couriers: getSetting(\"couriers\") || null,\n      returnDays: getSetting(\"return_days\"),\n      refundDays: getSetting(\"refund_days\"),\n    },\n  };\n}\n\nconst WORKING_DAYS = [\"Monday\", \"Tuesday\", \"Wednesday\", \"Thursday\", \"Friday\"].map((d) =\u003e `https://schema.org/${d}`);\nconst days = ([minValue, maxValue]) =\u003e ({ \"@type\": \"QuantitativeValue\", minValue, maxValue, unitCode: \"DAY\" });\n\n/** Same day before the cut-off, else next working day; then the courier's range. */\nfunction deliveryTimeJsonLd(range) {\n  const hour = String(getSetting(\"dispatch_cutoff_hour\")).padStart(2, \"0\");\n  return {\n    \"@type\": \"ShippingDeliveryTime\",\n    handlingTime: days([0, 1]),\n    transitTime: days(range),\n    cutoffTime: `${hour}:00:00+08:00`,\n    businessDays: { \"@type\": \"OpeningHoursSpecification\", dayOfWeek: WORKING_DAYS },\n  };\n}\n\nfunction rate(cents) {\n  return { \"@type\": \"MonetaryAmount\", value: (cents / 100).toFixed(2), currency: \"MYR\" };\n}\n\n/** schema.org OfferShippingDetails for Malaysia: West rate by default, East rate for East Malaysian postcodes. */\nexport function shippingDetailsJsonLd(priceCents) {\n  const { westCents, eastCents, freeThresholdCents } = shippingSummary();\n  const free = freeThresholdCents != null \u0026\u0026 priceCents \u003e= freeThresholdCents;\n  return [\n    {\n      \"@type\": \"OfferShippingDetails\",\n      shippingRate: rate(free ? 0 : westCents),\n      shippingDestination: { \"@type\": \"DefinedRegion\", addressCountry: \"MY\" },\n      deliveryTime: deliveryTimeJsonLd(getDayRange(\"delivery_west_days\")),\n    },\n    {\n      \"@type\": \"OfferShippingDetails\",\n      shippingRate: rate(free ? 0 : eastCents),\n      shippingDestination: { \"@type\": \"DefinedRegion\", addressCountry: \"MY\", postalCodeRange: EAST_POSTCODES },\n      deliveryTime: deliveryTimeJsonLd(getDayRange(\"delivery_east_days\")),\n    },\n  ];\n}\n\n/** Store details for search: Malaysia-only online shop based in Kuala Lumpur, with the contacts the site shows. */\nexport function businessJsonLd(origin) {\n  const whatsapp = getSetting(\"whatsappNumber\").replace(/\\D/g, \"\");\n  const shopee = getSetting(\"shopeeUrl\");\n  const { business } = storeInfo();\n  return {\n    \"@context\": \"https://schema.org\",\n    \"@type\": \"OnlineStore\",\n    name: BUSINESS_NAME,\n    url: `${origin}/`,\n    logo: `${origin}/images/wyr-logo-mark.png`,\n    description: \"NFC tags, RFID cards, readers and tap-to-review standees. Ready stock in Kuala Lumpur, shipped across Malaysia.\",\n    ...(business.regNo \u0026\u0026 { legalName: business.name, identifier: business.regNo }),\n    address: { \"@type\": \"PostalAddress\", addressLocality: \"Kuala Lumpur\", addressCountry: \"MY\" },\n    ...(business.email \u0026\u0026 { email: business.email }),\n    areaServed: { \"@type\": \"Country\", name: \"Malaysia\" },\n    currenciesAccepted: \"MYR\",\n    ...(whatsapp \u0026\u0026 {\n      contactPoint: { \"@type\": \"ContactPoint\", contactType: \"customer service\", telephone: `+${whatsapp}`, areaServed: \"MY\" },\n    }),\n    ...(shopee \u0026\u0026 { sameAs: [shopee] }),\n  };\n}\n\nexport function websiteJsonLd(origin) {\n  return { \"@context\": \"https://schema.org\", \"@type\": \"WebSite\", name: BUSINESS_NAME, alternateName: \"WYR Gadget\", url: `${origin}/` };\n}\n",
+      "replaceAll": false,
+      "structuredPatch": [
+        {
+          "lines": [
+            "   };",
+            " }",
+            " ",
+            "+// Marketplace boilerplate in descriptions imported from Shopee: Google treats store banners,",
+            "+// links and emoji as promotional text, so the feed and structured data leave them out.",
+            "+const BANNERS = [",
+            "+  /welcome to wyr technology[.!]?/gi,",
+            "+  /follow (?:our|us)\\b[^.!\\n]*[.!]?/gi,",
+            "+  /ready stock\\s*(?:\u0026|and|\\|)\\s*ship(?:ping)?\\s+from\\s+kl\\b[.!]?/gi,",
+            "+  /(?:all products are )?ready stock(?: is)?(?: available)?(?: in kl)?(?: and available for immediate shipment)?[.!]?/gi,",
+            "+  /same[- ]day shipping[^.!\\n]*[.!]?/gi,",
+            "+  /ship(?:ping)? from kl\\b[.!]?/gi,",
+            "+  /fast processing and delivery[.!]?/gi,",
+            "+  /why buy from us\\??/gi,",
+            "+];",
+            "+const PICTOGRAPHS = /[\\p{Extended_Pictographic}\\u{1F1E6}-\\u{1F1FF}️‍]/gu;",
+            "+",
+            "+/** A product description with Shopee links, hashtags, emoji and store banners removed. */",
+            "+export function googleDescription(text) {",
+            "+  return String(text ?? \"\")",
+            "+    .replace(/\\r\\n?/g, \"\\n\")",
+            "+    .split(\"\\n\")",
+            "+    .map((line) =\u003e {",
+            "+      let l = line",
+            "+        .replace(/https?:\\/\\/\\S+/gi, \"\")",
+            "+        .replace(/(?:^|\\s)#[\\p{L}\\p{N}_.]+/gu, \" \")",
+            "+        .replace(PICTOGRAPHS, \"\")",
+            "+        .replace(/【([^】\\n]*)】/g, \"$1: \");",
+            "+      for (const re of BANNERS) l = l.replace(re, \"\");",
+            "+      return l.replace(/\\s+/g, \" \").replace(/^[\\s:|,.\u0026-]+/, \"\").replace(/\\s*:\\s*:/g, \":\").trim();",
+            "+    })",
+            "+    // Drop lines left empty, or left as just the heading of what was removed (e.g. \"Ready Stock \u0026 Shipping:\").",
+            "+    .filter((l) =\u003e /[\\p{L}\\p{N}]/u.test(l) \u0026\u0026 !/^ready stock\\b[^.]{0,30}:?$/i.test(l))",
+            "+    .join(\"\\n\");",
+            "+}",
+            "+",
+            " /** Variant page URL: the product page with that variant preselected. */",
+            " export function variantUrl(productUrl, variant) {",
+            "   return `${productUrl}?variant=${variant.id}`;"
+          ],
+          "newLines": 39,
+          "newStart": 29,
+          "oldLines": 6,
+          "oldStart": 29
+        }
+      ],
+      "userModified": false
+    },
+    "tool_use_id": "toolu_01BLaq5HkyDiAD8kK2Z8XaxX",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\server\\src",
+    "duration_ms": 163,
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "40c1583e-2b85-4888-ade2-33b37b79fb31",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "command": "cd \"D:/Github/WYR Web/server/src\" \u0026\u0026 grep -n \"description\" merchant-feed.js seo.js | grep -v \"meta\\|DESCRIPTION\\|Description(\" | head",
+      "description": "Find description uses in feed and JSON-LD"
+    },
+    "tool_name": "Bash",
+    "tool_response": {
+      "interrupted": false,
+      "isImage": false,
+      "noOutputExpected": false,
+      "stderr": "",
+      "stdout": "merchant-feed.js:14:// Merchant Center limits: title 150 characters, description 5000.\nmerchant-feed.js:37:    [\"g:description\", clip(product.description || name, 5000)],\nmerchant-feed.js:78:      \"    \u003cdescription\u003eNFC tags, RFID cards and readers, shipped across Malaysia.\u003c/description\u003e\",\nseo.js:2:// redirect, and per-URL \u003chead\u003e tags (title, description, canonical, Open Graph, Product\nseo.js:16:// Public pages worth indexing (path -\u003e title, description).\nseo.js:21:    description: \"Browse NFC stickers, NTAG213/215/216 tags, RFID and DESFire cards, readers and tap-to-review standees. Ready stock in Malaysia, ships from Kuala Lumpur.\",\nseo.js:25:    description: \"WYR Technology makes NFC and RFID easy to buy in Malaysia: genuine chips, ready stock in Kuala Lumpur and help choosing the right tag.\",\nseo.js:29:    description: \"Questions about NFC tags, RFID cards or bulk orders? Contact WYR Technology by WhatsApp or email.\",\nseo.js:33:    description: \"Shipping fees, dispatch times and delivery times for WYR Technology orders across Peninsular and East Malaysia.\",\nseo.js:37:    description: \"How to return a defective, damaged or wrong item from WYR Technology, and how refunds are paid.\","
+    },
+    "tool_use_id": "toolu_01ENvPAiUrzoCPGqeHYcWL8g",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
+  },
+  {
+    "cwd": "D:\\Github\\WYR Web\\server\\src",
+    "duration_ms": 143,
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "permission_mode": "auto",
+    "prompt_id": "40c1583e-2b85-4888-ade2-33b37b79fb31",
+    "scratchpad_dir": "C:\\Users\\ALANCH~1\\AppData\\Local\\Temp\\claude\\af950a37d8178878\\4fa50ceb-3489-40cc-a1e3-368010171ce4\\scratchpad",
+    "session_id": "4fa50ceb-3489-40cc-a1e3-368010171ce4",
+    "tool_input": {
+      "command": "cd \"D:/Github/WYR Web/server/src\" \u0026\u0026 grep -n \"ready stock\" merchant.js",
+      "description": "Verify banner regex was written correctly"
+    },
+    "tool_name": "Bash",
+    "tool_response": {
+      "interrupted": false,
+      "isImage": false,
+      "noOutputExpected": false,
+      "stderr": "",
+      "stdout": "36:  /ready stock\\s*(?:\u0026|and)\\s*shipping\\s*:?/gi,\n38:  /ready stock\\s*(?:\u0026|and|\\|)\\s*ship(?:ping)?\\s+from\\s+kl\\b[.!]?/gi,\n39:  /(?:all products are )?ready stock(?: is)?(?: available)?(?: in kl)?(?: and available for immediate shipment)?[.!]?/gi,\n62:    .filter((l) =\u003e /[\\p{L}\\p{N}]/u.test(l) \u0026\u0026 !/^ready stock\\b[^.]{0,30}:?$/i.test(l))"
+    },
+    "tool_use_id": "toolu_016EMydBoxemKGWfC1qfrTgZ",
+    "transcript_path": "C:\\Users\\alancheng\\.claude\\projects\\D--Github-WYR-Web\\4fa50ceb-3489-40cc-a1e3-368010171ce4.jsonl"
   }
 ]

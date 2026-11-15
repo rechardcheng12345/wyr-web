@@ -42,17 +42,25 @@ export function parseCm(value, field, fields) {
   return Math.round(n * 10) / 10;
 }
 
+export const FAQ_KEYS = ["question", "answer", "questionMs", "answerMs"];
+
+/** FAQ rows: English question + answer required; the Bahasa Malaysia pair (questionMs/answerMs) is optional but both or neither. */
 export function parseFaqs(list, fields, prefix = "faqs") {
   const rows = (Array.isArray(list) ? list : [])
-    .map((f) => ({ question: f?.question, answer: f?.answer }))
-    .filter((f) => String(f.question ?? "").trim() || String(f.answer ?? "").trim());
+    .map((f) => Object.fromEntries(FAQ_KEYS.map((k) => [k, f?.[k]])))
+    .filter((f) => FAQ_KEYS.some((k) => String(f[k] ?? "").trim()));
   if (rows.length > MAX_FAQS) fields[prefix] = `At most ${MAX_FAQS} questions`;
   return rows.slice(0, MAX_FAQS).map((f, i) => {
-    const question = infoText(f.question, 500, `${prefix}.${i}.question`, fields);
-    const answer = infoText(f.answer, 5_000, `${prefix}.${i}.answer`, fields);
-    if (!question) fields[`${prefix}.${i}.question`] = "Required";
-    if (!answer) fields[`${prefix}.${i}.answer`] = "Required";
-    return { question, answer };
+    const at = (k) => `${prefix}.${i}.${k}`;
+    const question = infoText(f.question, 500, at("question"), fields);
+    const answer = infoText(f.answer, 5_000, at("answer"), fields);
+    const questionMs = infoText(f.questionMs, 500, at("questionMs"), fields);
+    const answerMs = infoText(f.answerMs, 5_000, at("answerMs"), fields);
+    if (!question) fields[at("question")] = "Required";
+    if (!answer) fields[at("answer")] = "Required";
+    if (questionMs && !answerMs) fields[at("answerMs")] = "Required when the Bahasa Malaysia question is filled in";
+    if (answerMs && !questionMs) fields[at("questionMs")] = "Required when the Bahasa Malaysia answer is filled in";
+    return { question, answer, questionMs, answerMs };
   });
 }
 

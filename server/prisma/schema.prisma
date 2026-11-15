@@ -133,6 +133,9 @@ model ProductFaq {
   productId Int     @map("product_id")
   question  String  @db.VarChar(500)
   answer    String  @db.Text
+  // Bahasa Malaysia version of the same question; optional, but both or neither
+  questionMs String? @map("question_ms") @db.VarChar(500)
+  answerMs   String? @map("answer_ms") @db.Text
   sortOrder Int     @default(0) @map("sort_order")
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
