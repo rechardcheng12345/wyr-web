@@ -12,8 +12,8 @@ import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 24;
 const SORTS = [
-  { value: "", label: "Featured" },
-  { value: "popular", label: "Best selling" },
+  // "" is the server default: best selling, or best match when searching. Old ?sort=popular links fall back to it.
+  { value: "", label: "Best selling" },
   { value: "price_asc", label: "Price: low to high" },
   { value: "price_desc", label: "Price: high to low" },
   { value: "newest", label: "Newest" },
