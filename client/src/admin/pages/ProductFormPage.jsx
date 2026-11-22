@@ -100,7 +100,7 @@ function toServer(form) {
     productType: form.productType,
     ...Object.fromEntries(INFO_FIELDS.map((f) => [f.key, form[f.key]])),
     images: form.images.map((i) => i.url.trim()).filter(Boolean),
-    faqs: form.faqs.map(({ question, answer }) => ({ question, answer })),
+    faqs: form.faqs.map(({ question, answer, questionMs, answerMs }) => ({ question, answer, questionMs, answerMs })),
     videos: form.videos.map(({ url, title }) => ({ url, title })),
     variants: form.variants.map(({ id, sku, name, price, specialPrice, weightG, lengthCm, widthCm, heightCm, stock }) => ({
       id,
@@ -579,9 +579,9 @@ function FaqEditor({ faqs, errors, onChange }) {
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
             <h2 className="font-semibold">FAQ</h2>
-            <p className="text-muted-foreground text-xs">Questions buyers often ask, with your answers.</p>
+            <p className="text-muted-foreground text-xs">Questions buyers often ask, with your answers. Add the Bahasa Malaysia version below each one.</p>
           </div>
-          <Button type="button" variant="outline" size="sm" onClick={() => onChange([...faqs, { key: newKey(), question: "", answer: "" }])}>
+          <Button type="button" variant="outline" size="sm" onClick={() => onChange([...faqs, { key: newKey(), question: "", answer: "", questionMs: "", answerMs: "" }])}>
             <Plus />
             Add question
           </Button>
@@ -597,6 +597,15 @@ function FaqEditor({ faqs, errors, onChange }) {
               <FormField label="Answer" htmlFor={`faq-a-${f.key}`} error={errors[`faqs.${i}.answer`]}>
                 <textarea id={`faq-a-${f.key}`} rows={3} value={f.answer} onChange={(e) => update(f.key, { answer: e.target.value })} className={textareaClass} />
               </FormField>
+              <div className="bg-muted/40 flex flex-col gap-2 rounded-md border border-dashed p-2">
+                <p className="text-muted-foreground text-xs font-medium">Bahasa Malaysia (optional)</p>
+                <FormField label="Soalan" htmlFor={`faq-qms-${f.key}`} error={errors[`faqs.${i}.questionMs`]}>
+                  <Input id={`faq-qms-${f.key}`} lang="ms" value={f.questionMs ?? ""} placeholder="cth. Adakah ia berfungsi dengan iPhone?" onChange={(e) => update(f.key, { questionMs: e.target.value })} />
+                </FormField>
+                <FormField label="Jawapan" htmlFor={`faq-ams-${f.key}`} error={errors[`faqs.${i}.answerMs`]}>
+                  <textarea id={`faq-ams-${f.key}`} lang="ms" rows={3} value={f.answerMs ?? ""} onChange={(e) => update(f.key, { answerMs: e.target.value })} className={textareaClass} />
+                </FormField>
+              </div>
               <div className="flex justify-end">
                 <Button type="button" variant="ghost" size="icon" className="size-7" disabled={i === 0} onClick={() => onChange(move(faqs, i, -1))} aria-label="Move up">
                   <ArrowUp />

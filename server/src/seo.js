@@ -7,6 +7,15 @@ import path from "node:path";
 import { prisma } from "./db.js";
 import { BUSINESS_NAME, businessJsonLd, googleDescription, shippingDetailsJsonLd, variantOffer, variantUrl, websiteJsonLd } from "./merchant.js";
 import { detailInclude, serializeDetail } from "./routes/products.js";
+import { getSetting } from "./settings.js";
+
+/** Google Analytics tag for public pages. GA's enhanced measurement counts SPA route changes itself. */
+function analyticsTag(reqPath) {
+  const id = getSetting("gaMeasurementId");
+  if (!id || reqPath === "/system" || reqPath.startsWith("/system/")) return "";
+  return `<script async src="https://www.googletagmanager.com/gtag/js?id=${id}"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","${id}");</script>`;
+}
 
 const SITE_NAME = BUSINESS_NAME;
 const DEFAULT_TITLE = "WYR Technology · NFC & RFID hardware";
@@ -272,7 +281,7 @@ export function createSeo(clientDist) {
       let html = loadTemplate()
         .replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeHtml(meta.title ?? DEFAULT_TITLE)}</title>`)
         .replace(/<meta name="description"[^>]*>/, `<meta name="description" content="${escapeHtml(meta.description ?? DEFAULT_DESCRIPTION)}" />`);
-      const tags = headTags(meta, origin);
+      const tags = [headTags(meta, origin), analyticsTag(req.path)].filter(Boolean).join("\n    ");
       if (tags) html = html.replace(/\s*<\/head>/, `\n    ${tags}\n  </head>`);
       res.status(meta.status).type("html").set("Cache-Control", "no-cache");
       if (meta.noindex) res.set("X-Robots-Tag", "noindex, nofollow");

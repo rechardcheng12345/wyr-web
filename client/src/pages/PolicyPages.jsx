@@ -338,13 +338,20 @@ export function PrivacyPolicyPage() {
         <ul>
           <li>courier companies, to deliver your parcel (name, phone and address),</li>
           <li>ToyyibPay, to take your payment,</li>
-          <li>the services we use to host this website and manage orders and stock.</li>
+          <li>the services we use to host this website and manage orders and stock,</li>
+          <li>Google Analytics, to count visits and see which pages are popular (it doesn't receive your name, address or payment details).</li>
         </ul>
         <p>We may also share data when the law requires it, for example with government authorities.</p>
       </Section>
       <Section title="Cookies and browser storage">
         <p>
-          We use a small number of cookies and browser storage to keep you logged in and to remember your cart. We don't use advertising or tracking cookies.
+          We use a small number of cookies and browser storage to keep you logged in and to remember your cart. We also use Google Analytics cookies to
+          measure how many people visit the site and which pages they view. We don't use advertising cookies. You can block or delete cookies in your browser
+          settings, or install Google's{" "}
+          <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">
+            Analytics opt-out add-on
+          </a>
+          .
         </p>
       </Section>
       <Section title="How long we keep it">

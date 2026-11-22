@@ -185,7 +185,8 @@ productsRouter.get("/", async (req, res) => {
   const page = positiveInt(req.query.page, 1);
   const pageSize = Math.min(positiveInt(req.query.pageSize, 24), MAX_PAGE_SIZE);
   const requested = firstString(req.query.sort);
-  const sort = SORTS.has(requested) ? requested : q ? "relevance" : "featured";
+  // Default listing order is best selling (sold = admin "sold base" + real orders).
+  const sort = SORTS.has(requested) ? requested : q ? "relevance" : "popular";
 
   const [pool, sold] = await Promise.all([
     prisma.product.findMany({
@@ -210,7 +211,7 @@ productsRouter.get("/", async (req, res) => {
   };
   const sorters = {
     relevance: (a, b) => b.score - a.score || sold(b.p.id) - sold(a.p.id),
-    popular: (a, b) => sold(b.p.id) - sold(a.p.id),
+    popular: (a, b) => sold(b.p.id) - sold(a.p.id) || a.p.id - b.p.id,
     price_asc: byPrice(1),
     price_desc: byPrice(-1),
     newest: (a, b) => (b.p.createdAt?.getTime() ?? 0) - (a.p.createdAt?.getTime() ?? 0) || b.p.id - a.p.id,
