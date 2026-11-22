@@ -126,7 +126,12 @@ function ProductView({ product }) {
               <VariantPrice product={product} variant={variant} />
             </div>
             {variant && <StockNote stock={variant.stock} minQty={variant.minQty} />}
-            {site.shipping && (
+            {product.productType === "digital" && (
+              <Badge variant="secondary" className={cn("mt-3", variant && "ml-2")} data-testid="virtual-badge">
+                Virtual product · delivered by email
+              </Badge>
+            )}
+            {site.shipping && product.productType !== "digital" && (
               <p className="text-muted-foreground mt-3 flex items-center gap-2 text-sm" data-testid="shipping-note">
                 <Truck className="size-4 shrink-0" />
                 <span>

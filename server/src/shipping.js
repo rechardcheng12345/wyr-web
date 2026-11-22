@@ -29,13 +29,25 @@ export function isMalaysianState(value) {
   return MALAYSIAN_STATES.includes(value);
 }
 
-/** Shipping for one parcel to `state`. Items are passed for when rates depend on weight (EasyParcel). */
-export function quoteShipping(state, _items, subtotalCents = 0) {
+export function physicalItems(items) {
+  return items.filter((i) => !i.digital);
+}
+
+export function shippingFeeFor(state, items, rates) {
   const zone = EAST_MALAYSIA.has(state) ? "east" : "west";
-  const { freeThresholdCents } = shippingSummary();
-  if (freeThresholdCents != null && subtotalCents >= freeThresholdCents) return { feeCents: 0, zone, method: "free" };
-  const feeCents = Math.round(getSetting(zone === "east" ? "shippingEastRm" : "shippingWestRm") * 100);
-  return { feeCents, zone, method: "flat" };
+  const physical = physicalItems(items);
+  if (physical.length === 0) return { feeCents: 0, zone, method: "digital" };
+  if (rates.freeThresholdCents != null && physicalSubtotalCents(physical) >= rates.freeThresholdCents) return { feeCents: 0, zone, method: "free" };
+  return { feeCents: zone === "east" ? rates.eastCents : rates.westCents, zone, method: "flat" };
+}
+
+/** Shipping for one parcel to `state`. Items are passed for when rates depend on weight (EasyParcel). */
+export function quoteShipping(state, items) {
+  return shippingFeeFor(state, items, shippingSummary());
+}
+
+export function physicalSubtotalCents(items) {
+  return physicalItems(items).reduce((sum, i) => sum + (i.lineTotalCents ?? 0), 0);
 }
 
 export function shippingSummary() {

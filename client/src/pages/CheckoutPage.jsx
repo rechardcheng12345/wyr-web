@@ -10,7 +10,7 @@ import { ApiError } from "@/lib/api";
 import { useCart } from "@/lib/cart";
 import { cents, checkVoucher, MALAYSIAN_STATES, placeOrder, rememberOrderEmail } from "@/lib/checkout";
 import { cn, formatPrice } from "@/lib/utils";
-import { lineProblem, linePricing, minimumOrderMessage, quoteIsCurrent, useCartQuote } from "./CartPage";
+import { lineProblem, linePricing, minimumOrderMessage, quoteIsCurrent, useCartQuote, VirtualBadge } from "./CartPage";
 
 const EMPTY = { name: "", email: "", phone: "", addressLine: "", postcode: "", city: "", state: "", companyName: "" };
 
@@ -109,6 +109,7 @@ export function CheckoutPage() {
   const lostVoucher = voucherCode && quote?.voucher && !quote.voucher.valid ? quote.voucher.error : null;
   const minimumMessage = quoteIsCurrent(quote, cart.items) ? minimumOrderMessage(quote) : null;
   const eastMalaysia = ["Sabah", "Sarawak", "W.P. Labuan"].includes(buyer.state);
+  const digitalOnly = !!quote?.digitalOnly;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -154,8 +155,14 @@ export function CheckoutPage() {
                 <Input name="companyName" autoComplete="organization" value={buyer.companyName} onChange={set("companyName")} maxLength={150} />
               </Field>
             </div>
+            {quote?.hasDigital && (
+              <p className="text-muted-foreground mt-3 text-xs" data-testid="checkout-digital-note">
+                Virtual products are delivered by email: we send the download link to the email above.
+              </p>
+            )}
           </fieldset>
 
+          {!digitalOnly && (
           <fieldset className="rounded-xl border p-5">
             <legend className="px-1 font-semibold">Shipping address (Malaysia)</legend>
             <div className="mt-2 grid gap-4 sm:grid-cols-6">
@@ -204,6 +211,7 @@ export function CheckoutPage() {
               </Field>
             </div>
           </fieldset>
+          )}
 
           <fieldset className="rounded-xl border p-5">
             <legend className="px-1 font-semibold">Order note (optional)</legend>
@@ -240,6 +248,7 @@ export function CheckoutPage() {
                   <div className="min-w-0 flex-1">
                     <p className="line-clamp-2">{item.productName}</p>
                     {item.variantName && <p className="text-muted-foreground text-xs">{item.variantName}</p>}
+                    {line?.digital && <VirtualBadge />}
                     <p className="text-muted-foreground text-xs">
                       {item.qty} × {formatPrice(price.unit)}
                       {price.savePct > 0 && <span className="text-emerald-700"> (save {price.savePct}%)</span>}
@@ -315,10 +324,10 @@ export function CheckoutPage() {
               </div>
             )}
             <div className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">Shipping{buyer.state && quote?.shippingRange && quote.shippingRange.westCents !== quote.shippingRange.eastCents && ` (${eastMalaysia ? "East" : "Peninsular"} Malaysia)`}</dt>
+              <dt className="text-muted-foreground">Shipping{!digitalOnly && buyer.state && quote?.shippingRange && quote.shippingRange.westCents !== quote.shippingRange.eastCents && ` (${eastMalaysia ? "East" : "Peninsular"} Malaysia)`}</dt>
               <dd data-testid="checkout-shipping" className="text-right">
                 {shipping != null ? (
-                  shipping === 0 ? "Free" : formatPrice(shipping)
+                  shipping === 0 ? (digitalOnly ? "Free (delivered by email)" : "Free") : formatPrice(shipping)
                 ) : (
                   <span className="text-muted-foreground">{shippingRangeText(quote?.shippingRange) ?? "Choose a state"}</span>
                 )}

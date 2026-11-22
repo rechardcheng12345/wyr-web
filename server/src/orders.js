@@ -4,7 +4,7 @@ import { prisma } from "./db.js";
 import { displayNameOf } from "./display-name.js";
 import { priceLadder, unitPriceCents as tierUnitPriceCents } from "./pricing.js";
 import { getSetting } from "./settings.js";
-import { isMalaysianState, quoteShipping, shippingSummary } from "./shipping.js";
+import { isMalaysianState, physicalSubtotalCents, quoteShipping, shippingSummary } from "./shipping.js";
 import { logStockMovement, minQtyFor, sellableQty, sellableSql } from "./stock.js";
 import { applyVoucher, normalizeCode } from "./vouchers.js";
 
@@ -65,7 +65,7 @@ export function normalizePhone(raw) {
   return /^0\d{8,10}$/.test(phone) ? phone : null;
 }
 
-export function parseBuyer(raw) {
+export function parseBuyer(raw, { requireAddress = true } = {}) {
   const b = (raw ?? {});
   const errors = {};
   const name = text(b.name, "name", 150, errors);
@@ -75,6 +75,10 @@ export function parseBuyer(raw) {
   if (phone && !errors.phone) {
     phone = normalizePhone(phone);
     if (!phone) errors.phone = PHONE_ERROR;
+  }
+  if (!requireAddress) {
+    if (Object.keys(errors).length > 0) throw new CheckoutError(400, "Please check the highlighted fields.", { fields: errors });
+    return { name, email, phone, addressLine: null, postcode: null, city: null, state: null };
   }
   const addressLine = text(b.addressLine, "addressLine", 300, errors);
   const postcode = text(b.postcode, "postcode", 10, errors);
@@ -110,7 +114,7 @@ export async function priceCart(items, db = prisma) {
     include: {
       inventory: true,
       priceTiers: true,
-      product: { select: { name: true, displayName: true, slug: true, isActive: true, images: { orderBy: [{ sortOrder: "asc" }, { id: "asc" }], take: 1 } } },
+      product: { select: { name: true, displayName: true, slug: true, isActive: true, productType: true, images: { orderBy: [{ sortOrder: "asc" }, { id: "asc" }], take: 1 } } },
     },
   });
   const byId = new Map(variants.map((v) => [v.id, v]));
@@ -134,6 +138,7 @@ export async function priceCart(items, db = prisma) {
       productName: v ? displayNameOf(v.product) : "Unavailable item",
       productSlug: v?.product.slug ?? null,
       variantName: v?.variationName ?? null,
+      digital: v?.product.productType === "digital",
       image: variantImages.find((i) => i.variantId === variantId)?.url ?? v?.product.images[0]?.url ?? null,
       qty,
       unitPriceCents,
@@ -158,15 +163,23 @@ export function minimumOrder(subtotalCents) {
   return { minCents, shortfallCents: Math.max(0, minCents - subtotalCents) };
 }
 
+export function isDigitalOnly(lines) {
+  return lines.length > 0 && lines.every((l) => l.digital);
+}
+
 export async function quote(items, state, voucherCode) {
   const { lines, subtotalCents, weights } = await priceCart(items);
-  const shipping = state ? quoteShipping(state, withWeights(items, weights), subtotalCents) : null;
+  const digitalOnly = isDigitalOnly(lines);
+  const shipping = state || digitalOnly ? quoteShipping(state, withWeights(lines, weights)) : null;
+  const physicalSubtotal = physicalSubtotalCents(lines);
   const voucher = voucherCode ? await applyVoucher(voucherCode, subtotalCents) : null;
   const discount = voucher?.valid ? voucher.discountCents : 0;
   const summary = shippingSummary();
   return {
     lines,
     subtotalCents,
+    digitalOnly,
+    hasDigital: lines.some((l) => l.digital),
     voucher,
     discountCents: discount,
     shippingCents: shipping?.feeCents ?? null,
@@ -174,7 +187,7 @@ export async function quote(items, state, voucherCode) {
       westCents: summary.westCents,
       eastCents: summary.eastCents,
       freeShippingThresholdCents: summary.freeThresholdCents,
-      freeShippingShortfallCents: summary.freeThresholdCents == null ? null : Math.max(0, summary.freeThresholdCents - subtotalCents),
+      freeShippingShortfallCents: summary.freeThresholdCents == null || digitalOnly ? null : Math.max(0, summary.freeThresholdCents - physicalSubtotal),
     },
     totalCents: shipping ? subtotalCents - discount + shipping.feeCents : null,
     minimumOrder: minimumOrder(subtotalCents),
@@ -224,6 +237,11 @@ export async function createPendingOrder(items, buyer, extras = {}) {
         const voucher = extras.voucherCode ? await applyVoucher(extras.voucherCode, subtotalCents, tx) : null;
         if (voucher && !voucher.valid) throw new CheckoutError(409, voucher.error, { fields: { voucherCode: voucher.error } });
         const discount = voucher?.discountCents ?? 0;
+        const digitalOnly = isDigitalOnly(lines);
+        if (!digitalOnly && !buyer.state) {
+          throw new CheckoutError(400, "Please enter a shipping address.", { lines, fields: { addressLine: "Required", postcode: "Required", city: "Required", state: "Choose a state" } });
+        }
+        const ship = digitalOnly ? { addressLine: null, postcode: null, city: null, state: null } : buyer;
 
         // Fixed lock order (by variant id) so two concurrent checkouts can't deadlock.
         for (const line of [...lines].sort((a, b) => a.variantId - b.variantId)) {
@@ -237,7 +255,7 @@ export async function createPendingOrder(items, buyer, extras = {}) {
           }
         }
 
-        const shipping = quoteShipping(buyer.state, withWeights(items, weights), subtotalCents);
+        const shipping = quoteShipping(ship.state, withWeights(lines, weights));
         const now = new Date();
         return tx.order.create({
           data: {
@@ -254,10 +272,10 @@ export async function createPendingOrder(items, buyer, extras = {}) {
             note: extras.note ?? null,
             shipName: buyer.name,
             shipPhone: buyer.phone,
-            shipAddress: buyer.addressLine,
-            shipPostcode: buyer.postcode,
-            shipCity: buyer.city,
-            shipState: buyer.state,
+            shipAddress: ship.addressLine,
+            shipPostcode: ship.postcode,
+            shipCity: ship.city,
+            shipState: ship.state,
             createdAt: now,
             expiresAt: new Date(now.getTime() + holdMinutes() * 60_000),
             items: {

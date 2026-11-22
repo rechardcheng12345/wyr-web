@@ -83,6 +83,9 @@ export function ProductsPage() {
               {p.name}
             </Link>
             <p className="text-muted-foreground truncate text-xs">/{p.slug}</p>
+            {p.productType === "digital" && (
+              <span className="mt-1 inline-block rounded-md bg-violet-50 px-2 py-0.5 text-xs font-medium whitespace-nowrap text-violet-700">Virtual product</span>
+            )}
           </div>
         </div>
       ),

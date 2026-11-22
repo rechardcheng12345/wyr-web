@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { getCustomer } from "../customer-auth.js";
 import { prisma } from "../db.js";
-import { cancelUnpaidOrder, CheckoutError, createPendingOrder, parseBuyer, parseCartItems, parseOrderExtras, priceCart, quote } from "../orders.js";
+import { cancelUnpaidOrder, CheckoutError, createPendingOrder, isDigitalOnly, parseBuyer, parseCartItems, parseOrderExtras, priceCart, quote } from "../orders.js";
 import { notifyOrderCreated } from "../notify.js";
 import { startPayment } from "../payments/index.js";
 import { isMalaysianState } from "../shipping.js";
@@ -31,11 +31,12 @@ checkoutRouter.post("/voucher", async (req, res) => {
 // Prices come from the database, never from the request.
 checkoutRouter.post("/", async (req, res) => {
   const items = parseCartItems(req.body?.items);
-  const buyer = parseBuyer(req.body?.buyer);
+  const { lines } = await priceCart(items);
+  const buyer = parseBuyer(req.body?.buyer, { requireAddress: !isDigitalOnly(lines) });
   const extras = parseOrderExtras(req.body);
   const customer = await getCustomer(req);
   const order = await createPendingOrder(items, buyer, { ...extras, customerId: customer?.id ?? null });
-  if (customer && !customer.addressLine) {
+  if (customer && !customer.addressLine && order.shipAddress) {
     await prisma.customer.update({
       where: { id: customer.id },
       data: { addressLine: buyer.addressLine, postcode: buyer.postcode, city: buyer.city, state: buyer.state, phone: customer.phone ?? buyer.phone },

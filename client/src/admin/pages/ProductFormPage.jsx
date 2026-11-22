@@ -43,6 +43,7 @@ const EMPTY = {
   description: "",
   isActive: true,
   showOnGoogle: true,
+  productType: "physical",
   ...Object.fromEntries(INFO_FIELDS.map((f) => [f.key, ""])),
   images: [],
   faqs: [],
@@ -96,6 +97,7 @@ function toServer(form) {
     description: form.description,
     isActive: form.isActive,
     showOnGoogle: form.showOnGoogle,
+    productType: form.productType,
     ...Object.fromEntries(INFO_FIELDS.map((f) => [f.key, form[f.key]])),
     images: form.images.map((i) => i.url.trim()).filter(Boolean),
     faqs: form.faqs.map(({ question, answer }) => ({ question, answer })),
@@ -404,6 +406,13 @@ export function ProductFormPage() {
                 <input type="checkbox" checked={form.showOnGoogle} onChange={(e) => set({ showOnGoogle: e.target.checked })} className="peer sr-only" />
                 <span className="relative mt-1 h-6 w-11 shrink-0 rounded-full bg-slate-300 transition-colors peer-checked:bg-emerald-500 peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/50 after:absolute after:top-0.5 after:left-0.5 after:size-5 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:after:translate-x-5" />
               </label>
+              <FormField label="Product type" error={errors.productType} className="mt-4 border-t pt-4">
+                <Select value={form.productType ?? "physical"} onChange={(e) => set({ productType: e.target.value })}>
+                  <option value="physical">Physical</option>
+                  <option value="digital">Virtual product</option>
+                </Select>
+              </FormField>
+              <p className="text-muted-foreground mt-1.5 text-xs">Virtual product = delivered by email, no shipping charged.</p>
             </CardContent>
           </Card>
 

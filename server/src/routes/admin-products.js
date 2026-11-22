@@ -12,6 +12,7 @@ adminProductsRouter.use(requireAdmin);
 const MAX_IMAGES = 20;
 const MAX_VARIANTS = 50;
 const PLATFORMS = ["shopee", "lazada"];
+const PRODUCT_TYPES = ["physical", "digital"];
 
 class ValidationError extends Error {
   constructor(message, fields = {}, status = 400) {
@@ -130,6 +131,12 @@ function parseInput(body) {
   const soldBase = body?.soldBase === "" || body?.soldBase == null ? 0 : Number(body.soldBase);
   if (!Number.isInteger(soldBase) || soldBase < 0 || soldBase > 100_000_000) fields.soldBase = "Whole number, 0 or more";
 
+  let productType;
+  if (body?.productType != null && body.productType !== "") {
+    if (PRODUCT_TYPES.includes(body.productType)) productType = body.productType;
+    else fields.productType = "Choose Physical or Virtual product";
+  }
+
   if (Object.keys(fields).length) throw new ValidationError("Please fix the highlighted fields", fields);
 
   return {
@@ -143,6 +150,7 @@ function parseInput(body) {
       description: typeof body?.description === "string" ? body.description.trim().slice(0, 60_000) || null : null,
       isActive: body?.isActive !== false,
       showOnGoogle: body?.showOnGoogle !== false,
+      ...(productType ? { productType } : {}),
       ...info,
     },
     images,
@@ -245,6 +253,7 @@ function serializeRow(p) {
     slug: p.slug,
     isActive: p.isActive !== false,
     showOnGoogle: p.showOnGoogle,
+    productType: p.productType,
     category: p.category,
     image: p.images[0]?.url ?? null,
     variantCount: p.variants.length,
@@ -269,6 +278,7 @@ function serializeForEdit(p) {
     isActive: p.isActive !== false,
     soldBase: p.soldBase ?? 0,
     showOnGoogle: p.showOnGoogle,
+    productType: p.productType,
     ...Object.fromEntries(INFO_FIELDS.map((f) => [f.key, p[f.key] ?? ""])),
     images: p.images.map((i) => i.url).filter(Boolean),
     faqs: p.faqs.map((f) => ({ question: f.question, answer: f.answer })),

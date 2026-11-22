@@ -307,7 +307,7 @@ function OrderDetails({ order }) {
         )}
       </section>
       <section className="h-fit rounded-xl border p-5 text-sm">
-        <h2 className="font-semibold">Shipping to</h2>
+        <h2 className="font-semibold">{s.addressLine ? "Shipping to" : "Delivered by email"}</h2>
         <address className="text-muted-foreground mt-3 leading-relaxed not-italic">
           {s.name}
           <br />
@@ -317,11 +317,17 @@ function OrderDetails({ order }) {
               <br />
             </>
           )}
-          {s.addressLine}
-          <br />
-          {s.postcode} {s.city}
-          <br />
-          {s.state}
+          {s.addressLine ? (
+            <>
+              {s.addressLine}
+              <br />
+              {s.postcode} {s.city}
+              <br />
+              {s.state}
+            </>
+          ) : (
+            order.email
+          )}
           <br />
           {s.phone}
         </address>

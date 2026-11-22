@@ -66,6 +66,14 @@ export function lineProblem(line) {
   return `Only ${line.stock} left. Please lower the quantity.`;
 }
 
+export function VirtualBadge({ className = "" }) {
+  return (
+    <span className={`inline-block rounded bg-sky-50 px-1.5 py-0.5 text-[11px] font-medium text-sky-800 ${className}`} data-testid="virtual-badge">
+      Virtual product · delivered by email
+    </span>
+  );
+}
+
 function shortRm(c) {
   return `RM${c % 100 === 0 ? c / 100 : (c / 100).toFixed(2)}`;
 }
@@ -124,6 +132,7 @@ export function CartPage() {
                         {item.productName}
                       </Link>
                       {item.variantName && <p className="text-muted-foreground mt-0.5 text-sm">{item.variantName}</p>}
+                      {line?.digital && <VirtualBadge className="mt-1" />}
                     </div>
                     <p className="shrink-0 text-sm font-semibold" data-testid="line-total">{formatPrice(price.total)}</p>
                   </div>
@@ -164,10 +173,13 @@ export function CartPage() {
             </div>
             <div className="flex justify-between gap-4">
               <dt className="text-muted-foreground">Shipping</dt>
-              <dd className="text-muted-foreground text-right">Calculated at checkout</dd>
+              <dd className="text-muted-foreground text-right">{quote?.digitalOnly ? "Free (delivered by email)" : "Calculated at checkout"}</dd>
             </div>
           </dl>
-          {site.shipping && (
+          {quote?.hasDigital && !quote.digitalOnly && (
+            <p className="text-muted-foreground mt-3 text-xs">Virtual products are delivered by email; shipping is charged on physical items only.</p>
+          )}
+          {site.shipping && !quote?.digitalOnly && (
             <p className="text-muted-foreground mt-3 text-xs" data-testid="cart-shipping-note">
               {shippingText(site.shipping)}
             </p>
