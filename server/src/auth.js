@@ -4,11 +4,11 @@ const COOKIE_NAME = "wyr_admin";
 const SESSION_HOURS = 8;
 const isProduction = !["dev", "development"].includes(process.env.NODE_ENV ?? "");
 
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
+const ADMIN_USERNAME = (process.env.ADMIN_USERNAME ?? "").trim();
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "";
 const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString("hex");
 
-export const USING_DEFAULT_ADMIN_LOGIN = !process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD;
+export const ADMIN_LOGIN_DISABLED = !ADMIN_USERNAME || !ADMIN_PASSWORD;
 export const USING_RANDOM_SESSION_SECRET = !process.env.SESSION_SECRET;
 
 export function sign(value) {
@@ -22,6 +22,7 @@ export function safeEqual(a, b) {
 }
 
 export function checkCredentials(username, password) {
+  if (ADMIN_LOGIN_DISABLED) return null;
   const userOk = safeEqual(String(username ?? "").trim().toLowerCase(), ADMIN_USERNAME.toLowerCase());
   const passOk = safeEqual(String(password ?? ""), ADMIN_PASSWORD);
   return userOk && passOk ? { username: ADMIN_USERNAME, name: "Administrator", role: "admin" } : null;

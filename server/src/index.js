@@ -1,6 +1,6 @@
 import { DB_CONFIG_HELP, MISSING_DB_VARS } from "./env.js";
 import { createApp } from "./app.js";
-import { USING_DEFAULT_ADMIN_LOGIN, USING_RANDOM_SESSION_SECRET } from "./auth.js";
+import { ADMIN_LOGIN_DISABLED, USING_RANDOM_SESSION_SECRET } from "./auth.js";
 import { startExpireOrdersJob } from "./jobs/expire-orders.js";
 import { paymentMode } from "./payments/index.js";
 import { loadSettings } from "./settings.js";
@@ -26,7 +26,7 @@ function start() {
     }
     console.log(`WYR API listening on http://localhost:${port}`);
     if (paymentMode() === "mock") console.warn("PAYMENT_MODE=mock: payments are fake. Never use this in production.");
-    if (USING_DEFAULT_ADMIN_LOGIN) console.warn("ADMIN_USERNAME/ADMIN_PASSWORD not set: admin login is admin/admin123. Set real values before going live.");
+    if (ADMIN_LOGIN_DISABLED) console.warn("ADMIN_USERNAME/ADMIN_PASSWORD not set: admin login is disabled until both are set.");
     if (USING_RANDOM_SESSION_SECRET) console.warn("SESSION_SECRET not set: admin sessions end whenever the server restarts.");
     startExpireOrdersJob();
     startSyncHealthJob();

@@ -124,7 +124,7 @@ try {
     const login = await fetch(`${API}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: process.env.ADMIN_USERNAME ?? "admin", password: process.env.ADMIN_PASSWORD ?? "admin123" }),
+      body: JSON.stringify({ username: process.env.ADMIN_USERNAME, password: process.env.ADMIN_PASSWORD }),
     });
     assert.equal(login.status, 200, "admin login (dev server on :4000 must be running)");
     const cookie = login.headers.get("set-cookie").split(";")[0];

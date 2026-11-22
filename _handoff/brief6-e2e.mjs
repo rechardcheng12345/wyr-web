@@ -118,7 +118,7 @@ console.log("— Free-shipping threshold (via admin settings API on the dev serv
   const login = await fetch(`${API}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username: process.env.ADMIN_USERNAME ?? "admin", password: process.env.ADMIN_PASSWORD ?? "admin123" }),
+    body: JSON.stringify({ username: process.env.ADMIN_USERNAME, password: process.env.ADMIN_PASSWORD }),
   });
   const cookie = login.headers.get("set-cookie")?.split(";")[0] ?? "";
   const put = (values) => fetch(`${API}/api/admin/settings`, { method: "PUT", headers: { "Content-Type": "application/json", cookie }, body: JSON.stringify({ values }) });

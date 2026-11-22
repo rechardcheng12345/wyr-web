@@ -48,3 +48,7 @@ server/src/logs/chat.json
 /client/claude-logs
 /client/src/admin/claude-logs
 /client/src/admin/pages/claude-logs
+
+# Claude Code hook logs and chat transcripts (may contain secrets)
+claude-logs/
+**/logs/chat.json
