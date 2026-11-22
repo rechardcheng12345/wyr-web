@@ -16,6 +16,8 @@
     "stock:crosscheck": "node scripts/stock-crosscheck.js",
     "stock:apply-shopee": "node scripts/stock-apply-shopee.js",
     "hide:discontinued": "node scripts/hide-discontinued.js",
+    "sold:export": "node scripts/sold-base-md.js export",
+    "sold:set": "node scripts/sold-base-md.js apply",
     "prisma": "node scripts/prisma.js"
   },
   "dependencies": {
